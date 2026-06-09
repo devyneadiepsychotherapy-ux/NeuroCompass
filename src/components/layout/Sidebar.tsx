@@ -3,7 +3,8 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { useAppStore } from "@/store/useAppStore";
 import { getAvatarOption } from "@/app/onboarding/page";
-import { X, Settings, Info, User, ChevronRight, Star } from "lucide-react";
+import { getTheme } from "@/lib/themes";
+import { X, Settings, Info, User, ChevronRight, Star, Palette } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SidebarProps {
@@ -15,8 +16,10 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   const userName = useAppStore((s) => s.userName);
   const userAvatar = useAppStore((s) => s.userAvatar);
   const profile = useAppStore((s) => s.profile);
+  const activeTheme = useAppStore((s) => s.activeTheme);
 
   const avatarInfo = getAvatarOption(userAvatar);
+  const theme = getTheme(activeTheme);
 
   // Lock body scroll while open
   useEffect(() => {
@@ -96,30 +99,47 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
 
         {/* Nav links */}
         <nav className="flex-1 px-4 space-y-1">
+          {/* Themes */}
+          <Link
+            href="/settings#themes"
+            onClick={onClose}
+            className="flex items-center gap-3 rounded-xl px-3 py-3 hover:bg-stone-100 transition-all group"
+          >
+            <div className="w-8 h-8 rounded-lg bg-stone-100 group-hover:bg-stone-200 flex items-center justify-center transition-colors shrink-0">
+              <Palette size={16} className="text-slate-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <span className="text-sm font-medium text-slate-700">Themes</span>
+              <p className="text-xs text-slate-400 leading-tight truncate">{theme.name}</p>
+            </div>
+            {/* Colour swatch */}
+            <div className="flex rounded-md overflow-hidden h-5 w-10 shrink-0 border border-black/10">
+              {theme.preview.map((c, i) => (
+                <div key={i} className="flex-1" style={{ background: c }} />
+              ))}
+            </div>
+            <ChevronRight size={14} className="text-slate-300 shrink-0" />
+          </Link>
+
           <SidebarLink
             href="/settings"
             icon={Settings}
             label="Settings"
             onClose={onClose}
           />
-          <SidebarLink
-            href="/settings"
-            icon={User}
-            label="Profile"
-            onClose={onClose}
-          />
+
           <div className="pt-4 pb-1">
             <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-3 mb-1">
               Info
             </p>
           </div>
-          <AboutRow />
+          <AboutRow onClose={onClose} />
         </nav>
 
         {/* Footer */}
         <div className="px-5 pb-8 pt-4 border-t border-slate-100">
           <p className="text-xs text-slate-400 leading-relaxed">
-            NeuroCompass — built for neurodivergent minds.
+            NeuroCompass · built for neurodivergent minds.
           </p>
         </div>
       </div>
@@ -153,10 +173,14 @@ function SidebarLink({
   );
 }
 
-function AboutRow() {
+function AboutRow({ onClose }: { onClose: () => void }) {
   return (
-    <div className="flex items-start gap-3 rounded-xl px-3 py-3">
-      <div className="w-8 h-8 rounded-lg bg-stone-100 flex items-center justify-center shrink-0">
+    <Link
+      href="/about"
+      onClick={onClose}
+      className="flex items-start gap-3 rounded-xl px-3 py-3 hover:bg-stone-100 transition-all group"
+    >
+      <div className="w-8 h-8 rounded-lg bg-stone-100 group-hover:bg-stone-200 flex items-center justify-center shrink-0 transition-colors">
         <Info size={16} className="text-slate-500" />
       </div>
       <div className="flex-1">
@@ -165,6 +189,7 @@ function AboutRow() {
           A compassionate app built for ADHD, autism, and other neurodivergent experiences.
         </p>
       </div>
-    </div>
+      <ChevronRight size={14} className="text-slate-300 shrink-0 mt-1" />
+    </Link>
   );
 }

@@ -134,7 +134,6 @@ export default function SettingsPage() {
 
         {/* ── Profile ── */}
         <section>
-          <SectionHeading label="Profile" />
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 space-y-4">
 
             {/* Current profile display */}
