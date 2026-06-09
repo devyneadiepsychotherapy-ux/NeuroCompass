@@ -246,6 +246,7 @@ export interface UserListItem {
 export interface UserList {
   id: string;
   name: string;
+  listType?: 'bullet' | 'checklist';
   items: UserListItem[];
   createdAt: string;
 }

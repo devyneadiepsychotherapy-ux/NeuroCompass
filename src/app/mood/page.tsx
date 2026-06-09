@@ -124,6 +124,7 @@ export default function MoodPage() {
   const [energy, setEnergy] = useState<EnergyLevel>(3);
   const [pleasantness, setPleasantness] = useState<PleasantnessLevel>(3);
   const [selectedAreas, setSelectedAreas] = useState<string[]>([]);
+  const [areaDescriptions, setAreaDescriptions] = useState<Record<string, string>>({});
   const [bodyNotes, setBodyNotes] = useState("");
   const [notes, setNotes] = useState("");
 
@@ -140,13 +141,17 @@ export default function MoodPage() {
   };
 
   const handleSubmit = () => {
+    const descParts = selectedAreas
+      .filter((a) => areaDescriptions[a]?.trim())
+      .map((a) => `${a}: ${areaDescriptions[a].trim()}`);
+    const combinedBodyNotes = [...descParts, bodyNotes].filter(Boolean).join(" | ") || undefined;
     addMoodEntry({
       energy,
       pleasantness,
       emotions: selectedEmotions,
       bodyAreas: selectedAreas,
-      bodyNotes,
-      notes,
+      bodyNotes: combinedBodyNotes,
+      notes: notes || undefined,
     });
     addXP(10);
     triggerXp(10);
@@ -195,6 +200,7 @@ export default function MoodPage() {
     setFlow("both");
     setSelectedEmotions([]);
     setSelectedAreas([]);
+    setAreaDescriptions({});
     setBodyNotes("");
     setNotes("");
     setEnergy(3);
@@ -230,9 +236,16 @@ export default function MoodPage() {
             </p>
           )}
           {selectedAreas.length > 0 && (
-            <p className="text-sm text-slate-600 mt-1">
-              Body: {selectedAreas.join(", ")}
-            </p>
+            <div className="mt-1">
+              <p className="text-sm text-slate-600 font-medium">Body areas:</p>
+              <div className="flex flex-wrap gap-1 mt-1">
+                {selectedAreas.map((area) => (
+                  <span key={area} className="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-100">
+                    {areaDescriptions[area] ? `${area}: ${areaDescriptions[area]}` : area}
+                  </span>
+                ))}
+              </div>
+            </div>
           )}
         </div>
         <div className="w-full space-y-2">
@@ -472,6 +485,24 @@ export default function MoodPage() {
               ))}
             </div>
           </div>
+          {selectedAreas.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-sm font-semibold text-slate-700">How does each area feel? (optional)</p>
+              {selectedAreas.map((area) => (
+                <div key={area} className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-slate-600 w-[76px] shrink-0">{area}</span>
+                  <input
+                    type="text"
+                    placeholder="How does it feel?"
+                    value={areaDescriptions[area] ?? ""}
+                    onChange={(e) => setAreaDescriptions((prev) => ({ ...prev, [area]: e.target.value }))}
+                    className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-sage-400 bg-stone-50"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
           <div>
             <p className="text-sm font-semibold text-slate-700 mb-2">Quick body prompts (tap any that apply)</p>
             <div className="flex flex-wrap gap-2">
@@ -532,7 +563,22 @@ export default function MoodPage() {
               <p className="text-sm text-slate-600">Emotions: <strong>{selectedEmotions.join(", ")}</strong></p>
             )}
             {selectedAreas.length > 0 && (
-              <p className="text-sm text-slate-600">Body: <strong>{selectedAreas.join(", ")}</strong></p>
+              <div className="mt-1">
+                <p className="text-sm text-slate-600 font-medium">Body areas:</p>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {selectedAreas.map((area) => (
+                    <span key={area} className="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-100">
+                      {areaDescriptions[area] ? `${area}: ${areaDescriptions[area]}` : area}
+                    </span>
+                  ))}
+                </div>
+                {bodyNotes.trim() && (
+                  <p className="text-xs text-slate-500 mt-1.5 italic">{bodyNotes}</p>
+                )}
+              </div>
+            )}
+            {selectedAreas.length === 0 && bodyNotes.trim() && (
+              <p className="text-sm text-slate-600">Body notes: <strong>{bodyNotes}</strong></p>
             )}
           </div>
           <div className="flex gap-3">

@@ -199,7 +199,7 @@ interface AppState {
 
   // User lists
   userLists: UserList[];
-  addUserList: (name: string) => void;
+  addUserList: (name: string, listType?: 'bullet' | 'checklist') => void;
   deleteUserList: (id: string) => void;
   addListItem: (listId: string, text: string) => void;
   toggleListItem: (listId: string, itemId: string) => void;
@@ -751,11 +751,11 @@ export const useAppStore = create<AppState>()(
 
       userLists: [],
 
-      addUserList: (name) =>
+      addUserList: (name, listType) =>
         set((s) => ({
           userLists: [
             ...s.userLists,
-            { id: generateId(), name: name.trim(), items: [], createdAt: new Date().toISOString() },
+            { id: generateId(), name: name.trim(), listType: listType ?? 'checklist', items: [], createdAt: new Date().toISOString() },
           ],
         })),
 

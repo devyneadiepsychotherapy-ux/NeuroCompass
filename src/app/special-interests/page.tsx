@@ -15,7 +15,7 @@ import Link from "next/link";
 type Intensity = SpecialInterest["intensity"];
 
 const INTENSITY_OPTIONS: { value: Intensity; label: string; color: string; bg: string; border: string }[] = [
-  { value: "casual",      label: "Casual",      color: "text-stone-600",  bg: "bg-stone-100",  border: "border-stone-300" },
+  { value: "casual",      label: "Casual",      color: "text-white",      bg: "bg-stone-500",  border: "border-stone-600" },
   { value: "active",      label: "Active",       color: "text-[#8f6559]",  bg: "bg-[#e8d8d2]",  border: "border-[#c4a090]" },
   { value: "hyperfocused",label: "Hyperfocused", color: "text-red-700",    bg: "bg-red-100",    border: "border-red-300" },
 ];

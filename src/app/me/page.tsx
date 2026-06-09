@@ -5,6 +5,7 @@ import {
   Brain, Leaf, Zap, Shield, Sparkles, ListChecks, Plus,
   Trash2, Check, ChevronDown, ChevronUp, X, User, ChevronRight,
   BatteryLow, BatteryMedium, BatteryFull, Heart,
+  LayoutGrid, LayoutList,
 } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 import { cn } from "@/lib/utils";
@@ -26,23 +27,24 @@ const ND_STRENGTHS: Record<string, string[]> = {
 };
 
 // ---------------------------------------------------------------------------
-// ND Strengths card
+// ND Strengths card  (muted sage green)
 // ---------------------------------------------------------------------------
 
 function NDStrengthsCard({ ndIdentities }: { ndIdentities: string[] }) {
   if (ndIdentities.length === 0) {
     return (
-      <div className="bg-cream-50 rounded-2xl border border-sage-100 shadow-sm p-4 space-y-2">
+      <div className="bg-cream-50 rounded-2xl border shadow-sm p-4 space-y-2" style={{ borderColor: '#D0DCCB' }}>
         <div className="flex items-center gap-2 mb-3">
-          <div className="w-8 h-8 rounded-xl bg-sage-100 flex items-center justify-center">
-            <Brain size={16} className="text-sage-700" />
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: '#E8EDE6' }}>
+            <Brain size={16} style={{ color: '#5E7A6E' }} />
           </div>
           <p className="text-sm font-semibold text-slate-800">ND Strengths</p>
         </div>
         <p className="text-sm text-slate-500">Add your ND identity to see your associated strengths.</p>
         <Link
           href="/strengths"
-          className="inline-flex items-center justify-center gap-1.5 mt-2 w-full min-h-[44px] bg-sage-100 hover:bg-sage-200 active:scale-[0.98] text-sage-700 font-semibold text-sm rounded-xl px-4 py-2.5 transition-all"
+          className="inline-flex items-center justify-center gap-1.5 mt-2 w-full min-h-[44px] active:scale-[0.98] text-sm font-semibold rounded-xl px-4 py-2.5 transition-all"
+          style={{ background: '#E8EDE6', color: '#5E7A6E' }}
         >
           Add your ND strengths
         </Link>
@@ -51,10 +53,10 @@ function NDStrengthsCard({ ndIdentities }: { ndIdentities: string[] }) {
   }
 
   return (
-    <div className="bg-cream-50 rounded-2xl border border-sage-100 shadow-sm p-4 space-y-4">
+    <div className="bg-cream-50 rounded-2xl border shadow-sm p-4 space-y-4" style={{ borderColor: '#D0DCCB' }}>
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 rounded-xl bg-sage-100 flex items-center justify-center">
-          <Brain size={16} className="text-sage-700" />
+        <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: '#E8EDE6' }}>
+          <Brain size={16} style={{ color: '#5E7A6E' }} />
         </div>
         <p className="text-sm font-semibold text-slate-800">ND Strengths</p>
       </div>
@@ -63,7 +65,8 @@ function NDStrengthsCard({ ndIdentities }: { ndIdentities: string[] }) {
           (ND_STRENGTHS[identity] ?? []).map((s) => (
             <span
               key={`${identity}-${s}`}
-              className="text-xs bg-sage-50 text-sage-800 border border-sage-200 px-2.5 py-1 rounded-full"
+              className="text-xs border px-2.5 py-1 rounded-full"
+              style={{ background: '#F0F4EE', color: '#5E7A6E', borderColor: '#D0DCCB' }}
             >
               {s}
             </span>
@@ -75,7 +78,7 @@ function NDStrengthsCard({ ndIdentities }: { ndIdentities: string[] }) {
 }
 
 // ---------------------------------------------------------------------------
-// Energy Accounting card
+// Energy Accounting card  (dusty gold)
 // ---------------------------------------------------------------------------
 
 const DRAIN_INTENSITY_COLORS: Record<string, string> = {
@@ -205,10 +208,10 @@ function EnergyAccountingCard() {
   } = useAppStore();
 
   return (
-    <div className="bg-cream-50 rounded-2xl border border-amber-100 shadow-sm p-4 space-y-4">
+    <div className="bg-cream-50 rounded-2xl border shadow-sm p-4 space-y-4" style={{ borderColor: '#E0D5A8' }}>
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 rounded-xl bg-amber-100 flex items-center justify-center">
-          <Zap size={16} className="text-amber-600" />
+        <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: '#EDE5C8' }}>
+          <Zap size={16} style={{ color: '#9B8A4A' }} />
         </div>
         <p className="text-sm font-semibold text-slate-800">Energy Accounting</p>
       </div>
@@ -246,24 +249,51 @@ function EnergyAccountingCard() {
 }
 
 // ---------------------------------------------------------------------------
-// My Tools card (favourited tools)
+// My Tools card  (soft lavender) — with grid/list toggle
 // ---------------------------------------------------------------------------
 
 function MyToolsCard({ favorites }: { favorites: ToolFavorite[] }) {
   const favTools = TOOLS.filter((t) => favorites.some((f) => f.toolId === t.id));
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
 
   return (
-    <div className="bg-cream-50 rounded-2xl border border-rose-100 shadow-sm p-4 space-y-3">
+    <div className="bg-cream-50 rounded-2xl border shadow-sm p-4 space-y-3" style={{ borderColor: '#DDD9F0' }}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-rose-100 flex items-center justify-center">
-            <Heart size={16} className="text-rose-500" />
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: '#EAE8F2' }}>
+            <Heart size={16} style={{ color: '#7775A4' }} />
           </div>
           <p className="text-sm font-semibold text-slate-800">My Tools</p>
         </div>
-        <Link href="/tools" className="text-xs text-sage-600 font-medium">
-          Browse all
-        </Link>
+        <div className="flex items-center gap-2">
+          {favTools.length > 0 && (
+            <div className="flex items-center gap-1 border border-slate-200 rounded-lg p-0.5">
+              <button
+                onClick={() => setViewMode("list")}
+                className={cn(
+                  "p-1 rounded transition-all",
+                  viewMode === "list" ? "bg-slate-100 text-slate-600" : "text-slate-300 hover:text-slate-500"
+                )}
+                aria-label="List view"
+              >
+                <LayoutList size={14} />
+              </button>
+              <button
+                onClick={() => setViewMode("grid")}
+                className={cn(
+                  "p-1 rounded transition-all",
+                  viewMode === "grid" ? "bg-slate-100 text-slate-600" : "text-slate-300 hover:text-slate-500"
+                )}
+                aria-label="Grid view"
+              >
+                <LayoutGrid size={14} />
+              </button>
+            </div>
+          )}
+          <Link href="/tools" className="text-xs font-medium" style={{ color: '#7775A4' }}>
+            Browse all
+          </Link>
+        </div>
       </div>
 
       {favTools.length === 0 ? (
@@ -271,12 +301,13 @@ function MyToolsCard({ favorites }: { favorites: ToolFavorite[] }) {
           <p className="text-sm text-slate-500">You haven&apos;t favourited any tools yet.</p>
           <Link
             href="/tools"
-            className="text-xs text-sage-600 font-medium underline underline-offset-2"
+            className="text-xs font-medium underline underline-offset-2"
+            style={{ color: '#7775A4' }}
           >
             Browse Tools to get started
           </Link>
         </div>
-      ) : (
+      ) : viewMode === "list" ? (
         <div className="space-y-2">
           {favTools.map((tool) => {
             const IC = ICON_MAP[tool.icon];
@@ -290,10 +321,35 @@ function MyToolsCard({ favorites }: { favorites: ToolFavorite[] }) {
               </>
             );
             const cls =
-              "flex items-center gap-2.5 bg-white/60 border border-slate-100 rounded-xl px-3 py-2 hover:border-rose-200 transition-all active:scale-[0.98]";
+              "flex items-center gap-2.5 bg-white/60 border border-slate-100 rounded-xl px-3 py-2 transition-all active:scale-[0.98]";
+            const href = tool.linkTo ? `${tool.linkTo}?from=me` : "/tools";
             return (
-              <Link key={tool.id} href={tool.linkTo ?? "/tools"} className={cls}>
+              <Link key={tool.id} href={href} className={cls} style={{ '--tw-border-opacity': '1' } as React.CSSProperties}
+                onMouseEnter={(e) => (e.currentTarget.style.borderColor = '#DDD9F0')}
+                onMouseLeave={(e) => (e.currentTarget.style.borderColor = '')}
+              >
                 {inner}
+              </Link>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-2">
+          {favTools.map((tool) => {
+            const IC = ICON_MAP[tool.icon];
+            const href = tool.linkTo ? `${tool.linkTo}?from=me` : "/tools";
+            return (
+              <Link
+                key={tool.id}
+                href={href}
+                className="flex flex-col items-center gap-2 p-3 bg-white/60 border border-slate-100 rounded-xl transition-all active:scale-[0.98]"
+                onMouseEnter={(e) => (e.currentTarget.style.borderColor = '#DDD9F0')}
+                onMouseLeave={(e) => (e.currentTarget.style.borderColor = '')}
+              >
+                <div className="w-10 h-10 rounded-xl bg-stone-100 flex items-center justify-center">
+                  {IC && <IC size={18} className="text-slate-600 opacity-70" />}
+                </div>
+                <p className="text-xs font-medium text-slate-700 text-center leading-tight">{tool.title}</p>
               </Link>
             );
           })}
@@ -327,7 +383,7 @@ function SensoryProfileSummaryCard({
           </div>
           <p className="text-sm font-semibold text-slate-800">Sensory Profile</p>
         </div>
-        <Link href="/tools/sensory-profile" className="text-xs text-sage-600 font-medium">
+        <Link href="/tools/sensory-profile?from=me" className="text-xs text-sage-600 font-medium">
           {hasAny ? "Edit" : "Build profile"}
         </Link>
       </div>
@@ -336,7 +392,7 @@ function SensoryProfileSummaryCard({
         <div className="text-center py-2 space-y-1">
           <p className="text-sm text-slate-500">Map what overwhelms you and what helps.</p>
           <Link
-            href="/tools/sensory-profile"
+            href="/tools/sensory-profile?from=me"
             className="text-xs text-sage-600 font-medium underline underline-offset-2"
           >
             Build your sensory profile
@@ -396,7 +452,7 @@ function SensoryProfileSummaryCard({
 
       {hasAny && (
         <Link
-          href="/tools/sensory-profile"
+          href="/tools/sensory-profile?from=me"
           className="flex items-center gap-0.5 text-xs text-sage-600 font-medium hover:text-sage-700 transition-colors"
         >
           View full profile
@@ -408,7 +464,7 @@ function SensoryProfileSummaryCard({
 }
 
 // ---------------------------------------------------------------------------
-// Special Interests card
+// Special Interests card  (dusty terracotta)
 // ---------------------------------------------------------------------------
 
 const INTENSITY_COLORS: Record<string, string> = {
@@ -431,11 +487,11 @@ function SpecialInterestsCard({ interests }: { interests: SpecialInterest[] }) {
   const preview = sorted.slice(0, 3);
 
   return (
-    <div className="bg-cream-50 rounded-2xl border border-rose-100 shadow-sm p-4 space-y-3">
+    <div className="bg-cream-50 rounded-2xl border shadow-sm p-4 space-y-3" style={{ borderColor: '#E0CCC7' }}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-rose-100 flex items-center justify-center">
-            <Sparkles size={16} className="text-rose-600" />
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: '#EDD8D2' }}>
+            <Sparkles size={16} style={{ color: '#9B6B60' }} />
           </div>
           <p className="text-sm font-semibold text-slate-800">My Special Interests</p>
         </div>
@@ -499,12 +555,14 @@ function MyListsCard() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [showNewForm, setShowNewForm] = useState(false);
   const [newListName, setNewListName] = useState("");
+  const [newListType, setNewListType] = useState<'bullet' | 'checklist'>('checklist');
   const [newItemText, setNewItemText] = useState<Record<string, string>>({});
 
   const handleCreateList = () => {
     if (!newListName.trim()) return;
-    addUserList(newListName.trim());
+    addUserList(newListName.trim(), newListType);
     setNewListName("");
+    setNewListType('checklist');
     setShowNewForm(false);
   };
 
@@ -545,6 +603,33 @@ function MyListsCard() {
             autoFocus
             onKeyDown={(e) => e.key === "Enter" && handleCreateList()}
           />
+          {/* List type toggle */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => setNewListType('checklist')}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-xl text-xs font-semibold border transition-all",
+                newListType === 'checklist'
+                  ? "bg-violet-600 text-white border-violet-600"
+                  : "bg-white text-slate-500 border-stone-200 hover:border-violet-300"
+              )}
+            >
+              <Check size={12} />
+              Checklist
+            </button>
+            <button
+              onClick={() => setNewListType('bullet')}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-xl text-xs font-semibold border transition-all",
+                newListType === 'bullet'
+                  ? "bg-violet-600 text-white border-violet-600"
+                  : "bg-white text-slate-500 border-stone-200 hover:border-violet-300"
+              )}
+            >
+              <span className="text-sm leading-none">•</span>
+              Bullet list
+            </button>
+          </div>
           <div className="flex flex-wrap gap-1.5">
             {LIST_SUGGESTIONS.map((s) => (
               <button
@@ -565,7 +650,7 @@ function MyListsCard() {
               Create
             </button>
             <button
-              onClick={() => { setShowNewForm(false); setNewListName(""); }}
+              onClick={() => { setShowNewForm(false); setNewListName(""); setNewListType('checklist'); }}
               className="px-4 py-2 rounded-xl text-sm text-slate-500 hover:bg-stone-100 transition-all"
             >
               Cancel
@@ -581,6 +666,7 @@ function MyListsCard() {
       <div className="space-y-2 overflow-y-auto max-h-48">
         {userLists.map((list) => {
           const isExpanded = expandedId === list.id;
+          const isBullet = list.listType === 'bullet';
           const doneCount = list.items.filter((i) => i.checked).length;
           return (
             <div key={list.id} className="bg-stone-100 rounded-xl overflow-hidden">
@@ -592,7 +678,7 @@ function MyListsCard() {
                   <p className="text-sm font-semibold text-slate-800 truncate">{list.name}</p>
                   <p className="text-xs text-slate-400">
                     {list.items.length} item{list.items.length !== 1 ? "s" : ""}
-                    {doneCount > 0 ? ` · ${doneCount} done` : ""}
+                    {!isBullet && doneCount > 0 ? ` · ${doneCount} done` : ""}
                   </p>
                 </div>
                 <button
@@ -612,21 +698,25 @@ function MyListsCard() {
                 <div className="px-3 pb-3 space-y-1.5 border-t border-stone-200 pt-2">
                   {list.items.map((item) => (
                     <div key={item.id} className="flex items-center gap-2 group">
-                      <button
-                        onClick={() => toggleListItem(list.id, item.id)}
-                        className={cn(
-                          "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
-                          item.checked
-                            ? "bg-sage-500 border-sage-500"
-                            : "border-stone-300 hover:border-sage-400"
-                        )}
-                      >
-                        {item.checked && <Check size={10} className="text-white" strokeWidth={3} />}
-                      </button>
+                      {isBullet ? (
+                        <span className="text-slate-400 text-base leading-none shrink-0 w-5 text-center">•</span>
+                      ) : (
+                        <button
+                          onClick={() => toggleListItem(list.id, item.id)}
+                          className={cn(
+                            "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
+                            item.checked
+                              ? "bg-sage-500 border-sage-500"
+                              : "border-stone-300 hover:border-sage-400"
+                          )}
+                        >
+                          {item.checked && <Check size={10} className="text-white" strokeWidth={3} />}
+                        </button>
+                      )}
                       <p
                         className={cn(
                           "flex-1 text-sm text-slate-700",
-                          item.checked && "line-through text-slate-400"
+                          !isBullet && item.checked && "line-through text-slate-400"
                         )}
                       >
                         {item.text}
@@ -696,14 +786,14 @@ export default function MePage() {
       {mounted ? (
         <NDStrengthsCard ndIdentities={profile.ndIdentities} />
       ) : (
-        <div className="bg-cream-50 rounded-2xl border border-sage-100 h-28 animate-pulse" />
+        <div className="bg-cream-50 rounded-2xl border h-28 animate-pulse" style={{ borderColor: '#D0DCCB' }} />
       )}
 
       {/* My Tools */}
       {mounted ? (
         <MyToolsCard favorites={favorites} />
       ) : (
-        <div className="bg-cream-50 rounded-2xl border border-rose-100 h-20 animate-pulse" />
+        <div className="bg-cream-50 rounded-2xl border h-20 animate-pulse" style={{ borderColor: '#DDD9F0' }} />
       )}
 
       {/* Sensory Profile Summary */}
@@ -720,7 +810,7 @@ export default function MePage() {
       {mounted ? (
         <SpecialInterestsCard interests={specialInterests} />
       ) : (
-        <div className="bg-cream-50 rounded-2xl border border-rose-100 h-24 animate-pulse" />
+        <div className="bg-cream-50 rounded-2xl border h-24 animate-pulse" style={{ borderColor: '#E0CCC7' }} />
       )}
 
       {/* My Lists */}
@@ -730,7 +820,7 @@ export default function MePage() {
       {mounted ? (
         <EnergyAccountingCard />
       ) : (
-        <div className="bg-cream-50 rounded-2xl border border-amber-100 h-28 animate-pulse" />
+        <div className="bg-cream-50 rounded-2xl border h-28 animate-pulse" style={{ borderColor: '#E0D5A8' }} />
       )}
     </div>
   );

@@ -8,13 +8,12 @@ import { ToolModal } from "@/components/ToolModal";
 import { getAvatarOption } from "@/app/onboarding/page";
 import Link from "next/link";
 import {
-  Heart, Star, Zap, Flame, Sparkles, Brain, Leaf, ChevronRight,
-  Shield, Wind, Shuffle, X, PersonStanding, Snowflake,
+  Heart, Star, Zap, Flame, Sparkles, Brain, ChevronRight,
+  Wind, Shuffle, X, PersonStanding, Snowflake,
   HeartHandshake, ExternalLink,
 } from "lucide-react";
 import { ICON_MAP } from "@/lib/icon-map";
 import { cn } from "@/lib/utils";
-import { SensoryProfileData } from "@/types";
 
 // ---------------------------------------------------------------------------
 // Data
@@ -67,8 +66,6 @@ const ndQuotes = [
   "Every version of you deserves kindness.",
   "You do not need to perform wellness to deserve rest.",
 ];
-
-const PLEASANT_LABELS = ["Very Unpleasant", "Unpleasant", "Neutral", "Pleasant", "Very Pleasant"];
 
 const MICRO_TASKS = [
   "Get a glass of water",
@@ -136,107 +133,6 @@ function FreezeSavedBanner({ onDismiss }: { onDismiss: () => void }) {
       <button onClick={onDismiss} className="text-blue-400 hover:text-blue-600 transition-colors">
         <X size={16} />
       </button>
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Sensory Profile card
-// ---------------------------------------------------------------------------
-
-function SensoryCard({ sensoryProfile }: { sensoryProfile: SensoryProfileData }) {
-  const allTriggers = Object.values(sensoryProfile.triggers).flat();
-  const allSoothers = Object.values(sensoryProfile.soothers).flat();
-  const allAccommodators = Object.values(sensoryProfile.accommodators).flat();
-  const hasAny = allTriggers.length > 0 || allSoothers.length > 0 || allAccommodators.length > 0;
-
-  return (
-    <div className="bg-cream-50 rounded-2xl border border-green-100 shadow-sm p-4 space-y-3">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-green-100 flex items-center justify-center">
-            <Leaf size={16} className="text-green-700" />
-          </div>
-          <p className="text-sm font-semibold text-slate-800">Sensory Profile</p>
-        </div>
-        <Link href="/tools/sensory-profile" className="text-xs text-sage-600 font-medium">
-          {hasAny ? "Edit" : "Build profile"}
-        </Link>
-      </div>
-
-      {!hasAny ? (
-        <div className="text-center py-2 space-y-1">
-          <p className="text-sm text-slate-500">Map your triggers, soothers, and accommodations</p>
-          <Link href="/tools/sensory-profile" className="text-xs text-sage-600 font-medium underline underline-offset-2">
-            Build your sensory profile
-          </Link>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {allTriggers.length > 0 && (
-            <div>
-              <div className="flex items-center gap-1 mb-1"><Zap size={11} className="text-red-500" /><p className="text-xs font-medium text-red-600">Triggers</p></div>
-              <div className="flex flex-wrap gap-1.5">
-                {allTriggers.slice(0, 3).map((t, i) => (
-                  <span key={i} className="text-xs bg-red-50 text-red-700 px-2.5 py-1 rounded-full border border-red-100">
-                    {t}
-                  </span>
-                ))}
-                {allTriggers.length > 3 && (
-                  <Link href="/tools/sensory-profile" className="text-xs bg-slate-50 text-slate-500 px-2.5 py-1 rounded-full border border-slate-200">
-                    +{allTriggers.length - 3} more
-                  </Link>
-                )}
-              </div>
-            </div>
-          )}
-          {allSoothers.length > 0 && (
-            <div>
-              <div className="flex items-center gap-1 mb-1"><Leaf size={11} className="text-emerald-500" /><p className="text-xs font-medium text-emerald-600">Soothers</p></div>
-              <div className="flex flex-wrap gap-1.5">
-                {allSoothers.slice(0, 3).map((s, i) => (
-                  <span key={i} className="text-xs bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-100">
-                    {s}
-                  </span>
-                ))}
-                {allSoothers.length > 3 && (
-                  <Link href="/tools/sensory-profile" className="text-xs bg-slate-50 text-slate-500 px-2.5 py-1 rounded-full border border-slate-200">
-                    +{allSoothers.length - 3} more
-                  </Link>
-                )}
-              </div>
-            </div>
-          )}
-          {allAccommodators.length > 0 && (
-            <div>
-              <div className="flex items-center gap-1 mb-1"><Shield size={11} className="text-sage-500" /><p className="text-xs font-medium text-sage-600">Accommodators</p></div>
-              <div className="flex flex-wrap gap-1.5">
-                {allAccommodators.slice(0, 3).map((a, i) => (
-                  <span key={i} className="text-xs bg-sage-50 text-sage-700 px-2.5 py-1 rounded-full border border-sage-100">
-                    {a}
-                  </span>
-                ))}
-                {allAccommodators.length > 3 && (
-                  <Link href="/tools/sensory-profile" className="text-xs bg-slate-50 text-slate-500 px-2.5 py-1 rounded-full border border-slate-200">
-                    +{allAccommodators.length - 3} more
-                  </Link>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* View full profile link */}
-      <div className="pt-1 border-t border-green-100">
-        <Link
-          href="/tools/sensory-profile"
-          className="flex items-center gap-1 text-xs text-sage-600 font-medium hover:text-sage-700 transition-colors"
-        >
-          View full profile
-          <ChevronRight size={12} />
-        </Link>
-      </div>
     </div>
   );
 }
@@ -553,7 +449,7 @@ function FeelingFrozenCard({ openTool }: { openTool: (id: string) => void }) {
 
 export default function HomePage() {
   const {
-    profile, tasks, moodEntries, favorites, sensoryProfile,
+    profile, tasks, favorites,
     streak, longestStreak, checkAndUpdateStreak,
     hasOnboarded, userName, userAvatar,
     showStreakCelebration, setShowStreakCelebration,
@@ -598,7 +494,6 @@ export default function HomePage() {
     (t) => t.status !== "done" && (!t.dueDate || t.dueDate === today)
   );
   const completedToday = mounted ? tasks.filter((t) => t.completedAt?.startsWith(today)).length : 0;
-  const lastMood = mounted ? moodEntries[0] : undefined;
   const greeting = greetings[new Date().getDay() % greetings.length];
   const displayLevel = mounted ? profile.level : 1;
   const displayXp = mounted ? profile.totalXp : 0;
@@ -693,19 +588,6 @@ export default function HomePage() {
             <p className="text-2xl font-bold text-slate-800 leading-none">{completedToday}</p>
             <p className="text-xs text-slate-400 mt-0.5">task{completedToday !== 1 ? "s" : ""}</p>
           </div>
-          <div className="flex-1 bg-cream-50 rounded-2xl p-3 border border-slate-100 shadow-sm flex flex-col justify-between min-h-[56px]">
-            <div className="flex items-center gap-1 mb-1">
-              <Heart size={12} className="text-rose-400" />
-              <p className="text-xs text-slate-500 font-medium">Mood</p>
-            </div>
-            {lastMood ? (
-              <p className="text-sm font-semibold text-slate-700 leading-none mt-1">
-                {PLEASANT_LABELS[lastMood.pleasantness - 1]}
-              </p>
-            ) : (
-              <p className="text-xs text-slate-400 mt-1">No entry yet</p>
-            )}
-          </div>
         </div>
       </div>
 
@@ -716,7 +598,7 @@ export default function HomePage() {
       <div className="grid grid-cols-2 gap-3">
         <Link
           href="/strengths"
-          className="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl p-4 flex flex-col justify-between hover:border-emerald-300 hover:shadow-md transition-all active:scale-[0.98]"
+          className="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl p-4 flex flex-col gap-2 hover:border-emerald-300 hover:shadow-md transition-all active:scale-[0.98]"
         >
           <div className="flex items-start justify-between">
             <div className="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center">
@@ -724,9 +606,24 @@ export default function HomePage() {
             </div>
             <ChevronRight size={14} className="text-slate-300 mt-0.5" />
           </div>
-          <div className="mt-3">
+          <div>
             <p className="font-semibold text-slate-800 text-sm">My Strengths</p>
-            <p className="text-xs text-slate-500 mt-0.5">Your ND profile</p>
+            {(profile.ndIdentities.length > 0 || profile.strengths.length > 0) ? (
+              <div className="flex flex-wrap gap-1 mt-1.5">
+                {[...profile.ndIdentities, ...profile.strengths].slice(0, 3).map((s) => (
+                  <span key={s} className="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full border border-emerald-200 leading-none">
+                    {s}
+                  </span>
+                ))}
+                {([...profile.ndIdentities, ...profile.strengths].length > 3) && (
+                  <span className="text-[10px] text-slate-400">
+                    +{[...profile.ndIdentities, ...profile.strengths].length - 3} more
+                  </span>
+                )}
+              </div>
+            ) : (
+              <p className="text-xs text-emerald-600 mt-0.5 font-medium">Add your ND strengths →</p>
+            )}
           </div>
         </Link>
         <Link
@@ -745,9 +642,6 @@ export default function HomePage() {
           </div>
         </Link>
       </div>
-
-      {/* Sensory Profile summary */}
-      <SensoryCard sensoryProfile={sensoryProfile} />
 
       {/* My Tools (favourites) */}
       <div className="bg-cream-50 rounded-2xl border border-slate-100 shadow-sm p-4">

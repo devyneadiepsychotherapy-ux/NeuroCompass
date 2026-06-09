@@ -1,10 +1,21 @@
 "use client";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { ArrowLeft, Plus, X, ChevronDown, ChevronUp, Heart, Eye, Music, Crosshair, Wind, Utensils, RefreshCw, Activity, Thermometer, Zap, Leaf, Shield } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 import type { LucideIcon } from "lucide-react";
+
+function BackLink() {
+  const searchParams = useSearchParams();
+  const backHref = searchParams.get("from") === "me" ? "/me" : "/tools";
+  return (
+    <Link href={backHref} className="p-2 rounded-xl hover:bg-slate-100">
+      <ArrowLeft size={20} className="text-slate-500" />
+    </Link>
+  );
+}
 
 const SENSES: { key: string; label: string; icon: LucideIcon }[] = [
   { key: "sight",    label: "Sight / Visual",              icon: Eye },
@@ -126,9 +137,9 @@ export default function SensoryProfilePage() {
   return (
     <div className="px-4 pt-12 pb-8 space-y-5">
       <div className="flex items-center gap-3">
-        <Link href="/tools" className="p-2 rounded-xl hover:bg-slate-100">
-          <ArrowLeft size={20} className="text-slate-500" />
-        </Link>
+        <Suspense fallback={<Link href="/tools" className="p-2 rounded-xl hover:bg-slate-100"><ArrowLeft size={20} className="text-slate-500" /></Link>}>
+          <BackLink />
+        </Suspense>
         <div className="flex-1">
           <h1 className="text-xl font-bold text-slate-800">Sensory Profile</h1>
           <p className="text-sm text-slate-500">Map your sensory world</p>
