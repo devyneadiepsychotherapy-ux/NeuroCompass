@@ -109,6 +109,26 @@ function taskMatchesView(task: Task, view: PlannerView): boolean {
   return task.showOn.includes(view);
 }
 
+function formatTimeStr(t: string): string {
+  const [h, m] = t.split(":").map(Number);
+  const ampm = h >= 12 ? "PM" : "AM";
+  const hour = h % 12 || 12;
+  return `${hour}:${m.toString().padStart(2, "0")} ${ampm}`;
+}
+
+function calcDuration(startTime: string, endTime: string): string {
+  if (!startTime || !endTime) return "";
+  const [sh, sm] = startTime.split(":").map(Number);
+  const [eh, em] = endTime.split(":").map(Number);
+  const totalMin = (eh * 60 + em) - (sh * 60 + sm);
+  if (totalMin <= 0) return "";
+  const hours = Math.floor(totalMin / 60);
+  const mins = totalMin % 60;
+  if (hours === 0) return `${mins} min`;
+  if (mins === 0) return `${hours} hour${hours !== 1 ? "s" : ""}`;
+  return `${hours} hour${hours !== 1 ? "s" : ""} ${mins} min`;
+}
+
 // ---------------------------------------------------------------------------
 // View Toggle
 // ---------------------------------------------------------------------------
@@ -714,6 +734,8 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
   const [showOn, setShowOn] = useState<("day" | "week" | "month")[]>(
     taskToEdit?.showOn ?? ["day", "week", "month"]
   );
+  const [startTime, setStartTime] = useState(taskToEdit?.startTime ?? "");
+  const [endTime, setEndTime] = useState(taskToEdit?.endTime ?? "");
 
   const toggleShowOn = (view: "day" | "week" | "month") => {
     setShowOn((prev) =>
@@ -738,6 +760,8 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
         timeEstimate,
         category,
         showOn,
+        startTime: startTime.trim() || undefined,
+        endTime: endTime.trim() || undefined,
       });
     } else {
       addTask({
@@ -756,6 +780,8 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
         timeEstimate,
         category,
         showOn,
+        startTime: startTime.trim() || undefined,
+        endTime: endTime.trim() || undefined,
       });
     }
     onClose();
@@ -808,16 +834,51 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
           </div>
         </div>
 
-        {/* Duration */}
-        <div>
-          <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">Duration</p>
-          <input
-            className="w-full border border-slate-200 rounded-xl px-4 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-400"
-            placeholder="e.g. 30 min, 1 hour"
-            value={duration}
-            onChange={(e) => setDuration(e.target.value)}
-          />
-        </div>
+        {/* Start / End Time — appointment & time-block only */}
+        {(taskType === "appointment" || taskType === "time-block") && (
+          <div className="space-y-2">
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Time</p>
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <label className="block text-xs text-slate-400 mb-1">Start</label>
+                <input
+                  type="time"
+                  className="w-full min-h-[44px] border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sage-400"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                />
+              </div>
+              <div className="flex-1">
+                <label className="block text-xs text-slate-400 mb-1">End</label>
+                <input
+                  type="time"
+                  className="w-full min-h-[44px] border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sage-400"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                />
+              </div>
+            </div>
+            {calcDuration(startTime, endTime) && (
+              <p className="text-xs text-slate-400 flex items-center gap-1">
+                <Clock size={11} />
+                {calcDuration(startTime, endTime)}
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Duration — task type only */}
+        {taskType === "task" && (
+          <div>
+            <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">Duration</p>
+            <input
+              className="w-full min-h-[44px] border border-slate-200 rounded-xl px-4 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-400"
+              placeholder="e.g. 30 min, 1 hour"
+              value={duration}
+              onChange={(e) => setDuration(e.target.value)}
+            />
+          </div>
+        )}
 
         {/* Priority */}
         <div>
@@ -1077,7 +1138,15 @@ function TaskCard({ task }: { task: Task }) {
                   {taskTypeConfig[taskType].label}
                 </span>
               )}
-              {task.duration && (
+              {(task.startTime || task.endTime) && (
+                <span className="flex items-center gap-1 text-xs text-slate-400">
+                  <Clock size={11} />
+                  {task.startTime ? formatTimeStr(task.startTime) : ""}
+                  {task.startTime && task.endTime ? " – " : ""}
+                  {task.endTime ? formatTimeStr(task.endTime) : ""}
+                </span>
+              )}
+              {task.duration && !task.startTime && !task.endTime && (
                 <span className="flex items-center gap-1 text-xs text-slate-400">
                   <Clock size={11} />
                   {task.duration}

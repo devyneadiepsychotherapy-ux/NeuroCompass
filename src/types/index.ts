@@ -24,6 +24,8 @@ export interface Task {
   showOn?: ("day" | "week" | "month")[]; // which views show this task; undefined = all views
   type?: TaskItemType; // defaults to 'task'
   duration?: string; // freeform e.g. "30 min", "1 hour"
+  startTime?: string; // "HH:MM" e.g. "09:00"
+  endTime?: string;   // "HH:MM" e.g. "11:30"
 }
 
 export interface ShopReward {
