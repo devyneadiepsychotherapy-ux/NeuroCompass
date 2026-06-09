@@ -107,7 +107,7 @@ function LevelUpToast({
           </div>
         )}
 
-        {/* No theme unlock — show next hint */}
+        {/* No theme unlock - show next hint */}
         {!unlockedTheme && data.nextThemeLevel !== null && (
           <p className="text-xs text-slate-400 pl-12">
             Next theme unlocks at Level {data.nextThemeLevel}

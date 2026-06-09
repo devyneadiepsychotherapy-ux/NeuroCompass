@@ -249,7 +249,7 @@ function EnergyAccountingCard() {
 }
 
 // ---------------------------------------------------------------------------
-// My Tools card  (soft lavender) — with grid/list toggle
+// My Tools card  (soft lavender) - with grid/list toggle
 // ---------------------------------------------------------------------------
 
 function MyToolsCard({ favorites }: { favorites: ToolFavorite[] }) {

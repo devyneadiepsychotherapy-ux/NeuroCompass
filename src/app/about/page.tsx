@@ -66,7 +66,7 @@ export default function AboutPage() {
             <p>
               NeuroCompass was created by a neurodivergent psychotherapist and owner of{' '}
               <span className="font-semibold">Willow Creek Counselling &amp; Psychotherapy</span>.
-              She built this app out of lived experience and professional insight — as someone
+              She built this app out of lived experience and professional insight: as someone
               who is neurodivergent herself, she wanted a tool that truly understood the ADHD
               and autistic experience from the inside out.
             </p>
@@ -96,7 +96,7 @@ export default function AboutPage() {
             style={{ background: 'var(--card, #F0F4EF)', color: 'var(--text, #2D3B2E)' }}
           >
             <p>
-              NeuroCompass is grounded in neurodivergent-affirming therapy — which means it
+              NeuroCompass is grounded in neurodivergent-affirming therapy, which means it
               starts from the belief that ADHD, autism, and other neurodivergent experiences
               are not deficits to be fixed. They&apos;re ways of being in the world that deserve
               understanding, support, and tools built specifically for them.
@@ -105,11 +105,11 @@ export default function AboutPage() {
               {[
                 {
                   title: 'Reduce shame',
-                  body: 'Too many ND people carry shame about how their brains work. This app is designed to be a shame-free space — no streaks used as punishment, no language that frames you as broken.',
+                  body: 'Too many ND people carry shame about how their brains work. This app is designed to be a shame-free space: no streaks used as punishment, no language that frames you as broken.',
                 },
                 {
                   title: 'Support daily functioning',
-                  body: 'From planning to sensory support to mood check-ins, the tools here are practical and adapted to how neurodivergent minds actually work — not how they "should" work.',
+                  body: 'From planning to sensory support to mood check-ins, the tools here are practical and adapted to how neurodivergent minds actually work, not how they "should" work.',
                 },
                 {
                   title: 'Build self-knowledge',
@@ -117,7 +117,7 @@ export default function AboutPage() {
                 },
                 {
                   title: 'Provide affirming tools',
-                  body: "Every feature is shaped by neurodivergent-affirming therapeutic practice — the same values that guide Willow Creek's clinical work.",
+                  body: "Every feature is shaped by neurodivergent-affirming therapeutic practice, reflecting the same values that guide Willow Creek's clinical work.",
                 },
               ].map(({ title, body }) => (
                 <div key={title} className="flex gap-3">
@@ -146,7 +146,7 @@ export default function AboutPage() {
             style={{ color: 'var(--primary, #6B8F71)' }}
           />
           <p>
-            This app was built for you — not in spite of how your brain works, but because of it.
+            This app was built for you: not in spite of how your brain works, but because of it.
             You belong here exactly as you are.
           </p>
         </div>

@@ -834,7 +834,7 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
           </div>
         </div>
 
-        {/* Start / End Time — appointment & time-block only */}
+        {/* Start / End Time - appointment & time-block only */}
         {(taskType === "appointment" || taskType === "time-block") && (
           <div className="space-y-2">
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Time</p>
@@ -867,7 +867,7 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
           </div>
         )}
 
-        {/* Duration — task type only */}
+        {/* Duration - task type only */}
         {taskType === "task" && (
           <div>
             <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">Duration</p>

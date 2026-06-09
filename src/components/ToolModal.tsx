@@ -1492,7 +1492,7 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
                 <div className="space-y-4">
                   <div>
                     <p className="text-base font-semibold text-slate-800">Phase 1: Dropping Demands</p>
-                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">During burnout recovery, the first step is radically reducing demands — not pushing through. This phase is about identifying what you can let go of.</p>
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">During burnout recovery, the first step is radically reducing demands, not pushing through. This phase is about identifying what you can let go of.</p>
                   </div>
 
                   {/* Drop checklist */}
@@ -1586,7 +1586,7 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
                 <div className="space-y-4">
                   <div>
                     <p className="text-base font-semibold text-slate-800">Phase 2: Gentle Reintroduction</p>
-                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">Once you feel some stability returning, start adding ONE small thing at a time. Go slowly — rushing recovery leads to relapse.</p>
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">Once you feel some stability returning, start adding ONE small thing at a time. Go slowly: rushing recovery leads to relapse.</p>
                   </div>
 
                   {/* Activities list */}

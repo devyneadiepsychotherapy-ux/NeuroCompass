@@ -15,7 +15,7 @@
   /* Override white to warm off-white so all bg-white cards feel cozy */
   --color-white: #F7F5F2;
 
-  /* Dusty sage green — primary action color (muted, calming) */
+  /* Dusty sage green - primary action color (muted, calming) */
   --color-sage-50: #f0f4ef;
   --color-sage-100: #d6e5d8;
   --color-sage-200: #aecbb2;
@@ -33,7 +33,7 @@
   --color-cream-200: #E5E2DE;
   --color-cream-300: #D8D5D0;
 
-  /* Muted terracotta — streak / engagement (replaces amber/orange) */
+  /* Muted terracotta - streak / engagement (replaces amber/orange) */
   --color-terracotta-50: #f5efec;
   --color-terracotta-100: #e8d8d2;
   --color-terracotta-200: #d4b8b0;
@@ -43,19 +43,19 @@
   --color-terracotta-600: #8f6559;
   --color-terracotta-700: #714f46;
 
-  /* Muted dusty gold — coins */
+  /* Muted dusty gold - coins */
   --color-gold-400: #c4b87a;
   --color-gold-500: #B8A96A;
   --color-gold-600: #9e9158;
 
-  /* Muted lavender/purple — XP / level */
+  /* Muted lavender/purple - XP / level */
   --color-lavender-100: #ebe8f5;
   --color-lavender-300: #bdb3e0;
   --color-lavender-500: #9B8EC4;
   --color-lavender-600: #8478aa;
   --color-lavender-700: #6b5f8e;
 
-  /* Muted mauve/dusty rose — warning */
+  /* Muted mauve/dusty rose - warning */
   --color-mauve-50: #f5eef0;
   --color-mauve-100: #ead8db;
   --color-mauve-300: #d0a8ae;

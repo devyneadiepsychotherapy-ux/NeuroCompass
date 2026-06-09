@@ -748,7 +748,7 @@ export const useAppStore = create<AppState>()(
         const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
 
         if (lastOpenedDate === yesterday) {
-          // Consecutive day — increment streak
+          // Consecutive day - increment streak
           const newStreak = streak + 1;
           const newLongest = Math.max(newStreak, longestStreak);
           const getsFreeze = newStreak % 7 === 0;
@@ -760,14 +760,14 @@ export const useAppStore = create<AppState>()(
             streakFreezes: getsFreeze ? streakFreezes + 1 : streakFreezes,
           });
         } else if (lastOpenedDate !== "" && streakFreezes > 0) {
-          // Missed a day but has a freeze — protect the streak
+          // Missed a day but has a freeze - protect the streak
           set({
             streakFreezes: streakFreezes - 1,
             lastOpenedDate: today,
             showFreezeSaved: true,
           });
         } else {
-          // Missed days (no freeze) or first-ever open — start/reset streak
+          // Missed days (no freeze) or first-ever open - start/reset streak
           const newStreak = 1;
           const newLongest = Math.max(newStreak, longestStreak);
           set({
@@ -870,7 +870,7 @@ export const useAppStore = create<AppState>()(
               setItem: () => {},
               removeItem: () => {},
             })),
-      // Exclude ephemeral UI flags — they should always start false on a fresh load.
+      // Exclude ephemeral UI flags - they should always start false on a fresh load.
       partialize: (state) => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { showStreakCelebration, showFreezeSaved, okayMode, pendingLevelUp, ...rest } = state;

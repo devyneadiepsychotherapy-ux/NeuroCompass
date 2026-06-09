@@ -458,7 +458,7 @@ export default function HomePage() {
   } = useAppStore();
   const router = useRouter();
 
-  // Mount guard — prevents SSR mismatch AND waits for Zustand persist to
+  // Mount guard - prevents SSR mismatch AND waits for Zustand persist to
   // finish rehydrating from localStorage. In Zustand v5, persist rehydration
   // is async (Promise.resolve) even with synchronous localStorage, so we
   // must not check `hasOnboarded` until onFinishHydration fires.
@@ -506,7 +506,7 @@ export default function HomePage() {
   // Before Zustand has hydrated: show a blank page matching the app background
   // so there's no flash. This resolves in one microtask once the store rehydrates.
   if (!mounted) return <div style={{ minHeight: "100vh", backgroundColor: "var(--background)" }} />;
-  // After mount, if not onboarded the redirect effect above is in-flight — show nothing.
+  // After mount, if not onboarded the redirect effect above is in-flight - show nothing.
   if (!hasOnboarded) return null;
 
   return (

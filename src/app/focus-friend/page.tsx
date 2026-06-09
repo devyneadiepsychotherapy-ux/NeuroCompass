@@ -71,7 +71,7 @@ function PlantSVG({ progress }: { progress: number }) {
       <ellipse cx="100" cy="240" rx="52" ry="12" fill={earthDark} opacity="0.5" />
       <ellipse cx="100" cy="236" rx="48" ry="10" fill={earthColor} />
 
-      {/* Stage 0 (0-20%): seedling — tiny sprout, 2 small leaves */}
+      {/* Stage 0 (0-20%): seedling - tiny sprout, 2 small leaves */}
       {stage === 0 && (
         <g style={{ transition: "opacity 0.8s ease" }}>
           {/* Thin stem */}
@@ -85,7 +85,7 @@ function PlantSVG({ progress }: { progress: number }) {
         </g>
       )}
 
-      {/* Stage 1 (20-40%): small plant — short stem, 4 leaves */}
+      {/* Stage 1 (20-40%): small plant - short stem, 4 leaves */}
       {stage === 1 && (
         <g style={{ transition: "opacity 0.8s ease" }}>
           <line x1="100" y1="236" x2="100" y2="188" stroke={stemColor} strokeWidth="4" strokeLinecap="round" />
@@ -100,7 +100,7 @@ function PlantSVG({ progress }: { progress: number }) {
         </g>
       )}
 
-      {/* Stage 2 (40-60%): growing plant — taller, more leaves, bud forming */}
+      {/* Stage 2 (40-60%): growing plant - taller, more leaves, bud forming */}
       {stage === 2 && (
         <g style={{ transition: "opacity 0.8s ease" }}>
           <line x1="100" y1="236" x2="100" y2="162" stroke={stemColor} strokeWidth="5" strokeLinecap="round" />
@@ -119,7 +119,7 @@ function PlantSVG({ progress }: { progress: number }) {
         </g>
       )}
 
-      {/* Stage 3 (60-80%): flowering — full stem, open flower */}
+      {/* Stage 3 (60-80%): flowering - full stem, open flower */}
       {stage === 3 && (
         <g style={{ transition: "opacity 0.8s ease" }}>
           <line x1="100" y1="236" x2="100" y2="144" stroke={stemColor} strokeWidth="5" strokeLinecap="round" />
@@ -346,7 +346,7 @@ export default function FocusFriendPage() {
           {formatTime(remaining)}
         </p>
 
-        {/* Duration selector — only shown when no active session */}
+        {/* Duration selector - only shown when no active session */}
         {!isActive && (
           <div className="w-full max-w-xs space-y-3 mb-6">
             <div className="flex flex-wrap gap-2 justify-center">
