@@ -1,13 +1,14 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useAppStore } from "@/store/useAppStore";
-import { THEMES, ThemeId, getTheme } from "@/lib/themes";
+import { getTheme } from "@/lib/themes";
 import { getAvatarOption } from "@/app/onboarding/page";
 import {
-  ArrowLeft, Check, Lock, Bell, BellOff, BellRing, Palette, User, ChevronRight,
+  ArrowLeft, Check, Bell, BellOff, BellRing, User,
   Cat, Star, Moon, Leaf, Zap, Sparkles, Mountain, Flower2, Compass, BookOpen,
-  Music, Gamepad2, Heart, Telescope, Feather, Waves,
+  Music, Gamepad2, Heart, Telescope, Feather, Waves, ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -55,20 +56,6 @@ function SectionHeading({ label }: { label: string }) {
 }
 
 // ---------------------------------------------------------------------------
-// Theme swatch preview
-// ---------------------------------------------------------------------------
-
-function ThemeSwatch({ colors }: { colors: string[] }) {
-  return (
-    <div className="flex rounded-lg overflow-hidden h-7 w-16 shrink-0 border border-black/10">
-      {colors.map((c, i) => (
-        <div key={i} className="flex-1" style={{ background: c }} />
-      ))}
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
 // Settings page
 // ---------------------------------------------------------------------------
 
@@ -76,12 +63,10 @@ export default function SettingsPage() {
   const router = useRouter();
   const {
     userName, userAvatar, profile,
-    activeTheme, setActiveTheme,
+    activeTheme,
     notificationStyle, setNotificationStyle,
     updateProfile,
   } = useAppStore();
-
-  const userLevel = profile.level;
 
   const [editingProfile, setEditingProfile] = useState(false);
   const [draftName, setDraftName] = useState(userName);
@@ -94,6 +79,7 @@ export default function SettingsPage() {
     setEditingProfile(false);
   };
 
+  const userLevel = profile.level;
   const avatarInfo = getAvatarOption(userAvatar);
 
   const notifOptions: { id: 'cheerleader' | 'gentle' | 'silent'; label: string; desc: string; Icon: React.ElementType }[] = [
@@ -265,76 +251,23 @@ export default function SettingsPage() {
         {/* ── Themes ── */}
         <section>
           <SectionHeading label="Themes" />
-          <div className="space-y-2">
-            {THEMES.map((theme) => {
-              const unlocked = userLevel >= theme.unlockLevel;
-              const isActive = activeTheme === theme.id;
-              return (
-                <button
-                  key={theme.id}
-                  onClick={() => unlocked && setActiveTheme(theme.id as ThemeId)}
-                  disabled={!unlocked}
-                  className={cn(
-                    "w-full flex items-center gap-3 rounded-2xl border p-4 text-left transition-all",
-                    isActive
-                      ? "bg-sage-50 border-sage-300 shadow-sm"
-                      : unlocked
-                      ? "bg-white border-slate-100 hover:border-slate-200"
-                      : "bg-white border-slate-100 opacity-50 cursor-not-allowed"
-                  )}
-                >
-                  {/* Swatch */}
-                  <div className="relative shrink-0">
-                    <ThemeSwatch colors={theme.preview} />
-                    {!unlocked && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-white/60 rounded-lg">
-                        <Lock size={12} className="text-slate-500" />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Name + lock info */}
-                  <div className="flex-1 min-w-0">
-                    <p className={cn("text-sm font-semibold", isActive ? "text-sage-800" : "text-slate-700")}>
-                      {theme.name}
-                    </p>
-                    {!unlocked && (
-                      <p className="text-xs text-slate-400 mt-0.5">
-                        Unlocks at Level {theme.unlockLevel}
-                      </p>
-                    )}
-                    {unlocked && !isActive && (
-                      <p className="text-xs text-slate-400 mt-0.5">Tap to apply</p>
-                    )}
-                    {isActive && (
-                      <p className="text-xs text-sage-600 font-medium mt-0.5">Active</p>
-                    )}
-                  </div>
-
-                  {/* Active checkmark */}
-                  {isActive && (
-                    <div className="w-6 h-6 rounded-full bg-sage-500 flex items-center justify-center shrink-0">
-                      <Check size={13} className="text-white" strokeWidth={2.5} />
-                    </div>
-                  )}
-                  {!unlocked && (
-                    <Lock size={14} className="text-slate-300 shrink-0" />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-          {/* Next theme hint */}
-          {(() => {
-            const nextTheme = THEMES.find((t) => t.unlockLevel > userLevel);
-            if (!nextTheme) return null;
-            return (
-              <p className="text-xs text-slate-400 mt-2 px-1">
-                Next unlock:{" "}
-                <span className="font-semibold text-slate-500">{nextTheme.name}</span> at Level {nextTheme.unlockLevel}
+          <Link
+            href="/themes"
+            className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-white p-4 hover:border-slate-200 transition-all"
+          >
+            <div className="flex rounded-lg overflow-hidden h-7 w-16 shrink-0 border border-black/10">
+              {getTheme(activeTheme).preview.map((c, i) => (
+                <div key={i} className="flex-1" style={{ background: c }} />
+              ))}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-slate-700">
+                {getTheme(activeTheme).name}
               </p>
-            );
-          })()}
+              <p className="text-xs text-slate-400 mt-0.5">Tap to browse all themes</p>
+            </div>
+            <ChevronRight size={14} className="text-slate-300 shrink-0" />
+          </Link>
         </section>
 
       </div>

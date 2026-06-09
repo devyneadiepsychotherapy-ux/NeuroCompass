@@ -101,7 +101,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         <nav className="flex-1 px-4 space-y-1">
           {/* Themes */}
           <Link
-            href="/settings#themes"
+            href="/themes"
             onClick={onClose}
             className="flex items-center gap-3 rounded-xl px-3 py-3 hover:bg-stone-100 transition-all group"
           >

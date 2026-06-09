@@ -10,7 +10,7 @@ import Link from "next/link";
 import {
   Heart, Star, Zap, Flame, Sparkles, Brain, ChevronRight,
   Wind, Shuffle, X, PersonStanding, Snowflake,
-  HeartHandshake, ExternalLink,
+  HeartHandshake, ExternalLink, BatteryLow, BatteryFull,
 } from "lucide-react";
 import { ICON_MAP } from "@/lib/icon-map";
 import { cn } from "@/lib/utils";
@@ -455,6 +455,7 @@ export default function HomePage() {
     showStreakCelebration, setShowStreakCelebration,
     showFreezeSaved, setShowFreezeSaved,
     streakFreezes,
+    energyDrains, energyRestorers,
   } = useAppStore();
   const router = useRouter();
 
@@ -642,10 +643,10 @@ export default function HomePage() {
         </Link>
       </div>
 
-      {/* My Tools (favourites) */}
+      {/* My Toolbox (favourites) */}
       <div className="bg-cream-50 rounded-2xl border border-slate-100 shadow-sm p-4">
         <div className="flex items-center justify-between mb-3">
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">My Tools</p>
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">My Toolbox</p>
           <Link href="/tools" className="text-xs text-sage-600 font-medium">Browse all</Link>
         </div>
         {favTools.length === 0 ? (
@@ -679,6 +680,55 @@ export default function HomePage() {
                 </button>
               );
             })}
+          </div>
+        )}
+      </div>
+
+      {/* Energy Accounting (compact summary) */}
+      <div className="bg-cream-50 rounded-2xl border shadow-sm p-4 space-y-3" style={{ borderColor: '#D8D0C8' }}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: '#E4DDD0' }}>
+              <Zap size={16} style={{ color: '#9B8A4A' }} />
+            </div>
+            <p className="text-sm font-semibold text-slate-800">Energy Accounting</p>
+          </div>
+          <Link href="/me" className="text-xs font-medium" style={{ color: '#9B8A4A' }}>
+            {energyDrains.length > 0 || energyRestorers.length > 0 ? 'Edit' : 'Set up'}
+          </Link>
+        </div>
+        {energyDrains.length === 0 && energyRestorers.length === 0 ? (
+          <p className="text-sm text-slate-400 italic">Track what drains and restores your energy</p>
+        ) : (
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-1">
+              <div className="flex items-center gap-1 mb-1">
+                <BatteryLow size={11} className="text-red-400" />
+                <p className="text-xs font-semibold text-red-500">Drains</p>
+              </div>
+              {energyDrains.slice(0, 3).map((d) => (
+                <span key={d.id} className="block text-xs text-red-700 bg-red-50 border border-red-100 px-2 py-0.5 rounded-full truncate">
+                  {d.label}
+                </span>
+              ))}
+              {energyDrains.length > 3 && (
+                <span className="text-xs text-slate-400">+{energyDrains.length - 3} more</span>
+              )}
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-1 mb-1">
+                <BatteryFull size={11} className="text-emerald-500" />
+                <p className="text-xs font-semibold text-emerald-600">Restorers</p>
+              </div>
+              {energyRestorers.slice(0, 3).map((r) => (
+                <span key={r.id} className="block text-xs text-emerald-700 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full truncate">
+                  {r.label}
+                </span>
+              ))}
+              {energyRestorers.length > 3 && (
+                <span className="text-xs text-slate-400">+{energyRestorers.length - 3} more</span>
+              )}
+            </div>
           </div>
         )}
       </div>
