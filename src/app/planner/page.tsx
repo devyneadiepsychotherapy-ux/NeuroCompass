@@ -1324,7 +1324,7 @@ export default function PlannerPage() {
   };
 
   return (
-    <div className="px-4 pt-12 pb-10 space-y-6">
+    <div className="px-4 pt-4 pb-10 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-slate-800">Planner</h1>

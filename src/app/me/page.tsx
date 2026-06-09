@@ -770,7 +770,7 @@ export default function MePage() {
   }, []);
 
   return (
-    <div className="px-4 pt-12 pb-24 space-y-4">
+    <div className="px-4 pt-4 pb-24 space-y-4">
       {/* Header */}
       <div className="flex items-center gap-3 pb-1">
         <div className="w-10 h-10 rounded-2xl bg-sage-100 flex items-center justify-center">

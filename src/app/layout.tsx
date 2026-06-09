@@ -36,7 +36,7 @@ export default function RootLayout({
         <ThemeProvider>
           <TourProvider>
             <SidebarWrapper />
-            <main className="max-w-lg mx-auto min-h-screen">{children}</main>
+            <main className="max-w-lg mx-auto min-h-screen pt-14">{children}</main>
             <BottomNav />
           </TourProvider>
         </ThemeProvider>

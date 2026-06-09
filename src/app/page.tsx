@@ -510,7 +510,7 @@ export default function HomePage() {
   if (!hasOnboarded) return null;
 
   return (
-    <div className="px-4 pt-12 pb-10 space-y-3">
+    <div className="px-4 pt-4 pb-10 space-y-3">
       {/* Overlays */}
       {mounted && showFreezeSaved && <FreezeSavedBanner onDismiss={() => setShowFreezeSaved(false)} />}
       {mounted && showStreakCelebration && (
