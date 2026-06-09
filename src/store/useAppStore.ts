@@ -1,6 +1,6 @@
 "use client";
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
 import {
   Task,
   MoodEntry,
@@ -780,6 +780,14 @@ export const useAppStore = create<AppState>()(
     {
       name: "neurocompass-store",
       version: 1,
+      storage:
+        typeof window !== "undefined"
+          ? createJSONStorage(() => localStorage)
+          : createJSONStorage(() => ({
+              getItem: () => null,
+              setItem: () => {},
+              removeItem: () => {},
+            })),
       // Exclude ephemeral UI flags — they should always start false on a fresh load.
       partialize: (state) => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
