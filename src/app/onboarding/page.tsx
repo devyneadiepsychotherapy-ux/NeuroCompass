@@ -504,16 +504,16 @@ export default function OnboardingPage() {
       )}
 
       {step === 2 && (
-        <StepOverview onNext={() => setStep(3)} onTutorial={startTour} />
-      )}
-
-      {step === 3 && (
         <StepName
           name={name}
           onNameChange={setName}
-          onNext={() => setStep(4)}
-          onSkip={() => { setName(""); setStep(4); }}
+          onNext={() => setStep(3)}
+          onSkip={() => { setName(""); setStep(3); }}
         />
+      )}
+
+      {step === 3 && (
+        <StepOverview onNext={() => setStep(4)} onTutorial={startTour} />
       )}
 
       {step === 4 && (
