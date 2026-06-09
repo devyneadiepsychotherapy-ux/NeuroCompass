@@ -1,0 +1,8 @@
+.next/
+out/
+node_modules/
+android/
+._*
+.DS_Store
+tsconfig.tsbuildinfo
+*.sst
