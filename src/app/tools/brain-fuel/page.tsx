@@ -1,10 +1,21 @@
 "use client";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { ArrowLeft, ChevronRight, Heart, Flame, Search, Sparkles, Trophy, Timer } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 import type { LucideIcon } from "lucide-react";
+
+function BackLink() {
+  const searchParams = useSearchParams();
+  const backHref = searchParams.get("from") === "me" ? "/me" : "/tools";
+  return (
+    <Link href={backHref} className="p-2 rounded-xl hover:bg-slate-100">
+      <ArrowLeft size={20} className="text-slate-500" />
+    </Link>
+  );
+}
 
 interface BrainFuelMotivator {
   key: string;
@@ -135,9 +146,9 @@ export default function BrainFuelPage() {
     return (
       <div className="px-4 pt-12 pb-8 space-y-6">
         <div className="flex items-center gap-3">
-          <Link href="/tools" className="p-2 rounded-xl hover:bg-slate-100">
-            <ArrowLeft size={20} className="text-slate-500" />
-          </Link>
+          <Suspense fallback={<Link href="/tools" className="p-2 rounded-xl hover:bg-slate-100"><ArrowLeft size={20} className="text-slate-500" /></Link>}>
+            <BackLink />
+          </Suspense>
           <div className="flex-1">
             <h1 className="text-2xl font-bold text-slate-800">Brain Fuel Results</h1>
             {taskName && <p className="text-sm text-slate-500 truncate">Task: {taskName}</p>}
@@ -232,9 +243,9 @@ export default function BrainFuelPage() {
     return (
       <div className="px-4 pt-12 pb-8 space-y-6">
         <div className="flex items-center gap-3">
-          <Link href="/tools" className="p-2 rounded-xl hover:bg-slate-100">
-            <ArrowLeft size={20} className="text-slate-500" />
-          </Link>
+          <Suspense fallback={<Link href="/tools" className="p-2 rounded-xl hover:bg-slate-100"><ArrowLeft size={20} className="text-slate-500" /></Link>}>
+            <BackLink />
+          </Suspense>
           <div className="flex-1">
             <h1 className="text-2xl font-bold text-slate-800">Brain Fuel</h1>
             <p className="text-sm text-slate-500">Find what activates your ADHD brain right now</p>
@@ -288,9 +299,9 @@ export default function BrainFuelPage() {
   return (
     <div className="px-4 pt-12 pb-8 space-y-5">
       <div className="flex items-center gap-3">
-        <Link href="/tools" className="p-2 rounded-xl hover:bg-slate-100">
-          <ArrowLeft size={20} className="text-slate-500" />
-        </Link>
+        <Suspense fallback={<Link href="/tools" className="p-2 rounded-xl hover:bg-slate-100"><ArrowLeft size={20} className="text-slate-500" /></Link>}>
+          <BackLink />
+        </Suspense>
         <div className="flex-1">
           <h1 className="text-2xl font-bold text-slate-800">Brain Fuel</h1>
           {taskName && <p className="text-sm text-slate-500 truncate">Task: {taskName}</p>}
