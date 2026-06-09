@@ -35,7 +35,7 @@ function NDStrengthsCard({ ndIdentities }: { ndIdentities: string[] }) {
     return (
       <div className="bg-cream-50 rounded-2xl border shadow-sm p-4 space-y-2" style={{ borderColor: '#D0DCCB' }}>
         <div className="flex items-center gap-2 mb-3">
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: '#E8EDE6' }}>
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: '#D8E4D6' }}>
             <Brain size={16} style={{ color: '#5E7A6E' }} />
           </div>
           <p className="text-sm font-semibold text-slate-800">ND Strengths</p>
@@ -55,7 +55,7 @@ function NDStrengthsCard({ ndIdentities }: { ndIdentities: string[] }) {
   return (
     <div className="bg-cream-50 rounded-2xl border shadow-sm p-4 space-y-4" style={{ borderColor: '#D0DCCB' }}>
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: '#E8EDE6' }}>
+        <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: '#D8E4D6' }}>
           <Brain size={16} style={{ color: '#5E7A6E' }} />
         </div>
         <p className="text-sm font-semibold text-slate-800">ND Strengths</p>
