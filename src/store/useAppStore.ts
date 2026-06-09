@@ -34,6 +34,7 @@ import {
   SensoryContingencyContact,
 } from "@/types";
 import { generateId, levelFromXp, getTodayKey } from "@/lib/utils";
+import { ThemeId, THEMES } from "@/lib/themes";
 
 interface AppState {
   tasks: Task[];
@@ -228,6 +229,19 @@ interface AppState {
   userName: string;
   userAvatar: string;
   completeOnboarding: (name: string, avatar: string) => void;
+
+  // Theme & notification
+  activeTheme: ThemeId;
+  setActiveTheme: (id: ThemeId) => void;
+  notificationStyle: 'cheerleader' | 'gentle' | 'silent';
+  setNotificationStyle: (style: 'cheerleader' | 'gentle' | 'silent') => void;
+  pendingLevelUp: {
+    level: number;
+    gotFreeze: boolean;
+    unlockedTheme: ThemeId | null;
+    nextThemeLevel: number | null;
+  } | null;
+  setPendingLevelUp: (v: AppState['pendingLevelUp']) => void;
 }
 
 const defaultShopRewards: ShopReward[] = [
@@ -367,13 +381,32 @@ export const useAppStore = create<AppState>()(
 
       addXp: (amount) =>
         set((s) => {
+          const oldLevel = s.profile.level;
           const newXp = s.profile.totalXp + amount;
+          const newLevel = levelFromXp(newXp);
+          const leveledUp = newLevel > oldLevel;
+          let pendingLevelUp = s.pendingLevelUp;
+          let streakFreezes = s.streakFreezes;
+          if (leveledUp) {
+            // Always award a streak freeze on level-up
+            streakFreezes = streakFreezes + 1;
+            // Check for theme unlock
+            const unlocked = THEMES.find(
+              (t) => t.unlockLevel > 1 && t.unlockLevel <= newLevel && t.unlockLevel > oldLevel
+            );
+            // Find next theme not yet unlocked
+            const nextTheme = THEMES.find((t) => t.unlockLevel > newLevel);
+            pendingLevelUp = {
+              level: newLevel,
+              gotFreeze: true,
+              unlockedTheme: unlocked ? unlocked.id : null,
+              nextThemeLevel: nextTheme ? nextTheme.unlockLevel : null,
+            };
+          }
           return {
-            profile: {
-              ...s.profile,
-              totalXp: newXp,
-              level: levelFromXp(newXp),
-            },
+            profile: { ...s.profile, totalXp: newXp, level: newLevel },
+            streakFreezes,
+            pendingLevelUp,
           };
         }),
 
@@ -816,6 +849,15 @@ export const useAppStore = create<AppState>()(
 
       completeOnboarding: (name, avatar) =>
         set({ hasOnboarded: true, userName: name, userAvatar: avatar }),
+
+      activeTheme: 'default',
+      setActiveTheme: (id) => set({ activeTheme: id }),
+
+      notificationStyle: 'gentle',
+      setNotificationStyle: (style) => set({ notificationStyle: style }),
+
+      pendingLevelUp: null,
+      setPendingLevelUp: (v) => set({ pendingLevelUp: v }),
     }),
     {
       name: "neurocompass-store",
@@ -831,7 +873,7 @@ export const useAppStore = create<AppState>()(
       // Exclude ephemeral UI flags — they should always start false on a fresh load.
       partialize: (state) => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { showStreakCelebration, showFreezeSaved, okayMode, ...rest } = state;
+        const { showStreakCelebration, showFreezeSaved, okayMode, pendingLevelUp, ...rest } = state;
         return rest;
       },
       migrate: (persistedState: unknown, version: number) => {

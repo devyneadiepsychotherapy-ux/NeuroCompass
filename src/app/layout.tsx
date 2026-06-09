@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import BottomNav from "@/components/layout/BottomNav";
 import { TourProvider } from "@/components/layout/TourProvider";
+import ThemeProvider from "@/components/layout/ThemeProvider";
 
 export const metadata: Metadata = {
   title: "NeuroCompass",
@@ -31,10 +32,12 @@ export default function RootLayout({
   return (
     <html lang="en" style={{ colorScheme: "light" }}>
       <body className="min-h-screen pb-20">
-        <TourProvider>
-          <main className="max-w-lg mx-auto min-h-screen">{children}</main>
-          <BottomNav />
-        </TourProvider>
+        <ThemeProvider>
+          <TourProvider>
+            <main className="max-w-lg mx-auto min-h-screen">{children}</main>
+            <BottomNav />
+          </TourProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

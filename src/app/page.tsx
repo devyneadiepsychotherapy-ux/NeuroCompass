@@ -10,8 +10,9 @@ import Link from "next/link";
 import {
   Heart, Star, Zap, Flame, Sparkles, Brain, ChevronRight,
   Wind, Shuffle, X, PersonStanding, Snowflake,
-  HeartHandshake, ExternalLink,
+  HeartHandshake, ExternalLink, Menu,
 } from "lucide-react";
+import Sidebar from "@/components/layout/Sidebar";
 import { ICON_MAP } from "@/lib/icon-map";
 import { cn } from "@/lib/utils";
 
@@ -483,6 +484,7 @@ export default function HomePage() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [openTool, setOpenTool] = useState<Tool | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleOpenToolById = (id: string) => {
     const tool = TOOLS.find((t) => t.id === id);
@@ -511,6 +513,7 @@ export default function HomePage() {
 
   return (
     <div className="px-4 pt-12 pb-10 space-y-3">
+      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       {/* Overlays */}
       {mounted && showFreezeSaved && <FreezeSavedBanner onDismiss={() => setShowFreezeSaved(false)} />}
@@ -521,6 +524,14 @@ export default function HomePage() {
       {/* Greeting + XP (full width) */}
       <div className="bg-cream-50 rounded-2xl p-4 border border-sage-100 shadow-sm space-y-3">
         <div className="flex items-start justify-between gap-3">
+          {/* Hamburger */}
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="w-9 h-9 rounded-xl bg-stone-100 flex items-center justify-center hover:bg-stone-200 transition-colors shrink-0 mt-0.5"
+            aria-label="Open menu"
+          >
+            <Menu size={18} className="text-slate-600" />
+          </button>
           <div className="flex-1 min-w-0">
             <p className="text-xs text-slate-400 font-medium">
               {new Date().toLocaleDateString("en-CA", { weekday: "long", month: "long", day: "numeric" })}

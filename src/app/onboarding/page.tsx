@@ -7,7 +7,7 @@ import {
   Compass, Cat, Star, Moon, Leaf, Zap, Sparkles, Mountain,
   Flower2, BookOpen, Music, Gamepad2, Heart, Telescope, Feather, Waves,
   ArrowRight, Check, Wrench, Gift, ListChecks, Flame,
-  ShoppingBag, Brain, CalendarDays, User,
+  ShoppingBag, Brain, CalendarDays, User, Bell, BellRing, BellOff,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -450,13 +450,107 @@ function StepAvatar({
 }
 
 // ---------------------------------------------------------------------------
+// Step 4: Notification style
+// ---------------------------------------------------------------------------
+
+type NotifStyle = 'cheerleader' | 'gentle' | 'silent';
+
+const NOTIF_OPTIONS: { id: NotifStyle; label: string; desc: string; Icon: React.ElementType }[] = [
+  {
+    id: 'cheerleader',
+    label: 'Cheerleader',
+    desc: 'Regular encouragement, streak reminders, and celebration alerts',
+    Icon: BellRing,
+  },
+  {
+    id: 'gentle',
+    label: 'Gentle Reminders',
+    desc: 'Occasional check-ins and important reminders only',
+    Icon: Bell,
+  },
+  {
+    id: 'silent',
+    label: 'Silent',
+    desc: 'No notifications',
+    Icon: BellOff,
+  },
+];
+
+function StepNotification({
+  selected,
+  onSelect,
+  onNext,
+}: {
+  selected: NotifStyle;
+  onSelect: (v: NotifStyle) => void;
+  onNext: () => void;
+}) {
+  return (
+    <div className="flex flex-col min-h-screen px-6 py-16">
+      <div className="max-w-sm mx-auto w-full flex flex-col gap-5">
+        <h2 className="text-2xl font-bold text-slate-800 leading-tight">
+          How would you like to be supported?
+        </h2>
+        <p className="text-sm text-slate-500 leading-relaxed -mt-2">
+          You can always change this later in Settings.
+        </p>
+        <div className="flex flex-col gap-2">
+          {NOTIF_OPTIONS.map(({ id, label, desc, Icon }) => {
+            const active = selected === id;
+            return (
+              <button
+                key={id}
+                onClick={() => onSelect(id)}
+                className={cn(
+                  "flex items-start gap-3 rounded-2xl border p-4 text-left transition-all",
+                  active
+                    ? "bg-sage-50 border-sage-300 shadow-sm"
+                    : "bg-cream-50 border-slate-200 hover:border-slate-300"
+                )}
+              >
+                <div className={cn(
+                  "w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5",
+                  active ? "bg-sage-100" : "bg-stone-100"
+                )}>
+                  <Icon size={19} className={active ? "text-sage-600" : "text-slate-400"} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className={cn("text-sm font-semibold", active ? "text-sage-800" : "text-slate-700")}>
+                    {label}
+                  </p>
+                  <p className="text-xs text-slate-500 mt-0.5 leading-snug">{desc}</p>
+                </div>
+                {active && (
+                  <div className="w-5 h-5 rounded-full bg-sage-500 flex items-center justify-center shrink-0 mt-0.5">
+                    <Check size={11} className="text-white" strokeWidth={3} />
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+        <p className="text-xs text-slate-400 -mt-1">
+          Notification delivery coming soon
+        </p>
+        <button
+          onClick={onNext}
+          className="w-full bg-sage-600 hover:bg-sage-700 active:scale-[0.98] text-white font-semibold text-base py-4 rounded-2xl shadow-md transition-all"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Progress dots
 // ---------------------------------------------------------------------------
 
 function ProgressDots({ step }: { step: number }) {
   return (
     <div className="fixed top-0 left-0 right-0 flex justify-center gap-2 pt-8 z-10">
-      {[1, 2, 3, 4].map((s) => (
+      {[1, 2, 3, 4, 5].map((s) => (
         <div
           key={s}
           className={cn(
@@ -479,18 +573,21 @@ function ProgressDots({ step }: { step: number }) {
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const { completeOnboarding } = useAppStore();
+  const { completeOnboarding, setNotificationStyle } = useAppStore();
   const { startTour: launchTour } = useTour();
   const [step, setStep] = useState(1);
   const [name, setName] = useState("");
   const [avatar, setAvatar] = useState("");
+  const [notifStyle, setNotifStyle] = useState<NotifStyle>('gentle');
 
-  const finish = (finalName: string, finalAvatar: string) => {
+  const finish = (finalName: string, finalAvatar: string, finalNotif: NotifStyle) => {
+    setNotificationStyle(finalNotif);
     completeOnboarding(finalName.trim(), finalAvatar);
     router.replace("/");
   };
 
   const startTour = () => {
+    setNotificationStyle(notifStyle);
     completeOnboarding(name.trim(), avatar);
     launchTour();
   };
@@ -520,8 +617,16 @@ export default function OnboardingPage() {
         <StepAvatar
           selectedAvatar={avatar}
           onSelect={setAvatar}
-          onFinish={() => finish(name, avatar)}
-          onSkip={() => finish(name, "")}
+          onFinish={() => setStep(5)}
+          onSkip={() => setStep(5)}
+        />
+      )}
+
+      {step === 5 && (
+        <StepNotification
+          selected={notifStyle}
+          onSelect={setNotifStyle}
+          onNext={() => finish(name, avatar, notifStyle)}
         />
       )}
     </div>
