@@ -21,34 +21,46 @@ import { EnergyLevel, PleasantnessLevel } from "@/types";
 const emotions: Record<string, { x: PleasantnessLevel; y: EnergyLevel }> = {
   // High energy, pleasant
   "Excited":          { x: 5, y: 5 },
+  "Joy":              { x: 5, y: 5 },
   "Joyful":           { x: 5, y: 4 },
   "Enthusiastic":     { x: 4, y: 5 },
   "Hopeful":          { x: 4, y: 4 },
   // High energy, unpleasant
   "Anxious":          { x: 2, y: 5 },
   "Angry":            { x: 1, y: 5 },
+  "Fear":             { x: 1, y: 5 },
+  "Panic":            { x: 1, y: 5 },
   "Overwhelmed":      { x: 1, y: 4 },
   "Frustrated":       { x: 2, y: 4 },
+  "Annoyed":          { x: 2, y: 4 },
+  "Worried":          { x: 2, y: 4 },
   // Low energy, pleasant
   "Calm":             { x: 4, y: 2 },
   "Content":          { x: 5, y: 2 },
   "Peaceful":         { x: 4, y: 1 },
   "Grateful":         { x: 5, y: 3 },
+  "Gratitude":        { x: 5, y: 2 },
+  "Satisfied":        { x: 5, y: 2 },
+  "Relaxed":          { x: 4, y: 2 },
   // Low energy, unpleasant
   "Sad":              { x: 2, y: 2 },
   "Exhausted":        { x: 1, y: 1 },
   "Numb":             { x: 2, y: 1 },
+  "Tired":            { x: 2, y: 1 },
   "Lonely":           { x: 1, y: 2 },
+  "Grief":            { x: 1, y: 2 },
+  "Disinterest":      { x: 2, y: 2 },
   // Middle / ND-specific
   "Neutral":          { x: 3, y: 3 },
   "Curious":          { x: 4, y: 3 },
+  "Disgust":          { x: 2, y: 3 },
   "Bored":            { x: 3, y: 2 },
   "Focused":          { x: 3, y: 4 },
   "Dissociated":      { x: 2, y: 3 },
   "Sensory overload": { x: 1, y: 3 },
 };
 
-const bodyAreas = ["Head", "Shoulders", "Chest", "Stomach", "Hands", "Legs", "Jaw", "Eyes"];
+const bodyAreas = ["Head", "Neck", "Shoulders", "Chest", "Stomach", "Hands", "Legs", "Back", "Jaw", "Eyes", "Face"];
 const bodyNotePrompts = [
   "Heart racing?", "Tight chest?", "Heavy limbs?", "Tingly?", "Tense jaw?",
   "Stomach tight?", "Shaky?", "Foggy?", "Numb?", "Restless?"
