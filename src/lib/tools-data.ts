@@ -561,6 +561,18 @@ export const TOOLS: Tool[] = [
     content: { intro: "" },
   },
 
+  {
+    id: "sensory-contingency-plan",
+    title: "Sensory Contingency Plan",
+    description: "Your personal exit plan and support toolkit for sensory-intense environments",
+    category: "sensory",
+    icon: "ShieldAlert",
+    type: "interactive",
+    content: {
+      intro: "Having a plan before you enter a sensory-intense environment reduces panic and helps you exit safely when needed.",
+    },
+  },
+
   // SELF-CARE & CHORES
   {
     id: "chore-hack",

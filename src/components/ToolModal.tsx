@@ -142,6 +142,8 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
     habitStacks, addHabitStack, removeHabitStack,
     boundaryScripts, addBoundaryScript, removeBoundaryScript,
     burnoutRecoveryPlan, updateBurnoutRecoveryPlan,
+    addBurnoutPhase2Activity, updateBurnoutPhase2Activity, removeBurnoutPhase2Activity,
+    sensoryContingencyPlan, updateSensoryContingencyPlan,
     energyLog, addEnergyLogEntry, removeEnergyLogEntry,
     arfidAccommodations, addArfidAccommodation, removeArfidAccommodation,
     savedNDMeals, toggleSavedNDMeal,
@@ -285,6 +287,17 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
 
   // ── burnout-signs: personal warning sign input ────────
   const [burnoutSignDraft, setBurnoutSignDraft] = useState("");
+
+  // ── burnout-recovery: phase 1 custom drop item input ──
+  const [brDropCustomInput, setBrDropCustomInput] = useState("");
+  // ── burnout-recovery: phase 2 new activity input ──────
+  const [brP2NewActivity, setBrP2NewActivity] = useState("");
+
+  // ── sensory-contingency-plan: contact inputs ──────────
+  const [scpContactDraft, setScpContactDraft] = useState({ name: "", phone: "", notes: "" });
+  // ── sensory-contingency-plan: custom warning / soother inputs ──
+  const [scpWarnCustomInput, setScpWarnCustomInput] = useState("");
+  const [scpSoothCustomInput, setScpSoothCustomInput] = useState("");
 
   // ── thirst-hunger-cues: session cue checkboxes ────────
   const [thirstCues, setThirstCues] = useState<Set<string>>(new Set());
@@ -1420,31 +1433,507 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
             </div>
           )}
 
-          {/* ── burnout-recovery: structured recovery plan ── */}
-          {tool.id === "burnout-recovery" && (
-            <div className="space-y-4">
-              <p className="text-sm font-semibold text-slate-700">My recovery plan</p>
-              {[
-                { key: "masking" as const, label: "Where can I unmask more?" },
-                { key: "commitments" as const, label: "What can I drop or reduce right now?" },
-                { key: "recovery" as const, label: "How will I increase genuine rest?" },
-                { key: "communication" as const, label: "Who needs to know?" },
-                { key: "reintroduce" as const, label: "What will I reintroduce first when I am ready?" },
-              ].map(({ key, label }) => (
-                <div key={key} className="space-y-1">
-                  <p className="text-xs text-slate-500 font-medium">{label}</p>
+          {/* ── burnout-recovery: two-phase recovery plan ── */}
+          {tool.id === "burnout-recovery" && (() => {
+            const defaultDropItems = [
+              "Work or school tasks",
+              "Social obligations",
+              "Household chores",
+              "Self-care routines beyond basics",
+              "Hobbies",
+              "Responding to messages",
+              "Cooking (switch to easy foods)",
+              "Exercise",
+            ];
+            const defaultWarnSigns = [
+              "Exhaustion after small tasks",
+              "Irritability or low frustration tolerance",
+              "Sleep disruption",
+              "Meltdown or shutdown increase",
+              "Physical symptoms (headaches, body aches)",
+            ];
+            const toggleDropItem = (label: string) => {
+              const checked = burnoutRecoveryPlan.phase1DropChecked ?? [];
+              updateBurnoutRecoveryPlan({
+                phase1DropChecked: checked.includes(label)
+                  ? checked.filter((x) => x !== label)
+                  : [...checked, label],
+              });
+            };
+            const addCustomDrop = () => {
+              if (!brDropCustomInput.trim()) return;
+              updateBurnoutRecoveryPlan({
+                phase1DropCustom: [...(burnoutRecoveryPlan.phase1DropCustom ?? []), brDropCustomInput.trim()],
+              });
+              setBrDropCustomInput("");
+            };
+            const removeCustomDrop = (label: string) => {
+              updateBurnoutRecoveryPlan({
+                phase1DropCustom: (burnoutRecoveryPlan.phase1DropCustom ?? []).filter((x) => x !== label),
+                phase1DropChecked: (burnoutRecoveryPlan.phase1DropChecked ?? []).filter((x) => x !== label),
+              });
+            };
+            const toggleWarnSign = (label: string) => {
+              const checked = burnoutRecoveryPlan.phase2WarnChecked ?? [];
+              updateBurnoutRecoveryPlan({
+                phase2WarnChecked: checked.includes(label)
+                  ? checked.filter((x) => x !== label)
+                  : [...checked, label],
+              });
+            };
+            const addP2Activity = () => {
+              if (!brP2NewActivity.trim()) return;
+              addBurnoutPhase2Activity(brP2NewActivity.trim());
+              setBrP2NewActivity("");
+            };
+            return (
+              <div className="space-y-6">
+                {/* PHASE 1 */}
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-base font-semibold text-slate-800">Phase 1: Dropping Demands</p>
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">During burnout recovery, the first step is radically reducing demands — not pushing through. This phase is about identifying what you can let go of.</p>
+                  </div>
+
+                  {/* Drop checklist */}
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Things I can drop or delay</p>
+                    <div className="space-y-1.5">
+                      {[...defaultDropItems, ...(burnoutRecoveryPlan.phase1DropCustom ?? [])].map((label) => {
+                        const isCustom = (burnoutRecoveryPlan.phase1DropCustom ?? []).includes(label);
+                        const checked = (burnoutRecoveryPlan.phase1DropChecked ?? []).includes(label);
+                        return (
+                          <div key={label} className="flex items-center gap-2.5">
+                            <button
+                              onClick={() => toggleDropItem(label)}
+                              className={cn("w-4.5 h-4.5 rounded border-2 flex items-center justify-center shrink-0 transition-all",
+                                checked ? "bg-sage-500 border-sage-500" : "border-slate-300 bg-white"
+                              )}
+                              style={{ width: 18, height: 18, minWidth: 18 }}
+                            >
+                              {checked && <CheckCircle size={11} className="text-white" strokeWidth={3} />}
+                            </button>
+                            <span className={cn("text-sm flex-1", checked ? "line-through text-slate-400" : "text-slate-700")}>{label}</span>
+                            {isCustom && (
+                              <button onClick={() => removeCustomDrop(label)}>
+                                <Trash2 size={12} className="text-slate-300 hover:text-rose-400 transition-colors" />
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="flex gap-2 mt-2">
+                      <input
+                        className="flex-1 border border-slate-200 rounded-xl px-3 py-1.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-300"
+                        placeholder="Add your own..."
+                        value={brDropCustomInput}
+                        onChange={(e) => setBrDropCustomInput(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter") addCustomDrop(); }}
+                      />
+                      <button onClick={addCustomDrop} className="bg-sage-600 text-white px-3 py-1.5 rounded-xl text-sm hover:bg-sage-700 transition-all">
+                        <Plus size={15} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Support needs */}
+                  <div className="space-y-1">
+                    <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">My support needs right now</p>
+                    <textarea
+                      className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-300 resize-none leading-relaxed"
+                      rows={2}
+                      placeholder="What do I need from others right now?"
+                      value={burnoutRecoveryPlan.phase1SupportNeeds ?? ""}
+                      onChange={(e) => updateBurnoutRecoveryPlan({ phase1SupportNeeds: e.target.value })}
+                    />
+                  </div>
+
+                  {/* Minimum viable day */}
+                  <div className="space-y-1">
+                    <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">My minimum viable day</p>
+                    <textarea
+                      className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-300 resize-none leading-relaxed"
+                      rows={2}
+                      placeholder="What does just surviving look like? (Just existing is enough.)"
+                      value={burnoutRecoveryPlan.phase1MinimumViableDay ?? ""}
+                      onChange={(e) => updateBurnoutRecoveryPlan({ phase1MinimumViableDay: e.target.value })}
+                    />
+                  </div>
+
+                  {/* Phase 1 notes */}
+                  <div className="space-y-1">
+                    <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Notes</p>
+                    <textarea
+                      className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-300 resize-none leading-relaxed"
+                      rows={2}
+                      placeholder="Anything else about Phase 1..."
+                      value={burnoutRecoveryPlan.phase1Notes ?? ""}
+                      onChange={(e) => updateBurnoutRecoveryPlan({ phase1Notes: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-200" /></div>
+                  <div className="relative flex justify-center">
+                    <span className="bg-white px-3 text-xs text-slate-400 font-medium uppercase tracking-widest">When you feel ready</span>
+                  </div>
+                </div>
+
+                {/* PHASE 2 */}
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-base font-semibold text-slate-800">Phase 2: Gentle Reintroduction</p>
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">Once you feel some stability returning, start adding ONE small thing at a time. Go slowly — rushing recovery leads to relapse.</p>
+                  </div>
+
+                  {/* Activities list */}
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Activities to reintroduce</p>
+                    {(burnoutRecoveryPlan.phase2Activities ?? []).length === 0 && (
+                      <p className="text-xs text-slate-400 text-center py-2">No activities yet. Add one below.</p>
+                    )}
+                    <div className="space-y-2.5">
+                      {(burnoutRecoveryPlan.phase2Activities ?? []).map((activity) => (
+                        <div key={activity.id} className="bg-slate-50 border border-slate-100 rounded-xl p-3 space-y-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-sm text-slate-700 font-medium flex-1">{activity.name}</span>
+                            <button onClick={() => removeBurnoutPhase2Activity(activity.id)}>
+                              <Trash2 size={13} className="text-slate-300 hover:text-rose-400 transition-colors" />
+                            </button>
+                          </div>
+                          <div className="flex gap-1.5 flex-wrap">
+                            {(["not-ready", "maybe-soon", "ready"] as const).map((r) => (
+                              <button
+                                key={r}
+                                onClick={() => updateBurnoutPhase2Activity(activity.id, { readiness: r })}
+                                className={cn("px-2.5 py-1 rounded-lg text-xs font-medium border transition-all",
+                                  activity.readiness === r
+                                    ? r === "ready" ? "bg-sage-500 text-white border-sage-500"
+                                      : r === "maybe-soon" ? "bg-amber-400 text-white border-amber-400"
+                                      : "bg-slate-400 text-white border-slate-400"
+                                    : "bg-white text-slate-500 border-slate-200 hover:border-slate-300"
+                                )}
+                              >
+                                {r === "not-ready" ? "Not Ready" : r === "maybe-soon" ? "Maybe Soon" : "Ready to Try"}
+                              </button>
+                            ))}
+                          </div>
+                          <input
+                            className="w-full border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-sage-300"
+                            placeholder="Start date (when feels right)"
+                            value={activity.startDate}
+                            onChange={(e) => updateBurnoutPhase2Activity(activity.id, { startDate: e.target.value })}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <input
+                        className="flex-1 border border-slate-200 rounded-xl px-3 py-1.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-300"
+                        placeholder="Add an activity..."
+                        value={brP2NewActivity}
+                        onChange={(e) => setBrP2NewActivity(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === "Enter") addP2Activity(); }}
+                      />
+                      <button onClick={addP2Activity} className="bg-sage-600 text-white px-3 py-1.5 rounded-xl text-sm hover:bg-sage-700 transition-all">
+                        <Plus size={15} />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Warning signs of overdoing it */}
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Warning signs I'm overdoing it</p>
+                    <p className="text-xs text-slate-400">Check the ones that apply to you as personal reminders.</p>
+                    <div className="space-y-1.5">
+                      {defaultWarnSigns.map((label) => {
+                        const checked = (burnoutRecoveryPlan.phase2WarnChecked ?? []).includes(label);
+                        return (
+                          <div key={label} className="flex items-center gap-2.5">
+                            <button
+                              onClick={() => toggleWarnSign(label)}
+                              className={cn("rounded border-2 flex items-center justify-center shrink-0 transition-all",
+                                checked ? "bg-rose-400 border-rose-400" : "border-slate-300 bg-white"
+                              )}
+                              style={{ width: 18, height: 18, minWidth: 18 }}
+                            >
+                              {checked && <CheckCircle size={11} className="text-white" strokeWidth={3} />}
+                            </button>
+                            <span className={cn("text-sm", checked ? "text-rose-500 font-medium" : "text-slate-700")}>{label}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Phase 2 notes */}
+                  <div className="space-y-1">
+                    <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Notes</p>
+                    <textarea
+                      className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-300 resize-none leading-relaxed"
+                      rows={2}
+                      placeholder="Anything else about Phase 2..."
+                      value={burnoutRecoveryPlan.phase2Notes ?? ""}
+                      onChange={(e) => updateBurnoutRecoveryPlan({ phase2Notes: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <p className="text-xs text-slate-400">All changes saved automatically.</p>
+              </div>
+            );
+          })()}
+
+          {/* ── sensory-contingency-plan ── */}
+          {tool.id === "sensory-contingency-plan" && (() => {
+            const defaultWarnSigns = [
+              "Sound sensitivity increasing",
+              "Light hurting my eyes",
+              "Skin feeling irritated or hypersensitive",
+              "Difficulty filtering conversation",
+              "Urge to flee or escape",
+              "Stimming increasing",
+              "Feeling 'fuzzy' or disconnected",
+            ];
+            const defaultSoothers = [
+              "Noise-cancelling headphones",
+              "Sunglasses",
+              "Fidget",
+              "Snack",
+              "Water",
+              "Comfort item",
+              "Earplugs",
+              "Cap or hat",
+              "Phone for music",
+            ];
+            const toggleWarn = (label: string) => {
+              const checked = sensoryContingencyPlan.earlyWarningChecked ?? [];
+              updateSensoryContingencyPlan({
+                earlyWarningChecked: checked.includes(label)
+                  ? checked.filter((x) => x !== label)
+                  : [...checked, label],
+              });
+            };
+            const addCustomWarn = () => {
+              if (!scpWarnCustomInput.trim()) return;
+              updateSensoryContingencyPlan({
+                earlyWarningCustom: [...(sensoryContingencyPlan.earlyWarningCustom ?? []), scpWarnCustomInput.trim()],
+              });
+              setScpWarnCustomInput("");
+            };
+            const removeCustomWarn = (label: string) => {
+              updateSensoryContingencyPlan({
+                earlyWarningCustom: (sensoryContingencyPlan.earlyWarningCustom ?? []).filter((x) => x !== label),
+                earlyWarningChecked: (sensoryContingencyPlan.earlyWarningChecked ?? []).filter((x) => x !== label),
+              });
+            };
+            const toggleSoother = (label: string) => {
+              const checked = sensoryContingencyPlan.soothersChecked ?? [];
+              updateSensoryContingencyPlan({
+                soothersChecked: checked.includes(label)
+                  ? checked.filter((x) => x !== label)
+                  : [...checked, label],
+              });
+            };
+            const addCustomSoother = () => {
+              if (!scpSoothCustomInput.trim()) return;
+              updateSensoryContingencyPlan({
+                soothersCustom: [...(sensoryContingencyPlan.soothersCustom ?? []), scpSoothCustomInput.trim()],
+              });
+              setScpSoothCustomInput("");
+            };
+            const removeCustomSoother = (label: string) => {
+              updateSensoryContingencyPlan({
+                soothersCustom: (sensoryContingencyPlan.soothersCustom ?? []).filter((x) => x !== label),
+                soothersChecked: (sensoryContingencyPlan.soothersChecked ?? []).filter((x) => x !== label),
+              });
+            };
+            const addContact = () => {
+              if (!scpContactDraft.name.trim()) return;
+              const contacts = sensoryContingencyPlan.supportContacts ?? [];
+              if (contacts.length >= 3) return;
+              updateSensoryContingencyPlan({
+                supportContacts: [...contacts, { id: Math.random().toString(36).slice(2), ...scpContactDraft }],
+              });
+              setScpContactDraft({ name: "", phone: "", notes: "" });
+            };
+            const removeContact = (id: string) => {
+              updateSensoryContingencyPlan({
+                supportContacts: (sensoryContingencyPlan.supportContacts ?? []).filter((c) => c.id !== id),
+              });
+            };
+            return (
+              <div className="space-y-5">
+                {/* 1. Exit plan */}
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Exit Plan</p>
                   <textarea
                     className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-300 resize-none leading-relaxed"
-                    rows={2}
-                    placeholder="Your answer..."
-                    value={burnoutRecoveryPlan[key] || ""}
-                    onChange={(e) => updateBurnoutRecoveryPlan({ [key]: e.target.value })}
+                    rows={3}
+                    placeholder="If I need to leave, I will... (signal, excuse, route)"
+                    value={sensoryContingencyPlan.exitPlan ?? ""}
+                    onChange={(e) => updateSensoryContingencyPlan({ exitPlan: e.target.value })}
                   />
                 </div>
-              ))}
-              <p className="text-xs text-slate-400">Saved automatically.</p>
-            </div>
-          )}
+
+                {/* 2. Early warning signs */}
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Early Warning Signs</p>
+                  <p className="text-xs text-slate-400">Check the signs that apply to you.</p>
+                  <div className="space-y-1.5">
+                    {[...defaultWarnSigns, ...(sensoryContingencyPlan.earlyWarningCustom ?? [])].map((label) => {
+                      const isCustom = (sensoryContingencyPlan.earlyWarningCustom ?? []).includes(label);
+                      const checked = (sensoryContingencyPlan.earlyWarningChecked ?? []).includes(label);
+                      return (
+                        <div key={label} className="flex items-center gap-2.5">
+                          <button
+                            onClick={() => toggleWarn(label)}
+                            className={cn("rounded border-2 flex items-center justify-center shrink-0 transition-all",
+                              checked ? "bg-amber-400 border-amber-400" : "border-slate-300 bg-white"
+                            )}
+                            style={{ width: 18, height: 18, minWidth: 18 }}
+                          >
+                            {checked && <CheckCircle size={11} className="text-white" strokeWidth={3} />}
+                          </button>
+                          <span className={cn("text-sm flex-1", checked ? "text-amber-600 font-medium" : "text-slate-700")}>{label}</span>
+                          {isCustom && (
+                            <button onClick={() => removeCustomWarn(label)}>
+                              <Trash2 size={12} className="text-slate-300 hover:text-rose-400 transition-colors" />
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="flex gap-2 mt-1">
+                    <input
+                      className="flex-1 border border-slate-200 rounded-xl px-3 py-1.5 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-300"
+                      placeholder="Add your own warning sign..."
+                      value={scpWarnCustomInput}
+                      onChange={(e) => setScpWarnCustomInput(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter") addCustomWarn(); }}
+                    />
+                    <button onClick={addCustomWarn} className="bg-sage-600 text-white px-3 py-1.5 rounded-xl text-sm hover:bg-sage-700 transition-all">
+                      <Plus size={15} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* 3. Soothers to bring */}
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Soothers to Bring</p>
+                  <p className="text-xs text-slate-400">Check what you pack.</p>
+                  <div className="space-y-1.5">
+                    {[...defaultSoothers, ...(sensoryContingencyPlan.soothersCustom ?? [])].map((label) => {
+                      const isCustom = (sensoryContingencyPlan.soothersCustom ?? []).includes(label);
+                      const checked = (sensoryContingencyPlan.soothersChecked ?? []).includes(label);
+                      return (
+                        <div key={label} className="flex items-center gap-2.5">
+                          <button
+                            onClick={() => toggleSoother(label)}
+                            className={cn("rounded border-2 flex items-center justify-center shrink-0 transition-all",
+                              checked ? "bg-sage-500 border-sage-500" : "border-slate-300 bg-white"
+                            )}
+                            style={{ width: 18, height: 18, minWidth: 18 }}
+                          >
+                            {checked && <CheckCircle size={11} className="text-white" strokeWidth={3} />}
+                          </button>
+                          <span className={cn("text-sm flex-1", checked ? "text-sage-700 font-medium" : "text-slate-700")}>{label}</span>
+                          {isCustom && (
+                            <button onClick={() => removeCustomSoother(label)}>
+                              <Trash2 size={12} className="text-slate-300 hover:text-rose-400 transition-colors" />
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="flex gap-2 mt-1">
+                    <input
+                      className="flex-1 border border-slate-200 rounded-xl px-3 py-1.5 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-300"
+                      placeholder="Add your own soother..."
+                      value={scpSoothCustomInput}
+                      onChange={(e) => setScpSoothCustomInput(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter") addCustomSoother(); }}
+                    />
+                    <button onClick={addCustomSoother} className="bg-sage-600 text-white px-3 py-1.5 rounded-xl text-sm hover:bg-sage-700 transition-all">
+                      <Plus size={15} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* 4. Support contacts */}
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Support Contacts (up to 3)</p>
+                  {(sensoryContingencyPlan.supportContacts ?? []).length === 0 && (
+                    <p className="text-xs text-slate-400 text-center py-1">No contacts added yet.</p>
+                  )}
+                  <div className="space-y-2">
+                    {(sensoryContingencyPlan.supportContacts ?? []).map((contact) => (
+                      <div key={contact.id} className="bg-slate-50 border border-slate-100 rounded-xl p-3 space-y-1.5">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="space-y-0.5 flex-1">
+                            <p className="text-sm font-semibold text-slate-700">{contact.name}</p>
+                            {contact.phone && <p className="text-xs text-slate-500">{contact.phone}</p>}
+                            {contact.notes && <p className="text-xs text-slate-500 italic">{contact.notes}</p>}
+                          </div>
+                          <button onClick={() => removeContact(contact.id)}>
+                            <Trash2 size={13} className="text-slate-300 hover:text-rose-400 transition-colors" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  {(sensoryContingencyPlan.supportContacts ?? []).length < 3 && (
+                    <div className="space-y-2 bg-slate-50 border border-slate-100 rounded-xl p-3">
+                      <input
+                        className="w-full border border-slate-200 rounded-lg px-2.5 py-1.5 text-sm placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-sage-300"
+                        placeholder="Name"
+                        value={scpContactDraft.name}
+                        onChange={(e) => setScpContactDraft((d) => ({ ...d, name: e.target.value }))}
+                      />
+                      <input
+                        className="w-full border border-slate-200 rounded-lg px-2.5 py-1.5 text-sm placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-sage-300"
+                        placeholder="Phone number"
+                        value={scpContactDraft.phone}
+                        onChange={(e) => setScpContactDraft((d) => ({ ...d, phone: e.target.value }))}
+                      />
+                      <input
+                        className="w-full border border-slate-200 rounded-lg px-2.5 py-1.5 text-sm placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-sage-300"
+                        placeholder="What they know (e.g. will leave with me without questions)"
+                        value={scpContactDraft.notes}
+                        onChange={(e) => setScpContactDraft((d) => ({ ...d, notes: e.target.value }))}
+                      />
+                      <button
+                        onClick={addContact}
+                        disabled={!scpContactDraft.name.trim()}
+                        className="w-full bg-sage-600 text-white py-1.5 rounded-lg text-sm font-medium hover:bg-sage-700 transition-all disabled:opacity-40"
+                      >
+                        Add Contact
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* 5. Recovery plan */}
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Recovery Plan</p>
+                  <textarea
+                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-300 resize-none leading-relaxed"
+                    rows={3}
+                    placeholder="After a sensory-intense environment, I recover by..."
+                    value={sensoryContingencyPlan.recoveryPlan ?? ""}
+                    onChange={(e) => updateSensoryContingencyPlan({ recoveryPlan: e.target.value })}
+                  />
+                </div>
+
+                <p className="text-xs text-slate-400">All changes saved automatically.</p>
+              </div>
+            );
+          })()}
 
           {/* ── energy-accounting: energy log ── */}
           {tool.id === "energy-accounting" && (

@@ -41,10 +41,10 @@ function NDStrengthsCard({ ndIdentities }: { ndIdentities: string[] }) {
         </div>
         <p className="text-sm text-slate-500">Add your ND identity to see your associated strengths.</p>
         <Link
-          href="/tools"
-          className="inline-flex items-center gap-1 text-xs text-sage-600 font-semibold underline underline-offset-2 mt-1"
+          href="/strengths"
+          className="inline-flex items-center justify-center gap-1.5 mt-2 w-full min-h-[44px] bg-sage-100 hover:bg-sage-200 active:scale-[0.98] text-sage-700 font-semibold text-sm rounded-xl px-4 py-2.5 transition-all"
         >
-          Add your ND identity in Tools
+          Add your ND strengths
         </Link>
       </div>
     );

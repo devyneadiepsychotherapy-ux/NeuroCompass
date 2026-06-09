@@ -21,6 +21,7 @@ import {
   HabitStack,
   BoundaryScript,
   BurnoutRecoveryPlan,
+  BurnoutPhase2Activity,
   BurnoutDemandItem,
   BurnoutReintroductionItem,
   EnergyLogEntry,
@@ -129,6 +130,12 @@ interface AppState {
 
   burnoutRecoveryPlan: BurnoutRecoveryPlan;
   updateBurnoutRecoveryPlan: (updates: Partial<BurnoutRecoveryPlan>) => void;
+  addBurnoutPhase2Activity: (name: string) => void;
+  updateBurnoutPhase2Activity: (id: string, updates: Partial<Omit<BurnoutPhase2Activity, "id">>) => void;
+  removeBurnoutPhase2Activity: (id: string) => void;
+
+  sensoryContingencyPlan: SensoryContingencyPlan;
+  updateSensoryContingencyPlan: (updates: Partial<SensoryContingencyPlan>) => void;
 
   energyLog: EnergyLogEntry[];
   addEnergyLogEntry: (label: string, type: "drain" | "restore") => void;
@@ -282,7 +289,8 @@ export const useAppStore = create<AppState>()(
       mvscList: [],
       habitStacks: [],
       boundaryScripts: [],
-      burnoutRecoveryPlan: { masking: "", commitments: "", recovery: "", communication: "", reintroduce: "", demands: [], demandNotes: "", reintroductions: [], reintroductionNotes: "" },
+      burnoutRecoveryPlan: { masking: "", commitments: "", recovery: "", communication: "", reintroduce: "", demands: [], demandNotes: "", reintroductions: [], reintroductionNotes: "", phase1DropChecked: [], phase1DropCustom: [], phase1SupportNeeds: "", phase1MinimumViableDay: "", phase1Notes: "", phase2Activities: [], phase2WarnChecked: [], phase2Notes: "" },
+      sensoryContingencyPlan: { exitPlan: "", earlyWarningChecked: [], earlyWarningCustom: [], soothersChecked: [], soothersCustom: [], supportContacts: [], recoveryPlan: "" },
       energyLog: [],
       arfidAccommodations: [],
       savedNDMeals: [],
@@ -579,6 +587,38 @@ export const useAppStore = create<AppState>()(
 
       updateBurnoutRecoveryPlan: (updates) =>
         set((s) => ({ burnoutRecoveryPlan: { ...s.burnoutRecoveryPlan, ...updates } })),
+
+      addBurnoutPhase2Activity: (name) =>
+        set((s) => ({
+          burnoutRecoveryPlan: {
+            ...s.burnoutRecoveryPlan,
+            phase2Activities: [
+              ...s.burnoutRecoveryPlan.phase2Activities,
+              { id: generateId(), name, readiness: "not-ready", startDate: "" },
+            ],
+          },
+        })),
+
+      updateBurnoutPhase2Activity: (id, updates) =>
+        set((s) => ({
+          burnoutRecoveryPlan: {
+            ...s.burnoutRecoveryPlan,
+            phase2Activities: s.burnoutRecoveryPlan.phase2Activities.map((a) =>
+              a.id === id ? { ...a, ...updates } : a
+            ),
+          },
+        })),
+
+      removeBurnoutPhase2Activity: (id) =>
+        set((s) => ({
+          burnoutRecoveryPlan: {
+            ...s.burnoutRecoveryPlan,
+            phase2Activities: s.burnoutRecoveryPlan.phase2Activities.filter((a) => a.id !== id),
+          },
+        })),
+
+      updateSensoryContingencyPlan: (updates) =>
+        set((s) => ({ sensoryContingencyPlan: { ...s.sensoryContingencyPlan, ...updates } })),
 
       addEnergyLogEntry: (label, type) =>
         set((s) => ({

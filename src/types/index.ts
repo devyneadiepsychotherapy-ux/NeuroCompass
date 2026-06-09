@@ -175,6 +175,7 @@ export interface BurnoutReintroductionItem {
 }
 
 export interface BurnoutRecoveryPlan {
+  // Legacy fields (kept for migration compat)
   masking: string;
   commitments: string;
   recovery: string;
@@ -184,6 +185,23 @@ export interface BurnoutRecoveryPlan {
   demandNotes: string;
   reintroductions: BurnoutReintroductionItem[];
   reintroductionNotes: string;
+  // Phase 1 fields
+  phase1DropChecked: string[];   // labels of checked default drop items
+  phase1DropCustom: string[];    // user-added custom items
+  phase1SupportNeeds: string;
+  phase1MinimumViableDay: string;
+  phase1Notes: string;
+  // Phase 2 fields
+  phase2Activities: BurnoutPhase2Activity[];
+  phase2WarnChecked: string[];   // labels of checked default warning signs
+  phase2Notes: string;
+}
+
+export interface BurnoutPhase2Activity {
+  id: string;
+  name: string;
+  readiness: "not-ready" | "maybe-soon" | "ready";
+  startDate: string;
 }
 
 export interface EmotionLogEntry {
@@ -196,14 +214,17 @@ export interface EmotionLogEntry {
 export interface SensoryContingencyContact {
   id: string;
   name: string;
-  role: string;
+  phone: string;
+  notes: string;
 }
 
 export interface SensoryContingencyPlan {
   exitPlan: string;
-  soothersToBring: string[];
+  earlyWarningChecked: string[];   // labels of checked default warning signs
+  earlyWarningCustom: string[];    // user-added custom warning signs
+  soothersChecked: string[];       // labels of checked default soother items
+  soothersCustom: string[];        // user-added custom soothers
   supportContacts: SensoryContingencyContact[];
-  earlyWarningSigns: string;
   recoveryPlan: string;
 }
 
