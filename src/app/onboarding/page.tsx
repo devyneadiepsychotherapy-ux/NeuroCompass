@@ -6,7 +6,7 @@ import { useTour } from "@/components/layout/TourProvider";
 import {
   Compass, Cat, Star, Moon, Leaf, Zap, Sparkles, Mountain,
   Flower2, BookOpen, Music, Gamepad2, Heart, Telescope, Feather, Waves,
-  ArrowRight, Check, Wrench, Gift, ListChecks, Flame,
+  ArrowRight, Check, Wrench, Gift, Flame,
   ShoppingBag, CalendarDays, User, Bell, BellRing, BellOff,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -186,15 +186,6 @@ const OVERVIEW_TOPICS = [
     tutorial: "Spend your coins in the Shop on real-life rewards you choose, like a movie night, a fancy coffee, or guilt-free screen time. You can edit the pre-loaded rewards or add your own custom ones.",
   },
   {
-    icon: ListChecks,
-    bg: "bg-sage-100",
-    color: "text-sage-700",
-    heading: "My Lists & Special Interests",
-    tldr: "Build lists for anything on the Me page and log your current special interests.",
-    detail: "On the Me page, you can make as many lists as you like: safe foods, shows to watch, things to research, comfort media. Whatever fits your brain. Lists are quick to add to and easy to scroll through. You can also log your current special interests or hyperfocuses, with an intensity slider to track how deep you are at any given time.",
-    tutorial: "Your lists and special interests are accessible from the Me page. Create lists for anything and track your current hyperfocuses with intensity levels.",
-  },
-  {
     icon: Flame,
     bg: "bg-[#f5efec]",
     color: "text-[#8f6559]",
@@ -226,9 +217,9 @@ const OVERVIEW_TOPICS = [
     bg: "bg-indigo-100",
     color: "text-indigo-600",
     heading: "Me Page",
-    tldr: "Your Me page is your personal hub: ND strengths, sensory profile summary, special interests, and your lists, all in one place.",
-    detail: "The Me page is your personal neurodivergent profile, bringing together your ND strengths, a summary of your sensory profile, and your special interests in one dedicated space. Your sensory profile is built in Tools and displayed in summary form here, so your key sensory info is always close at hand. Your custom lists and current hyperfocuses also live on the Me page, making it the central hub for everything that defines how you work best.",
-    tutorial: "Your Me page is your personal hub. Your ND strengths, sensory profile summary, special interests, and lists all live here in one place.",
+    tldr: "Your Me page is your personal hub: ND strengths, sensory profile summary, and your custom lists and special interests, all in one place.",
+    detail: "The Me page is your personal neurodivergent profile, bringing together your ND strengths and a summary of your sensory profile. Your sensory profile is built in Tools and displayed in summary form here, so your key sensory info is always close at hand.",
+    tutorial: "Your Me page is your personal hub. Your ND strengths and sensory profile summary live here in one place.",
   },
 ];
 
