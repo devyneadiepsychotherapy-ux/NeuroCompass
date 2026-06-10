@@ -444,6 +444,8 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
     addBurnoutPhase2Activity, updateBurnoutPhase2Activity, removeBurnoutPhase2Activity,
     sensoryContingencyPlan, updateSensoryContingencyPlan,
     energyLog, addEnergyLogEntry, removeEnergyLogEntry,
+    energyDrains, addEnergyDrain, removeEnergyDrain,
+    energyRestorers, addEnergyRestorer, removeEnergyRestorer,
     arfidAccommodations, addArfidAccommodation, removeArfidAccommodation,
     savedNDMeals, toggleSavedNDMeal,
     focusRitual, setFocusRitual,
@@ -545,6 +547,10 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
   // ── energy log: add form ──────────────────
   const [elLabel, setElLabel] = useState("");
   const [elType, setElType] = useState<"drain" | "restore">("drain");
+
+  // ── energy profile: add form ──────────────
+  const [epDrainLabel, setEpDrainLabel] = useState("");
+  const [epRestoreLabel, setEpRestoreLabel] = useState("");
 
   // ── body-scan: step-by-step ───────────────
   const [bsStep, setBsStep] = useState(0);
@@ -2234,62 +2240,148 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
             );
           })()}
 
-          {/* ── energy-accounting: energy log ── */}
+          {/* ── energy-accounting: profile + daily log ── */}
           {tool.id === "energy-accounting" && (
-            <div className="space-y-3">
-              <p className="text-sm font-semibold text-slate-700">Today's energy log</p>
-              <div className="flex gap-2">
-                <input
-                  className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-400"
-                  placeholder="What drained or restored you?"
-                  value={elLabel}
-                  onChange={(e) => setElLabel(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && elLabel.trim()) { addEnergyLogEntry(elLabel.trim(), elType); setElLabel(""); }
-                  }}
-                />
-                <button
-                  onClick={() => setElType((t) => t === "drain" ? "restore" : "drain")}
-                  className={cn("px-3 py-2 rounded-xl text-sm font-medium border transition-all",
-                    elType === "drain" ? "bg-rose-100 text-rose-700 border-rose-200" : "bg-sage-100 text-sage-700 border-sage-200"
-                  )}
-                >
-                  {elType === "drain" ? "Drain" : "Restore"}
-                </button>
-                <button
-                  onClick={() => { if (elLabel.trim()) { addEnergyLogEntry(elLabel.trim(), elType); setElLabel(""); } }}
-                  className="bg-sage-600 text-white px-3 py-2 rounded-xl text-sm font-medium hover:bg-sage-700 transition-all"
-                >
-                  <Plus size={16} />
-                </button>
-              </div>
-              {todayEnergy.length > 0 ? (
-                <div className="space-y-1.5">
-                  {todayEnergy.map((entry) => (
-                    <div key={entry.id} className={cn("flex items-center justify-between p-2.5 rounded-xl border",
-                      entry.type === "drain" ? "bg-rose-50 border-rose-100" : "bg-sage-50 border-sage-100"
-                    )}>
-                      <div className="flex items-center gap-2">
-                        <span className={cn("text-xs font-bold", entry.type === "drain" ? "text-rose-500" : "text-sage-600")}>{entry.type === "drain" ? "−" : "+"}</span>
-                        <span className="text-sm text-slate-700">{entry.label}</span>
-                      </div>
-                      <button onClick={() => removeEnergyLogEntry(entry.id)}>
-                        <Trash2 size={13} className="text-slate-300 hover:text-rose-400 transition-colors" />
-                      </button>
-                    </div>
-                  ))}
-                  <div className="bg-slate-50 rounded-xl p-3 border border-slate-100 text-center">
-                    <p className="text-xs text-slate-500">
-                      <span className="text-rose-600 font-medium">{drains} drain{drains !== 1 ? "s" : ""}</span>
-                      {" vs "}
-                      <span className="text-sage-600 font-medium">{restores} restore{restores !== 1 ? "s" : ""}</span>
-                      {restores > drains ? " You are topping up." : drains > restores ? " More deposits needed." : " Balanced."}
-                    </p>
+            <div className="space-y-5">
+
+              {/* Energy Profile */}
+              <div className="space-y-3">
+                <p className="text-sm font-semibold text-slate-700">Your Energy Profile</p>
+                <p className="text-xs text-slate-500">Build your personal list of what drains and restores you. This stays saved over time.</p>
+
+                {/* Drains */}
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold" style={{ color: '#8f6559' }}>Drains</p>
+                  <div className="flex gap-2">
+                    <input
+                      className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-200"
+                      placeholder="What drains your energy?"
+                      value={epDrainLabel}
+                      onChange={(e) => setEpDrainLabel(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && epDrainLabel.trim()) {
+                          addEnergyDrain({ label: epDrainLabel.trim() });
+                          setEpDrainLabel("");
+                        }
+                      }}
+                    />
+                    <button
+                      onClick={() => { if (epDrainLabel.trim()) { addEnergyDrain({ label: epDrainLabel.trim() }); setEpDrainLabel(""); } }}
+                      className="px-3 py-2 rounded-xl text-sm font-medium bg-rose-100 text-rose-700 border border-rose-200 hover:bg-rose-200 transition-all"
+                    >
+                      <Plus size={16} />
+                    </button>
                   </div>
+                  {energyDrains.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {energyDrains.map((d) => (
+                        <span key={d.id} className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full" style={{ color: '#8f6559', background: '#C4897A22', border: '1px solid #8f655966' }}>
+                          {d.label}
+                          <button onClick={() => removeEnergyDrain(d.id)} className="ml-0.5 opacity-60 hover:opacity-100">
+                            <X size={10} />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              ) : (
-                <p className="text-xs text-slate-400 text-center py-2">No entries yet today.</p>
-              )}
+
+                {/* Restorers */}
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold" style={{ color: '#4d6e5e' }}>Restorers</p>
+                  <div className="flex gap-2">
+                    <input
+                      className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-200"
+                      placeholder="What restores your energy?"
+                      value={epRestoreLabel}
+                      onChange={(e) => setEpRestoreLabel(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && epRestoreLabel.trim()) {
+                          addEnergyRestorer({ label: epRestoreLabel.trim() });
+                          setEpRestoreLabel("");
+                        }
+                      }}
+                    />
+                    <button
+                      onClick={() => { if (epRestoreLabel.trim()) { addEnergyRestorer({ label: epRestoreLabel.trim() }); setEpRestoreLabel(""); } }}
+                      className="px-3 py-2 rounded-xl text-sm font-medium bg-sage-100 text-sage-700 border border-sage-200 hover:bg-sage-200 transition-all"
+                    >
+                      <Plus size={16} />
+                    </button>
+                  </div>
+                  {energyRestorers.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {energyRestorers.map((r) => (
+                        <span key={r.id} className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full" style={{ color: '#4d6e5e', background: '#7FA88222', border: '1px solid #4d6e5e66' }}>
+                          {r.label}
+                          <button onClick={() => removeEnergyRestorer(r.id)} className="ml-0.5 opacity-60 hover:opacity-100">
+                            <X size={10} />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="border-t border-slate-100" />
+
+              {/* Today's Log */}
+              <div className="space-y-3">
+                <p className="text-sm font-semibold text-slate-700">Today's log</p>
+                <div className="flex gap-2">
+                  <input
+                    className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-400"
+                    placeholder="What drained or restored you today?"
+                    value={elLabel}
+                    onChange={(e) => setElLabel(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && elLabel.trim()) { addEnergyLogEntry(elLabel.trim(), elType); setElLabel(""); }
+                    }}
+                  />
+                  <button
+                    onClick={() => setElType((t) => t === "drain" ? "restore" : "drain")}
+                    className={cn("px-3 py-2 rounded-xl text-sm font-medium border transition-all",
+                      elType === "drain" ? "bg-rose-100 text-rose-700 border-rose-200" : "bg-sage-100 text-sage-700 border-sage-200"
+                    )}
+                  >
+                    {elType === "drain" ? "Drain" : "Restore"}
+                  </button>
+                  <button
+                    onClick={() => { if (elLabel.trim()) { addEnergyLogEntry(elLabel.trim(), elType); setElLabel(""); } }}
+                    className="bg-sage-600 text-white px-3 py-2 rounded-xl text-sm font-medium hover:bg-sage-700 transition-all"
+                  >
+                    <Plus size={16} />
+                  </button>
+                </div>
+                {todayEnergy.length > 0 ? (
+                  <div className="space-y-1.5">
+                    {todayEnergy.map((entry) => (
+                      <div key={entry.id} className={cn("flex items-center justify-between p-2.5 rounded-xl border",
+                        entry.type === "drain" ? "bg-rose-50 border-rose-100" : "bg-sage-50 border-sage-100"
+                      )}>
+                        <div className="flex items-center gap-2">
+                          <span className={cn("text-xs font-bold", entry.type === "drain" ? "text-rose-500" : "text-sage-600")}>{entry.type === "drain" ? "−" : "+"}</span>
+                          <span className="text-sm text-slate-700">{entry.label}</span>
+                        </div>
+                        <button onClick={() => removeEnergyLogEntry(entry.id)}>
+                          <Trash2 size={13} className="text-slate-300 hover:text-rose-400 transition-colors" />
+                        </button>
+                      </div>
+                    ))}
+                    <div className="bg-slate-50 rounded-xl p-3 border border-slate-100 text-center">
+                      <p className="text-xs text-slate-500">
+                        <span className="text-rose-600 font-medium">{drains} drain{drains !== 1 ? "s" : ""}</span>
+                        {" vs "}
+                        <span className="text-sage-600 font-medium">{restores} restore{restores !== 1 ? "s" : ""}</span>
+                        {restores > drains ? " You are topping up." : drains > restores ? " More deposits needed." : " Balanced."}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-400 text-center py-2">No entries yet today.</p>
+                )}
+              </div>
             </div>
           )}
 

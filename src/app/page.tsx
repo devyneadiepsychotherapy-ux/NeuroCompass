@@ -10,7 +10,7 @@ import Link from "next/link";
 import {
   Heart, Star, Zap, Flame, Sparkles, Brain, ChevronRight,
   Wind, Shuffle, X, PersonStanding, Snowflake,
-  HeartHandshake, ExternalLink, BatteryLow, BatteryFull,
+  HeartHandshake, ExternalLink,
 } from "lucide-react";
 import { ICON_MAP } from "@/lib/icon-map";
 import { cn } from "@/lib/utils";
@@ -455,7 +455,6 @@ export default function HomePage() {
     showStreakCelebration, setShowStreakCelebration,
     showFreezeSaved, setShowFreezeSaved,
     streakFreezes,
-    energyDrains, energyRestorers,
     _hasHydrated,
   } = useAppStore();
   const router = useRouter();
@@ -673,55 +672,6 @@ export default function HomePage() {
                 </button>
               );
             })}
-          </div>
-        )}
-      </div>
-
-      {/* Energy Accounting (compact summary) */}
-      <div className="bg-cream-50 rounded-2xl border shadow-sm p-4 space-y-3" style={{ borderColor: '#D8D0C8' }}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: '#E4DDD0' }}>
-              <Zap size={16} style={{ color: '#9B8A4A' }} />
-            </div>
-            <p className="text-sm font-semibold text-slate-800">Energy Accounting</p>
-          </div>
-          <Link href="/me" className="text-xs font-medium" style={{ color: '#9B8A4A' }}>
-            {energyDrains.length > 0 || energyRestorers.length > 0 ? 'Edit' : 'Set up'}
-          </Link>
-        </div>
-        {energyDrains.length === 0 && energyRestorers.length === 0 ? (
-          <p className="text-sm text-slate-400 italic">Track what drains and restores your energy</p>
-        ) : (
-          <div className="grid grid-cols-2 gap-2">
-            <div className="space-y-1">
-              <div className="flex items-center gap-1 mb-1">
-                <BatteryLow size={11} style={{ color: '#C4897A' }} />
-                <p className="text-xs font-semibold" style={{ color: '#8f6559' }}>Drains</p>
-              </div>
-              {energyDrains.slice(0, 3).map((d) => (
-                <span key={d.id} className="block text-xs px-2 py-0.5 rounded-full truncate" style={{ color: '#8f6559', background: '#C4897A33', border: '1px solid #8f655966' }}>
-                  {d.label}
-                </span>
-              ))}
-              {energyDrains.length > 3 && (
-                <span className="text-xs text-slate-400">+{energyDrains.length - 3} more</span>
-              )}
-            </div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-1 mb-1">
-                <BatteryFull size={11} style={{ color: '#7FA882' }} />
-                <p className="text-xs font-semibold" style={{ color: '#4d6e5e' }}>Restorers</p>
-              </div>
-              {energyRestorers.slice(0, 3).map((r) => (
-                <span key={r.id} className="block text-xs px-2 py-0.5 rounded-full truncate" style={{ color: '#4d6e5e', background: '#7FA88233', border: '1px solid #4d6e5e66' }}>
-                  {r.label}
-                </span>
-              ))}
-              {energyRestorers.length > 3 && (
-                <span className="text-xs text-slate-400">+{energyRestorers.length - 3} more</span>
-              )}
-            </div>
           </div>
         )}
       </div>

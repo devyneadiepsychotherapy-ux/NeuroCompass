@@ -19,7 +19,7 @@ const TOUR_STEPS: TourStep[] = [
   {
     path: "/",
     heading: "Home",
-    body: "This is your home. You'll see your streak, quick tools, and everything at a glance.",
+    body: "This is your home. You'll see your streak, quick tools, and everything at a glance. Tap the Feeling Frozen card if you're stuck and need a nudge, or the Learn card to explore how your brain works.",
   },
   {
     path: "/",
@@ -39,7 +39,7 @@ const TOUR_STEPS: TourStep[] = [
   {
     path: "/me",
     heading: "Your Me Page",
-    body: "Your Me page has your ND strengths, a sensory profile summary, your lists, and special interests, all in one place.",
+    body: "Your Me page has your ND strengths and sensory profile summary, all in one place.",
   },
   {
     path: "/",

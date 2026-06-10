@@ -217,7 +217,7 @@ const OVERVIEW_TOPICS = [
     bg: "bg-indigo-100",
     color: "text-indigo-600",
     heading: "Me Page",
-    tldr: "Your Me page is your personal hub: ND strengths, sensory profile summary, and your custom lists and special interests, all in one place.",
+    tldr: "Your Me page is your personal hub: ND strengths and sensory profile summary, all in one place.",
     detail: "The Me page is your personal neurodivergent profile, bringing together your ND strengths and a summary of your sensory profile. Your sensory profile is built in Tools and displayed in summary form here, so your key sensory info is always close at hand.",
     tutorial: "Your Me page is your personal hub. Your ND strengths and sensory profile summary live here in one place.",
   },

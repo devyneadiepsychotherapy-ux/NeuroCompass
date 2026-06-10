@@ -373,6 +373,31 @@ function Section({
 // Schedule section
 // ---------------------------------------------------------------------------
 
+const REMINDER_OPTIONS = [
+  { label: "No reminder", value: undefined as number | undefined },
+  { label: "At time", value: 0 },
+  { label: "5 min before", value: 5 },
+  { label: "10 min before", value: 10 },
+  { label: "15 min before", value: 15 },
+  { label: "30 min before", value: 30 },
+  { label: "1 hour before", value: 60 },
+];
+
+function requestNotificationPermission() {
+  if (typeof Notification !== "undefined" && Notification.permission === "default") {
+    Notification.requestPermission();
+  }
+}
+
+function scheduleNotification(title: string, fireAt: Date) {
+  if (typeof Notification === "undefined" || Notification.permission !== "granted") return;
+  const msUntil = fireAt.getTime() - Date.now();
+  if (msUntil < 0) return;
+  setTimeout(() => {
+    new Notification("NeuroCompass Reminder", { body: title, icon: "/icon-192.png" });
+  }, msUntil);
+}
+
 function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
   const { appointments, addAppointment, deleteAppointment, updateAppointment } = useAppStore();
   const [showForm, setShowForm] = useState(false);
@@ -381,6 +406,7 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
   const [title, setTitle] = useState("");
   const [notes, setNotes] = useState("");
   const [showOn, setShowOn] = useState<("day" | "week" | "month")[]>(["day", "week", "month"]);
+  const [reminderMins, setReminderMins] = useState<number | undefined>(undefined);
 
   const selectedKey = dateKey(selectedDate);
   const dayAppointments = appointments.filter((a) => a.date === selectedKey);
@@ -400,12 +426,21 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
       title: title.trim(),
       notes: notes.trim() || undefined,
       showOn,
+      reminderMinsBefore: reminderMins,
     });
+    if (reminderMins !== undefined) {
+      requestNotificationPermission();
+      const [h, m] = startTime.split(":").map(Number);
+      const fireAt = new Date(selectedDate);
+      fireAt.setHours(h, m - reminderMins, 0, 0);
+      scheduleNotification(title.trim(), fireAt);
+    }
     setTitle("");
     setNotes("");
     setStartTime("09:00");
     setEndTime("10:00");
     setShowOn(["day", "week", "month"]);
+    setReminderMins(undefined);
     setShowForm(false);
   };
 
@@ -472,6 +507,21 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
           />
+          {/* Reminder */}
+          <div>
+            <label className="block text-xs text-slate-400 mb-1">Reminder</label>
+            <select
+              className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sage-400 bg-white"
+              value={reminderMins === undefined ? "" : String(reminderMins)}
+              onChange={(e) => setReminderMins(e.target.value === "" ? undefined : Number(e.target.value))}
+            >
+              {REMINDER_OPTIONS.map((opt) => (
+                <option key={String(opt.value)} value={opt.value === undefined ? "" : String(opt.value)}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
           {/* Show On */}
           <div>
             <p className="text-xs text-slate-400 mb-1.5">Show on</p>
@@ -549,6 +599,7 @@ function AppointmentRow({
   const [editShowOn, setEditShowOn] = useState<("day" | "week" | "month")[]>(
     appt.showOn ?? ["day", "week", "month"]
   );
+  const [editReminderMins, setEditReminderMins] = useState<number | undefined>(appt.reminderMinsBefore);
 
   const toggleEditShowOn = (view: "day" | "week" | "month") => {
     setEditShowOn((prev) =>
@@ -564,7 +615,15 @@ function AppointmentRow({
       endTime: editEndTime || undefined,
       notes: editNotes.trim() || undefined,
       showOn: editShowOn,
+      reminderMinsBefore: editReminderMins,
     });
+    if (editReminderMins !== undefined) {
+      requestNotificationPermission();
+      const [h, m] = editStartTime.split(":").map(Number);
+      const fireAt = new Date(appt.date + "T00:00:00");
+      fireAt.setHours(h, m - editReminderMins, 0, 0);
+      scheduleNotification(editTitle.trim(), fireAt);
+    }
     setShowEdit(false);
     setExpanded(false);
   };
@@ -575,6 +634,7 @@ function AppointmentRow({
     setEditEndTime(appt.endTime ?? "");
     setEditNotes(appt.notes ?? "");
     setEditShowOn(appt.showOn ?? ["day", "week", "month"]);
+    setEditReminderMins(appt.reminderMinsBefore);
     setShowEdit(true);
     setExpanded(false);
   };
@@ -629,6 +689,20 @@ function AppointmentRow({
           value={editNotes}
           onChange={(e) => setEditNotes(e.target.value)}
         />
+        <div>
+          <label className="block text-xs text-slate-400 mb-1">Reminder</label>
+          <select
+            className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sage-400 bg-white"
+            value={editReminderMins === undefined ? "" : String(editReminderMins)}
+            onChange={(e) => setEditReminderMins(e.target.value === "" ? undefined : Number(e.target.value))}
+          >
+            {REMINDER_OPTIONS.map((opt) => (
+              <option key={String(opt.value)} value={opt.value === undefined ? "" : String(opt.value)}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+        </div>
         <div>
           <p className="text-xs text-slate-400 mb-1.5">Show on</p>
           <div className="flex gap-2">
@@ -963,6 +1037,7 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
   const [startTime, setStartTime] = useState(taskToEdit?.startTime ?? "");
   const [endTime, setEndTime] = useState(taskToEdit?.endTime ?? "");
   const [carryOver, setCarryOver] = useState(taskToEdit?.carryOver ?? false);
+  const [reminderMins, setReminderMins] = useState<number | undefined>(taskToEdit?.reminderMinsBefore);
 
   const toggleShowOn = (view: "day" | "week" | "month") => {
     setShowOn((prev) =>
@@ -990,6 +1065,7 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
         startTime: startTime.trim() || undefined,
         endTime: endTime.trim() || undefined,
         carryOver: carryOver || undefined,
+        reminderMinsBefore: reminderMins,
       });
     } else {
       addTask({
@@ -1011,6 +1087,7 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
         startTime: startTime.trim() || undefined,
         endTime: endTime.trim() || undefined,
         carryOver: carryOver || undefined,
+        reminderMinsBefore: reminderMins,
       });
     }
     onClose();
@@ -1096,6 +1173,24 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
                 {calcDuration(startTime, endTime)}
               </p>
             )}
+          </div>
+        )}
+
+        {/* Reminder - appointment & time-block only */}
+        {(taskType === "appointment" || taskType === "time-block") && (
+          <div>
+            <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">Reminder</p>
+            <select
+              className="w-full min-h-[44px] border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sage-400 bg-white"
+              value={reminderMins === undefined ? "" : String(reminderMins)}
+              onChange={(e) => setReminderMins(e.target.value === "" ? undefined : Number(e.target.value))}
+            >
+              {REMINDER_OPTIONS.map((opt) => (
+                <option key={String(opt.value)} value={opt.value === undefined ? "" : String(opt.value)}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
           </div>
         )}
 
