@@ -373,7 +373,7 @@ function Section({
 // Schedule section
 // ---------------------------------------------------------------------------
 
-function ScheduleSection() {
+function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
   const { appointments, addAppointment, deleteAppointment, updateAppointment } = useAppStore();
   const [showForm, setShowForm] = useState(false);
   const [startTime, setStartTime] = useState("09:00");
@@ -381,6 +381,9 @@ function ScheduleSection() {
   const [title, setTitle] = useState("");
   const [notes, setNotes] = useState("");
   const [showOn, setShowOn] = useState<("day" | "week" | "month")[]>(["day", "week", "month"]);
+
+  const selectedKey = dateKey(selectedDate);
+  const dayAppointments = appointments.filter((a) => a.date === selectedKey);
 
   const toggleShowOn = (view: "day" | "week" | "month") => {
     setShowOn((prev) =>
@@ -391,6 +394,7 @@ function ScheduleSection() {
   const handleAdd = () => {
     if (!title.trim()) return;
     addAppointment({
+      date: selectedKey,
       startTime,
       endTime: endTime || undefined,
       title: title.trim(),
@@ -407,11 +411,11 @@ function ScheduleSection() {
 
   return (
     <div className="space-y-2">
-      {appointments.length === 0 && !showForm && (
+      {dayAppointments.length === 0 && !showForm && (
         <p className="text-sm text-slate-400 italic">No appointments yet for today.</p>
       )}
 
-      {appointments.map((appt) => (
+      {dayAppointments.map((appt) => (
         <AppointmentRow
           key={appt.id}
           appt={appt}
@@ -1658,7 +1662,7 @@ export default function PlannerPage() {
               title="Schedule"
               onToggle={() => toggleSection("schedule")}
             >
-              <ScheduleSection />
+              <ScheduleSection selectedDate={selectedDate} />
             </Section>
           )}
 

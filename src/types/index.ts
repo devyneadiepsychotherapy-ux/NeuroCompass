@@ -70,6 +70,7 @@ export interface ToolFavorite {
 
 export interface Appointment {
   id: string;
+  date: string;      // "YYYY-MM-DD"
   startTime: string; // "HH:MM"
   endTime?: string;  // "HH:MM"
   title: string;
