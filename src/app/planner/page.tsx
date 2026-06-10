@@ -34,7 +34,7 @@ const recurOptions: { value: RecurType; label: string }[] = [
 ];
 
 const taskTypeConfig: Record<TaskItemType, { label: string; color: string }> = {
-  task: { label: "Task", color: "bg-slate-100 text-slate-600" },
+  task: { label: "Activity", color: "bg-slate-100 text-slate-600" },
   appointment: { label: "Appointment", color: "bg-blue-100 text-blue-700" },
   "time-block": { label: "Time Block", color: "bg-violet-100 text-violet-700" },
 };
@@ -238,8 +238,8 @@ function WeekView({ date }: { date: Date }) {
               </div>
               <span className="flex-1 text-sm text-slate-500">
                 {totalCount === 0
-                  ? "No tasks"
-                  : `${pendingTasks.length} task${pendingTasks.length !== 1 ? "s" : ""}${
+                  ? "No activities"
+                  : `${pendingTasks.length} activit${pendingTasks.length !== 1 ? "ies" : "y"}${
                       doneTasks.length > 0 ? `, ${doneTasks.length} done` : ""
                     }`}
               </span>
@@ -944,7 +944,7 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
   const [priority, setPriority] = useState<TaskPriority>(taskToEdit?.priority ?? "medium");
   const [taskType, setTaskType] = useState<TaskItemType>(taskToEdit?.type ?? "task");
   const [duration, setDuration] = useState(taskToEdit?.duration ?? "");
-  const [dueDate, setDueDate] = useState(taskToEdit?.dueDate ?? getTodayKey());
+  const [dueDate, setDueDate] = useState(taskToEdit?.dueDate ?? "");
   const [isRecurring, setIsRecurring] = useState(taskToEdit?.isRecurring ?? false);
   const [recurType, setRecurType] = useState<RecurType>(taskToEdit?.recurType ?? "daily");
   const [category, setCategory] = useState(taskToEdit?.category ?? "Personal");
@@ -974,7 +974,7 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
         duration: duration.trim() || undefined,
         xpReward: rewardAmount,
         rewardType,
-        dueDate,
+        dueDate: dueDate || undefined,
         isRecurring,
         recurType: isRecurring ? recurType : undefined,
         timeEstimate,
@@ -993,7 +993,7 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
         status: "todo",
         xpReward: rewardAmount,
         rewardType,
-        dueDate,
+        dueDate: dueDate || undefined,
         isRecurring,
         recurType: isRecurring ? recurType : undefined,
         tags: [],
@@ -1011,7 +1011,7 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
     <div className="fixed inset-0 z-50 bg-black/40 flex items-end justify-center p-0">
       <div className="bg-cream-50 rounded-t-3xl w-full max-w-lg p-6 pb-10 space-y-4 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-slate-800">{isEditing ? "Edit Task" : "New Task"}</h2>
+          <h2 className="text-lg font-bold text-slate-800">{isEditing ? "Edit Activity" : "New Activity"}</h2>
           <button onClick={onClose} className="p-2 rounded-xl hover:bg-slate-100">
             <X size={20} className="text-slate-500" />
           </button>
@@ -1103,7 +1103,8 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
           </div>
         )}
 
-        {/* Priority */}
+        {/* Priority - Activity only */}
+        {taskType === "task" && (
         <div>
           <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">Priority</p>
           <div className="grid grid-cols-4 gap-2">
@@ -1125,8 +1126,10 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
             )}
           </div>
         </div>
+        )}
 
-        {/* Reward */}
+        {/* Reward - only for Activity type */}
+        {taskType === "task" && (
         <div>
           <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">
             Reward on completion
@@ -1170,8 +1173,10 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
             <span className="text-xs text-slate-400">{rewardType === "xp" ? "XP" : "coins"}</span>
           </div>
         </div>
+        )}
 
-        {/* Category */}
+        {/* Category - Activity only */}
+        {taskType === "task" && (
         <div>
           <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">Category</p>
           <div className="flex flex-wrap gap-2">
@@ -1191,8 +1196,10 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
             ))}
           </div>
         </div>
+        )}
 
-        {/* Time estimate */}
+        {/* Time estimate - Activity only */}
+        {taskType === "task" && (
         <div>
           <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">
             Time estimate
@@ -1212,8 +1219,10 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
             ))}
           </div>
         </div>
+        )}
 
-        {/* Due date */}
+        {/* Due date - Activity only (optional) */}
+        {taskType === "task" && (
         <div>
           <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">Due date</p>
           <input
@@ -1223,6 +1232,7 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
             onChange={(e) => setDueDate(e.target.value)}
           />
         </div>
+        )}
 
         {/* Show on */}
         <div>
@@ -1287,7 +1297,7 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
           disabled={!title.trim()}
           className="w-full bg-sage-600 hover:bg-sage-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-semibold rounded-2xl py-3 transition-all"
         >
-          {isEditing ? "Save Changes" : "Add Task"}
+          {isEditing ? "Save Changes" : "Add Activity"}
         </button>
       </div>
     </div>
@@ -1388,7 +1398,7 @@ function TaskCard({ task }: { task: Task }) {
                   {recurOptions.find((r) => r.value === task.recurType)?.label}
                 </span>
               )}
-              {task.rewardType === "coins" ? (
+              {taskType === "task" && (task.rewardType === "coins" ? (
                 <span className="text-xs text-[#B8A96A] font-medium flex items-center gap-0.5">
                   <Coins size={10} />
                   +{task.xpReward}
@@ -1398,7 +1408,7 @@ function TaskCard({ task }: { task: Task }) {
                   <Star size={10} fill="currentColor" />
                   +{task.xpReward} XP
                 </span>
-              )}
+              ))}
             </div>
           </div>
 
@@ -1414,7 +1424,7 @@ function TaskCard({ task }: { task: Task }) {
             <button
               onClick={() => setShowEdit(true)}
               className="p-1 text-slate-300 hover:text-sage-500 transition-colors"
-              aria-label="Edit task"
+              aria-label="Edit activity"
             >
               <Pencil size={15} />
             </button>
@@ -1490,12 +1500,12 @@ function TasksSection({
       {filter === "today" && tasks.length === 0 && (
         <div className="bg-gradient-to-br from-sage-50 to-stone-100 rounded-2xl p-5 text-center">
           <p className="font-semibold text-slate-700 text-sm">Start somewhere</p>
-          <p className="text-xs text-slate-500 mt-1">Even one small task is progress.</p>
+          <p className="text-xs text-slate-500 mt-1">Even one small activity is progress.</p>
           <button
             onClick={onAddTask}
             className="mt-3 bg-sage-600 text-white px-5 py-1.5 rounded-2xl text-xs font-medium hover:bg-sage-700 transition-all"
           >
-            Add your first task
+            Add your first activity
           </button>
         </div>
       )}
@@ -1503,12 +1513,12 @@ function TasksSection({
       {filtered.length === 0 && tasks.length > 0 && (
         <div className="bg-cream-50 rounded-2xl p-5 text-center border border-slate-100">
           <p className="font-semibold text-slate-700 text-sm">
-            {filter === "done" ? "No completed tasks yet" : "All caught up!"}
+            {filter === "done" ? "No completed activities yet" : "All caught up!"}
           </p>
           <p className="text-xs text-slate-400 mt-1">
             {filter === "done"
-              ? "Complete a task to see it here"
-              : "Great work! Add a new task anytime."}
+              ? "Complete an activity to see it here"
+              : "Great work! Add a new activity anytime."}
           </p>
         </div>
       )}
@@ -1575,7 +1585,7 @@ export default function PlannerPage() {
                 const labels: Record<string, string> = {
                   schedule: "Schedule",
                   top3: "Top 3",
-                  tasks: "Tasks",
+                  tasks: "Activities",
                   habits: "Habits",
                 };
                 return (
@@ -1621,7 +1631,7 @@ export default function PlannerPage() {
             <Section
               id="tasks"
               icon={<ListTodo size={16} />}
-              title="Tasks"
+              title="Activities"
               onToggle={() => toggleSection("tasks")}
               action={
                 <button
@@ -1629,7 +1639,7 @@ export default function PlannerPage() {
                   className="flex items-center gap-1 text-xs text-sage-600 font-medium hover:text-sage-700 transition-all"
                 >
                   <Plus size={13} />
-                  Add task
+                  Add activity
                 </button>
               }
             >
@@ -1670,7 +1680,7 @@ export default function PlannerPage() {
               className="flex items-center gap-1 text-xs text-sage-600 font-medium hover:text-sage-700 transition-all"
             >
               <Plus size={13} />
-              Add task
+              Add activity
             </button>
           </div>
           <WeekView date={selectedDate} />
