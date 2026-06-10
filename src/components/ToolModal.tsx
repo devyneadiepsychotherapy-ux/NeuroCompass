@@ -133,99 +133,153 @@ function SavedList({
 // ─────────────────────────────────────────────
 
 function EmotionWheelTool() {
-  const CORE_EMOTIONS = [
-    { name: "Joy",      color: "#F6D56C", textColor: "#7A5A00" },
-    { name: "Surprise", color: "#A8D8B9", textColor: "#2A5A3A" },
-    { name: "Fear",     color: "#9DC3E6", textColor: "#1A3D5C" },
-    { name: "Sadness",  color: "#B0C4DE", textColor: "#2A3B5C" },
-    { name: "Disgust",  color: "#B5C99A", textColor: "#3A4A2A" },
-    { name: "Anger",    color: "#E8A09A", textColor: "#6A1A1A" },
+  const cx = 200, cy = 200;
+  const r1 = 55;   // core outer radius
+  const r2 = 115;  // secondary outer radius
+  const r3 = 188;  // tertiary outer radius
+
+  const EMOTIONS = [
+    { name: "Joy",      color: "#F6D56C", textColor: "#7A5A00", secondary: [
+      { name: "Happy",       color: "#FBE897", tertiary: ["Joyful",     "Elated"]      },
+      { name: "Content",     color: "#FAE0A0", tertiary: ["Peaceful",   "Satisfied"]   },
+      { name: "Excited",     color: "#F8CF55", tertiary: ["Eager",      "Thrilled"]    },
+    ]},
+    { name: "Surprise", color: "#A8D8B9", textColor: "#2A5A3A", secondary: [
+      { name: "Amazed",      color: "#BDE8CB", tertiary: ["Astonished", "Awed"]        },
+      { name: "Confused",    color: "#C5E4D0", tertiary: ["Bewildered", "Perplexed"]   },
+      { name: "Startled",    color: "#B0E0C4", tertiary: ["Shocked",    "Stunned"]     },
+    ]},
+    { name: "Fear",     color: "#9DC3E6", textColor: "#1A3D5C", secondary: [
+      { name: "Anxious",     color: "#B4D0E8", tertiary: ["Worried",    "Nervous"]     },
+      { name: "Scared",      color: "#A8C8E0", tertiary: ["Terrified",  "Helpless"]    },
+      { name: "Overwhelmed", color: "#90B8DC", tertiary: ["Paralysed",  "Drained"]     },
+    ]},
+    { name: "Sadness",  color: "#B0C4DE", textColor: "#2A3B5C", secondary: [
+      { name: "Lonely",      color: "#C0CFEA", tertiary: ["Isolated",   "Abandoned"]   },
+      { name: "Grief",       color: "#B8CADF", tertiary: ["Devastated", "Crushed"]     },
+      { name: "Hurt",        color: "#A8BCDA", tertiary: ["Wounded",    "Betrayed"]    },
+    ]},
+    { name: "Disgust",  color: "#B5C99A", textColor: "#3A4A2A", secondary: [
+      { name: "Discomfort",  color: "#C4D6AE", tertiary: ["Uneasy",     "Revolted"]    },
+      { name: "Repulsed",    color: "#BBC9A2", tertiary: ["Horrified",  "Nauseated"]   },
+      { name: "Contempt",    color: "#A8BC90", tertiary: ["Scornful",   "Dismissive"]  },
+    ]},
+    { name: "Anger",    color: "#E8A09A", textColor: "#6A1A1A", secondary: [
+      { name: "Frustrated",  color: "#EDB8B0", tertiary: ["Annoyed",    "Agitated"]    },
+      { name: "Irritated",   color: "#E8AEA8", tertiary: ["Impatient",  "Resentful"]   },
+      { name: "Furious",     color: "#E09090", tertiary: ["Enraged",    "Livid"]       },
+    ]},
   ];
-  const SECONDARY_EMOTIONS: Record<string, { name: string; color: string }[]> = {
-    Joy:      [{ name: "Gratitude", color: "#FBE897" }, { name: "Serenity", color: "#FAE0A0" }],
-    Surprise: [{ name: "Amazement", color: "#BDE8CB" }, { name: "Confusion", color: "#C5E4D0" }],
-    Fear:     [{ name: "Anxiety",   color: "#B4D0E8" }, { name: "Dread",     color: "#A8C8E0" }],
-    Sadness:  [{ name: "Grief",     color: "#C0CFEA" }, { name: "Loneliness",color: "#B8CADF" }],
-    Disgust:  [{ name: "Boredom",   color: "#C4D6AE" }, { name: "Contempt",  color: "#BBC9A2" }],
-    Anger:    [{ name: "Frustration",color: "#EDB8B0"}, { name: "Irritable", color: "#E8AEA8" }],
-  };
+
   const [selectedEmotion, setSelectedEmotion] = useState<string | null>(null);
-  const cx = 150, cy = 150, r1 = 55, r2 = 95, r3 = 130;
-  const n = CORE_EMOTIONS.length;
-  const sliceAngle = (2 * Math.PI) / n;
+  const n = EMOTIONS.length;
+  const coreSlice = (2 * Math.PI) / n;
 
-  const describeArc = (cx: number, cy: number, r: number, startAngle: number, endAngle: number) => {
-    const x1 = cx + r * Math.cos(startAngle);
-    const y1 = cy + r * Math.sin(startAngle);
-    const x2 = cx + r * Math.cos(endAngle);
-    const y2 = cy + r * Math.sin(endAngle);
-    const largeArc = endAngle - startAngle > Math.PI ? 1 : 0;
-    return `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`;
+  const describeArc = (cx: number, cy: number, r: number, start: number, end: number) => {
+    const x1 = cx + r * Math.cos(start), y1 = cy + r * Math.sin(start);
+    const x2 = cx + r * Math.cos(end),   y2 = cy + r * Math.sin(end);
+    return `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2} Z`;
   };
 
-  const describeAnnulusSector = (cx: number, cy: number, innerR: number, outerR: number, startAngle: number, endAngle: number) => {
-    const x1 = cx + innerR * Math.cos(startAngle), y1 = cy + innerR * Math.sin(startAngle);
-    const x2 = cx + outerR * Math.cos(startAngle), y2 = cy + outerR * Math.sin(startAngle);
-    const x3 = cx + outerR * Math.cos(endAngle),   y3 = cy + outerR * Math.sin(endAngle);
-    const x4 = cx + innerR * Math.cos(endAngle),   y4 = cy + innerR * Math.sin(endAngle);
-    const largeArc = endAngle - startAngle > Math.PI ? 1 : 0;
-    return `M ${x1} ${y1} L ${x2} ${y2} A ${outerR} ${outerR} 0 ${largeArc} 1 ${x3} ${y3} L ${x4} ${y4} A ${innerR} ${innerR} 0 ${largeArc} 0 ${x1} ${y1} Z`;
+  const describeRing = (cx: number, cy: number, ri: number, ro: number, start: number, end: number) => {
+    const c1 = Math.cos(start), s1 = Math.sin(start);
+    const c2 = Math.cos(end),   s2 = Math.sin(end);
+    return [
+      `M ${cx + ri * c1} ${cy + ri * s1}`,
+      `L ${cx + ro * c1} ${cy + ro * s1}`,
+      `A ${ro} ${ro} 0 0 1 ${cx + ro * c2} ${cy + ro * s2}`,
+      `L ${cx + ri * c2} ${cy + ri * s2}`,
+      `A ${ri} ${ri} 0 0 0 ${cx + ri * c1} ${cy + ri * s1} Z`,
+    ].join(" ");
+  };
+
+  const radialLabel = (tx: number, ty: number, mid: number, text: string, size: number, fill: string, weight = "600") => {
+    const deg = mid * 180 / Math.PI;
+    return (
+      <text
+        x={tx} y={ty}
+        textAnchor="middle" dominantBaseline="middle"
+        fontSize={size} fontWeight={weight} fill={fill}
+        transform={`rotate(${deg}, ${tx}, ${ty})`}
+        style={{ pointerEvents: "none", userSelect: "none" }}
+      >
+        {text}
+      </text>
+    );
   };
 
   return (
     <div className="space-y-3">
-      <p className="text-sm font-semibold text-slate-700">Tap a segment to explore</p>
-      <div className="flex justify-center">
-        <svg width="300" height="300" viewBox="0 0 300 300">
-          {CORE_EMOTIONS.map((emotion, i) => {
-            const start = i * sliceAngle - Math.PI / 2;
-            const end = start + sliceAngle;
-            const mid = (start + end) / 2;
-            const textR = r1 * 0.6;
-            const tx = cx + textR * Math.cos(mid);
-            const ty = cy + textR * Math.sin(mid);
-            const isSelected = selectedEmotion === emotion.name;
-            const secondary = SECONDARY_EMOTIONS[emotion.name] ?? [];
+      <p className="text-sm font-semibold text-slate-700">Tap a segment to identify how you feel</p>
+      <div className="w-full">
+        <svg viewBox="0 0 400 400" style={{ width: "100%", display: "block" }}>
+          {EMOTIONS.map((emotion, i) => {
+            const cStart = i * coreSlice - Math.PI / 2;
+            const cEnd = cStart + coreSlice;
+            const cMid = (cStart + cEnd) / 2;
+            const isCore = selectedEmotion === emotion.name;
+            const cTR = r1 * 0.65;
+
             return (
               <g key={emotion.name}>
-                <path d={describeArc(cx, cy, r1, start, end)} fill={emotion.color} stroke="white" strokeWidth="2"
-                  opacity={selectedEmotion && !isSelected ? 0.5 : 1}
+                {/* Core slice */}
+                <path
+                  d={describeArc(cx, cy, r1, cStart, cEnd)}
+                  fill={emotion.color} stroke="white" strokeWidth="2"
+                  opacity={selectedEmotion && !isCore ? 0.35 : 1}
                   style={{ cursor: "pointer", transition: "opacity 0.2s" }}
-                  onClick={() => setSelectedEmotion(isSelected ? null : emotion.name)} />
-                <text x={tx} y={ty} textAnchor="middle" dominantBaseline="middle"
-                  fontSize="7" fontWeight="600" fill={emotion.textColor} style={{ pointerEvents: "none" }}>
-                  {emotion.name}
-                </text>
-                {secondary.map((sec, j) => {
-                  const secSlice = sliceAngle / secondary.length;
-                  const s2 = start + j * secSlice;
-                  const e2 = s2 + secSlice;
-                  const m2 = (s2 + e2) / 2;
-                  const tr = r1 + (r2 - r1) / 2;
-                  const tx2 = cx + tr * Math.cos(m2);
-                  const ty2 = cy + tr * Math.sin(m2);
-                  const isSecSelected = selectedEmotion === sec.name;
+                  onClick={() => setSelectedEmotion(isCore ? null : emotion.name)}
+                />
+                {radialLabel(cx + cTR * Math.cos(cMid), cy + cTR * Math.sin(cMid), cMid, emotion.name, 9, emotion.textColor)}
+
+                {emotion.secondary.map((sec, j) => {
+                  const secSlice = coreSlice / emotion.secondary.length;
+                  const sStart = cStart + j * secSlice;
+                  const sEnd = sStart + secSlice;
+                  const sMid = (sStart + sEnd) / 2;
+                  const isSec = selectedEmotion === sec.name;
+                  const sTR = r1 + (r2 - r1) * 0.5;
+
                   return (
                     <g key={sec.name}>
-                      <path d={describeAnnulusSector(cx, cy, r1 + 1, r2, s2, e2)} fill={sec.color} stroke="white" strokeWidth="1.5"
-                        opacity={selectedEmotion && !isSecSelected ? 0.5 : 1}
+                      <path
+                        d={describeRing(cx, cy, r1 + 1, r2, sStart, sEnd)}
+                        fill={sec.color} stroke="white" strokeWidth="1.5"
+                        opacity={selectedEmotion && !isSec ? 0.35 : 1}
                         style={{ cursor: "pointer", transition: "opacity 0.2s" }}
-                        onClick={() => setSelectedEmotion(isSecSelected ? null : sec.name)} />
-                      <text x={tx2} y={ty2} textAnchor="middle" dominantBaseline="middle"
-                        fontSize="5.5" fontWeight="500" fill="#444" style={{ pointerEvents: "none" }}>
-                        {sec.name}
-                      </text>
+                        onClick={() => setSelectedEmotion(isSec ? null : sec.name)}
+                      />
+                      {radialLabel(cx + sTR * Math.cos(sMid), cy + sTR * Math.sin(sMid), sMid, sec.name, 6.5, "#333")}
+
+                      {sec.tertiary.map((ter, k) => {
+                        const terSlice = secSlice / sec.tertiary.length;
+                        const tStart = sStart + k * terSlice;
+                        const tEnd = tStart + terSlice;
+                        const tMid = (tStart + tEnd) / 2;
+                        const isTer = selectedEmotion === ter;
+                        const tTR = r2 + (r3 - r2) * 0.5;
+
+                        return (
+                          <g key={ter}>
+                            <path
+                              d={describeRing(cx, cy, r2 + 1, r3, tStart, tEnd)}
+                              fill={sec.color + "99"} stroke="white" strokeWidth="1"
+                              opacity={selectedEmotion && !isTer ? 0.35 : 1}
+                              style={{ cursor: "pointer", transition: "opacity 0.2s" }}
+                              onClick={() => setSelectedEmotion(isTer ? null : ter)}
+                            />
+                            {radialLabel(cx + tTR * Math.cos(tMid), cy + tTR * Math.sin(tMid), tMid, ter, 5.5, "#444", "500")}
+                          </g>
+                        );
+                      })}
                     </g>
                   );
                 })}
-                <path d={describeAnnulusSector(cx, cy, r2 + 1, r3, start, end)}
-                  fill={emotion.color + "60"} stroke="white" strokeWidth="1"
-                  style={{ pointerEvents: "none" }} />
               </g>
             );
           })}
-          <circle cx={cx} cy={cy} r="12" fill="white" stroke="#e2e8f0" strokeWidth="1" />
-          <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle" fontSize="8" fill="#94a3b8">😶</text>
+          {/* Center circle */}
+          <circle cx={cx} cy={cy} r="14" fill="white" stroke="#e2e8f0" strokeWidth="1.5" />
         </svg>
       </div>
       {selectedEmotion ? (

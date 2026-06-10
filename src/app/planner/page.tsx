@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { useAppStore } from "@/store/useAppStore";
+import { useAppStore, defaultTopPriorities } from "@/store/useAppStore";
 import { Task, TaskPriority, RecurType, RewardType, TaskItemType, Appointment, TopPriority, Habit } from "@/types";
 import { getTodayKey, formatMinutes } from "@/lib/utils";
 import { cn } from "@/lib/utils";
@@ -704,18 +704,19 @@ function AppointmentRow({
 // Top 3 Priorities section
 // ---------------------------------------------------------------------------
 
-function Top3Section() {
-  const { topPriorities, updateTopPriority } = useAppStore();
+function Top3Section({ date }: { date: string }) {
+  const { topPrioritiesByDate, updateTopPriority } = useAppStore();
+  const priorities = topPrioritiesByDate[date] ?? defaultTopPriorities;
 
   return (
     <div className="space-y-2">
-      {topPriorities.map((priority, idx) => (
+      {priorities.map((priority, idx) => (
         <Top3Item
           key={priority.id}
           priority={priority}
           label={TOP3_LABELS[idx]}
           index={idx}
-          onUpdate={(updates) => updateTopPriority(priority.id, updates)}
+          onUpdate={(updates) => updateTopPriority(date, priority.id, updates)}
         />
       ))}
     </div>
@@ -956,6 +957,7 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
   );
   const [startTime, setStartTime] = useState(taskToEdit?.startTime ?? "");
   const [endTime, setEndTime] = useState(taskToEdit?.endTime ?? "");
+  const [carryOver, setCarryOver] = useState(taskToEdit?.carryOver ?? false);
 
   const toggleShowOn = (view: "day" | "week" | "month") => {
     setShowOn((prev) =>
@@ -982,6 +984,7 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
         showOn,
         startTime: startTime.trim() || undefined,
         endTime: endTime.trim() || undefined,
+        carryOver: carryOver || undefined,
       });
     } else {
       addTask({
@@ -1002,6 +1005,7 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
         showOn,
         startTime: startTime.trim() || undefined,
         endTime: endTime.trim() || undefined,
+        carryOver: carryOver || undefined,
       });
     }
     onClose();
@@ -1292,6 +1296,29 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
           )}
         </div>
 
+        {/* Carry over - task type only */}
+        {taskType === "task" && (
+          <div>
+            <button
+              onClick={() => setCarryOver(!carryOver)}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all border",
+                carryOver
+                  ? "bg-blue-50 text-blue-700 border-blue-300"
+                  : "bg-slate-100 text-slate-600 border-transparent"
+              )}
+            >
+              <Repeat size={15} />
+              Carry over
+            </button>
+            {carryOver && (
+              <p className="text-xs text-slate-400 mt-1.5 ml-1">
+                This task will reappear on days after its due date.
+              </p>
+            )}
+          </div>
+        )}
+
         <button
           onClick={handleSubmit}
           disabled={!title.trim()}
@@ -1409,6 +1436,21 @@ function TaskCard({ task }: { task: Task }) {
                   +{task.xpReward} XP
                 </span>
               ))}
+              {taskType === "task" && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); updateTask(task.id, { carryOver: !task.carryOver }); }}
+                  className={cn(
+                    "flex items-center gap-0.5 text-xs px-2 py-0.5 rounded-full font-medium transition-all",
+                    task.carryOver
+                      ? "bg-blue-100 text-blue-600"
+                      : "bg-slate-100 text-slate-400 hover:text-slate-600"
+                  )}
+                  title={task.carryOver ? "Carry over: on" : "Carry over: off"}
+                >
+                  <Repeat size={9} />
+                  Carry over
+                </button>
+              )}
             </div>
           </div>
 
@@ -1467,7 +1509,13 @@ function TasksSection({
   const filtered = tasks.filter((t) => {
     if (filter === "done") return t.status === "done";
     if (!taskMatchesView(t, activeView)) return false;
-    if (filter === "today") return (!t.dueDate || t.dueDate === selKey) && t.status !== "done";
+    if (filter === "today") {
+      if (t.status === "done") return false;
+      if (!t.dueDate) return true;                 // no due date: always show
+      if (t.dueDate > selKey) return false;        // future task: hide
+      if (t.dueDate === selKey) return true;       // today's task: show
+      return t.carryOver === true;                 // past task: show only if carry-over
+    }
     return t.status !== "done";
   });
 
@@ -1622,7 +1670,7 @@ export default function PlannerPage() {
               title="Top 3 Priorities"
               onToggle={() => toggleSection("top3")}
             >
-              <Top3Section />
+              <Top3Section date={dateKey(selectedDate)} />
             </Section>
           )}
 

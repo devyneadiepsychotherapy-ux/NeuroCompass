@@ -44,7 +44,7 @@ interface AppState {
 
   // Planner extras
   appointments: Appointment[];
-  topPriorities: TopPriority[]; // always exactly 3 items
+  topPrioritiesByDate: Record<string, TopPriority[]>; // keyed by "YYYY-MM-DD"
   habits: Habit[];
   sectionVisibility: SectionVisibility;
 
@@ -72,7 +72,7 @@ interface AppState {
   updateAppointment: (id: string, updates: Partial<Omit<Appointment, "id" | "createdAt">>) => void;
 
   // Top 3 Priorities
-  updateTopPriority: (id: string, updates: Partial<Omit<TopPriority, "id">>) => void;
+  updateTopPriority: (date: string, id: string, updates: Partial<Omit<TopPriority, "id">>) => void;
 
   // Habits
   addHabit: (name: string) => void;
@@ -278,7 +278,7 @@ const defaultProfile: UserProfile = {
   reducedMotion: false,
 };
 
-const defaultTopPriorities: TopPriority[] = [
+export const defaultTopPriorities: TopPriority[] = [
   { id: "p1", text: "", completed: false },
   { id: "p2", text: "", completed: false },
   { id: "p3", text: "", completed: false },
@@ -299,7 +299,7 @@ export const useAppStore = create<AppState>()(
       profile: defaultProfile,
       favorites: [],
       appointments: [],
-      topPriorities: defaultTopPriorities,
+      topPrioritiesByDate: {},
       habits: [],
       sectionVisibility: defaultSectionVisibility,
       focusSession: null,
@@ -457,12 +457,16 @@ export const useAppStore = create<AppState>()(
             .sort((a, b) => a.startTime.localeCompare(b.startTime)),
         })),
 
-      updateTopPriority: (id, updates) =>
-        set((s) => ({
-          topPriorities: s.topPriorities.map((p) =>
-            p.id === id ? { ...p, ...updates } : p
-          ),
-        })),
+      updateTopPriority: (date, id, updates) =>
+        set((s) => {
+          const existing = s.topPrioritiesByDate[date] ?? defaultTopPriorities.map((p) => ({ ...p }));
+          return {
+            topPrioritiesByDate: {
+              ...s.topPrioritiesByDate,
+              [date]: existing.map((p) => (p.id === id ? { ...p, ...updates } : p)),
+            },
+          };
+        }),
 
       addHabit: (name) =>
         set((s) => ({
@@ -882,7 +886,7 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: "neurocompass-store",
-      version: 1,
+      version: 2,
       storage:
         typeof window !== "undefined"
           ? createJSONStorage(() => localStorage)
@@ -911,6 +915,14 @@ export const useAppStore = create<AppState>()(
           const rewards = state.shopRewards;
           if (!Array.isArray(rewards) || rewards.length === 0) {
             state.shopRewards = defaultShopRewards;
+          }
+        }
+        if (version < 2) {
+          // topPriorities (flat array) replaced by topPrioritiesByDate (date-keyed map).
+          // Drop old flat data — each day now starts fresh automatically.
+          delete state.topPriorities;
+          if (!state.topPrioritiesByDate) {
+            state.topPrioritiesByDate = {};
           }
         }
         return state;

@@ -696,11 +696,11 @@ export default function HomePage() {
           <div className="grid grid-cols-2 gap-2">
             <div className="space-y-1">
               <div className="flex items-center gap-1 mb-1">
-                <BatteryLow size={11} className="text-red-400" />
-                <p className="text-xs font-semibold text-red-500">Drains</p>
+                <BatteryLow size={11} style={{ color: '#C4897A' }} />
+                <p className="text-xs font-semibold" style={{ color: '#8f6559' }}>Drains</p>
               </div>
               {energyDrains.slice(0, 3).map((d) => (
-                <span key={d.id} className="block text-xs text-red-700 bg-red-50 border border-red-100 px-2 py-0.5 rounded-full truncate">
+                <span key={d.id} className="block text-xs px-2 py-0.5 rounded-full truncate" style={{ color: '#8f6559', background: '#C4897A33', border: '1px solid #8f655966' }}>
                   {d.label}
                 </span>
               ))}
@@ -710,11 +710,11 @@ export default function HomePage() {
             </div>
             <div className="space-y-1">
               <div className="flex items-center gap-1 mb-1">
-                <BatteryFull size={11} className="text-emerald-500" />
-                <p className="text-xs font-semibold text-emerald-600">Restorers</p>
+                <BatteryFull size={11} style={{ color: '#7FA882' }} />
+                <p className="text-xs font-semibold" style={{ color: '#4d6e5e' }}>Restorers</p>
               </div>
               {energyRestorers.slice(0, 3).map((r) => (
-                <span key={r.id} className="block text-xs text-emerald-700 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full truncate">
+                <span key={r.id} className="block text-xs px-2 py-0.5 rounded-full truncate" style={{ color: '#4d6e5e', background: '#7FA88233', border: '1px solid #4d6e5e66' }}>
                   {r.label}
                 </span>
               ))}

@@ -26,6 +26,7 @@ export interface Task {
   duration?: string; // freeform e.g. "30 min", "1 hour"
   startTime?: string; // "HH:MM" e.g. "09:00"
   endTime?: string;   // "HH:MM" e.g. "11:30"
+  carryOver?: boolean; // if true, task reappears on days after its dueDate
 }
 
 export interface ShopReward {
