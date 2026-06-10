@@ -230,6 +230,14 @@ interface AppState {
   userAvatar: string;
   completeOnboarding: (name: string, avatar: string) => void;
 
+  // Hydration flag — true once persist middleware has finished rehydrating from localStorage
+  _hasHydrated: boolean;
+  setHasHydrated: (v: boolean) => void;
+
+  // Toolbox view mode
+  toolboxViewMode: 'grid' | 'list';
+  setToolboxViewMode: (mode: 'grid' | 'list') => void;
+
   // Theme & notification
   activeTheme: ThemeId;
   setActiveTheme: (id: ThemeId) => void;
@@ -329,6 +337,8 @@ export const useAppStore = create<AppState>()(
       hasOnboarded: false,
       userName: "",
       userAvatar: "",
+      _hasHydrated: false,
+      setHasHydrated: (v) => set({ _hasHydrated: v }),
 
       addTask: (task) =>
         set((s) => ({
@@ -850,6 +860,9 @@ export const useAppStore = create<AppState>()(
       completeOnboarding: (name, avatar) =>
         set({ hasOnboarded: true, userName: name, userAvatar: avatar }),
 
+      toolboxViewMode: 'list',
+      setToolboxViewMode: (mode) => set({ toolboxViewMode: mode }),
+
       activeTheme: 'default',
       setActiveTheme: (id) => set({ activeTheme: id }),
 
@@ -870,10 +883,16 @@ export const useAppStore = create<AppState>()(
               setItem: () => {},
               removeItem: () => {},
             })),
+      // Set _hasHydrated: true once localStorage has been read. Components subscribe
+      // to this flag instead of calling useAppStore.persist.hasHydrated(), which is
+      // unreliable in Zustand v5.
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
       // Exclude ephemeral UI flags - they should always start false on a fresh load.
       partialize: (state) => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { showStreakCelebration, showFreezeSaved, okayMode, pendingLevelUp, ...rest } = state;
+        const { showStreakCelebration, showFreezeSaved, okayMode, pendingLevelUp, _hasHydrated, ...rest } = state;
         return rest;
       },
       migrate: (persistedState: unknown, version: number) => {

@@ -456,21 +456,14 @@ export default function HomePage() {
     showFreezeSaved, setShowFreezeSaved,
     streakFreezes,
     energyDrains, energyRestorers,
+    _hasHydrated,
   } = useAppStore();
   const router = useRouter();
 
-  // Mount guard - prevents SSR mismatch AND waits for Zustand persist to
-  // finish rehydrating from localStorage. In Zustand v5, persist rehydration
-  // is async (Promise.resolve) even with synchronous localStorage, so we
-  // must not check `hasOnboarded` until onFinishHydration fires.
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => {
-    if (useAppStore.persist.hasHydrated()) {
-      setMounted(true);
-    } else {
-      return useAppStore.persist.onFinishHydration(() => setMounted(true));
-    }
-  }, []);
+  // _hasHydrated is set to true by onRehydrateStorage in the store once
+  // Zustand persist has finished reading from localStorage. Using store state
+  // is more reliable than useAppStore.persist.hasHydrated() in Zustand v5.
+  const mounted = _hasHydrated;
 
   // Redirect un-onboarded users; gated on mounted so Zustand has rehydrated
   useEffect(() => {

@@ -98,7 +98,7 @@ function NDStrengthsCard({
 
 function MyToolboxCard({ favorites }: { favorites: ToolFavorite[] }) {
   const favTools = TOOLS.filter((t) => favorites.some((f) => f.toolId === t.id));
-  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  const { toolboxViewMode: viewMode, setToolboxViewMode: setViewMode } = useAppStore();
 
   return (
     <div
@@ -284,8 +284,8 @@ function SensoryProfileSummaryCard({
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <div className="flex items-center gap-1">
-              <Zap size={11} className="text-red-500" />
-              <p className="text-xs font-semibold text-red-600">Triggers</p>
+              <Zap size={11} style={{ color: "#C4897A" }} />
+              <p className="text-xs font-semibold" style={{ color: "#C4897A" }}>Triggers</p>
             </div>
             {allTriggers.length === 0 ? (
               <p className="text-xs text-slate-400">None added</p>
@@ -294,7 +294,8 @@ function SensoryProfileSummaryCard({
                 {allTriggers.slice(0, 4).map((t, i) => (
                   <span
                     key={i}
-                    className="text-xs bg-red-50 text-red-700 px-2 py-0.5 rounded-full border border-red-100"
+                    className="text-xs px-2 py-0.5 rounded-full border"
+                    style={{ background: "#F5EAE7", color: "#C4897A", borderColor: "#E8C9C1" }}
                   >
                     {t}
                   </span>
@@ -310,8 +311,8 @@ function SensoryProfileSummaryCard({
 
           <div className="space-y-1.5">
             <div className="flex items-center gap-1">
-              <Shield size={11} className="text-emerald-500" />
-              <p className="text-xs font-semibold text-emerald-600">Soothers</p>
+              <Shield size={11} style={{ color: "#7FA882" }} />
+              <p className="text-xs font-semibold" style={{ color: "#7FA882" }}>Soothers</p>
             </div>
             {allSoothers.length === 0 ? (
               <p className="text-xs text-slate-400">None added</p>
@@ -320,7 +321,8 @@ function SensoryProfileSummaryCard({
                 {allSoothers.slice(0, 4).map((s, i) => (
                   <span
                     key={i}
-                    className="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-100"
+                    className="text-xs px-2 py-0.5 rounded-full border"
+                    style={{ background: "#EBF2EB", color: "#7FA882", borderColor: "#C8DEC9" }}
                   >
                     {s}
                   </span>
@@ -356,7 +358,7 @@ function SensoryProfileSummaryCard({
 const INTENSITY_COLORS: Record<string, string> = {
   casual: "bg-stone-100 text-stone-600",
   active: "bg-[#e8e0d8] text-[#8f6559]",
-  hyperfocused: "bg-red-100 text-red-700",
+  hyperfocused: "bg-[#EDD8D4] text-[#C4897A]",
 };
 
 const INTENSITY_LABELS: Record<string, string> = {

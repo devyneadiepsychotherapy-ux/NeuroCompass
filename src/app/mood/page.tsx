@@ -471,7 +471,7 @@ export default function MoodPage() {
           </div>
           <div>
             <p className="text-sm font-semibold text-slate-700 mb-3">Where do you notice sensation?</p>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="flex flex-wrap justify-center gap-2">
               {bodyAreas.map((area) => (
                 <button key={area} onClick={() => toggleArea(area)}
                   className={cn(
