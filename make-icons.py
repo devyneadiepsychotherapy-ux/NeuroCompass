@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generates NeuroCompass app icons — finds the visual centre of the icon automatically."""
+"""Generates NeuroCompass app icons — finds the compass rose centre via colour deviation."""
 import subprocess, sys
 
 try:
@@ -15,69 +15,62 @@ img = Image.open(SRC).convert("RGB")
 w, h = img.size
 print(f"Source size: {w} x {h}")
 
-# Detect the icon bounds by scanning for non-background pixels.
-# The outer area of the screenshot is a light neutral colour; the icon has a
-# sage-green rounded-square background.  We decide a pixel is "background"
-# when all three channels are > 200 (i.e. near-white / light-grey).
-BG_THRESHOLD = 200
+# Sample the sage-green background from the four corners of the image
+# (the compass rose is in the middle; corners are background)
+corner_samples = [
+    img.getpixel((5, 5)),
+    img.getpixel((w - 6, 5)),
+    img.getpixel((5, h - 6)),
+    img.getpixel((w - 6, h - 6)),
+]
+bg_r = sum(p[0] for p in corner_samples) // 4
+bg_g = sum(p[1] for p in corner_samples) // 4
+bg_b = sum(p[2] for p in corner_samples) // 4
+print(f"Background colour (sampled from corners): ({bg_r}, {bg_g}, {bg_b})")
 
-def is_bg(r, g, b):
-    return r > BG_THRESHOLD and g > BG_THRESHOLD and b > BG_THRESHOLD
+# Find pixels that deviate from the background — these are the compass rose
+DEVIATION = 30  # minimum colour distance to count as "not background"
 
-# Find left edge
-left_edge = 0
-for x in range(w):
-    col = [img.getpixel((x, y)) for y in range(h // 4, 3 * h // 4)]
-    non_bg = sum(1 for r, g, b in col if not is_bg(r, g, b))
-    if non_bg > len(col) * 0.5:
-        left_edge = x
-        break
+sum_x = 0
+sum_y = 0
+count = 0
 
-# Find right edge
-right_edge = w - 1
-for x in range(w - 1, -1, -1):
-    col = [img.getpixel((x, y)) for y in range(h // 4, 3 * h // 4)]
-    non_bg = sum(1 for r, g, b in col if not is_bg(r, g, b))
-    if non_bg > len(col) * 0.5:
-        right_edge = x
-        break
-
-# Find top edge
-top_edge = 0
 for y in range(h):
-    row = [img.getpixel((x, y)) for x in range(w // 4, 3 * w // 4)]
-    non_bg = sum(1 for r, g, b in row if not is_bg(r, g, b))
-    if non_bg > len(row) * 0.5:
-        top_edge = y
-        break
+    for x in range(w):
+        r, g, b = img.getpixel((x, y))
+        dist = abs(r - bg_r) + abs(g - bg_g) + abs(b - bg_b)
+        if dist > DEVIATION:
+            sum_x += x
+            sum_y += y
+            count += 1
 
-# Find bottom edge
-bottom_edge = h - 1
-for y in range(h - 1, -1, -1):
-    row = [img.getpixel((x, y)) for x in range(w // 4, 3 * w // 4)]
-    non_bg = sum(1 for r, g, b in row if not is_bg(r, g, b))
-    if non_bg > len(row) * 0.5:
-        bottom_edge = y
-        break
+if count == 0:
+    # Fallback: use geometric centre
+    cx, cy = w // 2, h // 2
+    print("No foreground pixels found — using geometric centre")
+else:
+    cx = sum_x // count
+    cy = sum_y // count
 
-print(f"Icon bounds: left={left_edge}, right={right_edge}, top={top_edge}, bottom={bottom_edge}")
+print(f"Compass rose centroid: ({cx}, {cy}), from {count} pixels")
 
-icon_w = right_edge - left_edge
-icon_h = bottom_edge - top_edge
-cx = left_edge + icon_w // 2
-cy = top_edge  + icon_h // 2
-print(f"Icon size: {icon_w} x {icon_h}, centre: ({cx}, {cy})")
-
-# Use the smaller of the two dimensions so the crop is square
-side = min(icon_w, icon_h)
-# Shave 2% from each edge to remove any rounded-corner artefacts
+# Build a square crop centred on the compass rose centroid.
+# Use the full shorter dimension of the image as the crop size.
+side = min(w, h)
+# Trim 2% from each edge to remove rounded-corner artefacts
 trim = int(side * 0.02)
-side_trimmed = side - 2 * trim
+half = side // 2
 
-crop_left   = cx - side // 2 + trim
-crop_top    = cy - side // 2 + trim
-crop_right  = crop_left + side_trimmed
-crop_bottom = crop_top  + side_trimmed
+crop_left   = cx - half + trim
+crop_top    = cy - half + trim
+crop_right  = cx + half - trim
+crop_bottom = cy + half - trim
+
+# Clamp to image bounds
+crop_left   = max(0, crop_left)
+crop_top    = max(0, crop_top)
+crop_right  = min(w, crop_right)
+crop_bottom = min(h, crop_bottom)
 
 print(f"Crop box: ({crop_left}, {crop_top}, {crop_right}, {crop_bottom})")
 
