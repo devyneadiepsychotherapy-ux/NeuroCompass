@@ -1107,6 +1107,7 @@ function AddScheduleModal({
   const { addAppointment } = useAppStore();
   const [title, setTitle] = useState("");
   const [itemType, setItemType] = useState<ScheduleItemType>("appointment");
+  const [date, setDate] = useState(dateKey(selectedDate));
   const [allDay, setAllDay] = useState(false);
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("10:00");
@@ -1121,8 +1122,8 @@ function AddScheduleModal({
   };
 
   const handleSubmit = () => {
-    if (!title.trim()) return;
-    const selectedKey = dateKey(selectedDate);
+    if (!title.trim() || !date) return;
+    const selectedKey = date;
     addAppointment({
       date: selectedKey,
       type: itemType,
@@ -1137,7 +1138,7 @@ function AddScheduleModal({
     if (!allDay && reminderMins !== undefined) {
       requestNotificationPermission();
       const [h, m] = startTime.split(":").map(Number);
-      const fireAt = new Date(selectedDate);
+      const fireAt = new Date(date + "T00:00:00");
       fireAt.setHours(h, m - reminderMins, 0, 0);
       scheduleNotification(title.trim(), fireAt);
     }
@@ -1162,6 +1163,17 @@ function AddScheduleModal({
           onChange={(e) => setTitle(e.target.value)}
           autoFocus
         />
+
+        {/* Date */}
+        <div>
+          <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">Date</p>
+          <input
+            type="date"
+            className="w-full min-h-[44px] border border-slate-200 rounded-xl px-4 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-sage-400"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+          />
+        </div>
 
         {/* Type */}
         <div>
@@ -1300,7 +1312,7 @@ function AddScheduleModal({
 
         <button
           onClick={handleSubmit}
-          disabled={!title.trim()}
+          disabled={!title.trim() || !date}
           className="w-full bg-sage-600 hover:bg-sage-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-semibold rounded-2xl py-3 transition-all"
         >
           Add to Schedule
