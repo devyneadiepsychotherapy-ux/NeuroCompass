@@ -69,6 +69,7 @@ interface AppState {
   // Appointments
   addAppointment: (appt: Omit<Appointment, "id" | "createdAt">) => void;
   deleteAppointment: (id: string) => void;
+  updateAppointment: (id: string, updates: Partial<Omit<Appointment, "id" | "createdAt">>) => void;
 
   // Top 3 Priorities
   updateTopPriority: (id: string, updates: Partial<Omit<TopPriority, "id">>) => void;
@@ -447,6 +448,13 @@ export const useAppStore = create<AppState>()(
       deleteAppointment: (id) =>
         set((s) => ({
           appointments: s.appointments.filter((a) => a.id !== id),
+        })),
+
+      updateAppointment: (id, updates) =>
+        set((s) => ({
+          appointments: s.appointments
+            .map((a) => (a.id === id ? { ...a, ...updates } : a))
+            .sort((a, b) => a.startTime.localeCompare(b.startTime)),
         })),
 
       updateTopPriority: (id, updates) =>

@@ -116,6 +116,13 @@ function formatTimeStr(t: string): string {
   return `${hour}:${m.toString().padStart(2, "0")} ${ampm}`;
 }
 
+function addOneHour(time: string): string {
+  if (!time) return "";
+  const [h, m] = time.split(":").map(Number);
+  const newH = (h + 1) % 24;
+  return `${String(newH).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
+
 function calcDuration(startTime: string, endTime: string): string {
   if (!startTime || !endTime) return "";
   const [sh, sm] = startTime.split(":").map(Number);
@@ -367,7 +374,7 @@ function Section({
 // ---------------------------------------------------------------------------
 
 function ScheduleSection() {
-  const { appointments, addAppointment, deleteAppointment } = useAppStore();
+  const { appointments, addAppointment, deleteAppointment, updateAppointment } = useAppStore();
   const [showForm, setShowForm] = useState(false);
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("10:00");
@@ -405,7 +412,12 @@ function ScheduleSection() {
       )}
 
       {appointments.map((appt) => (
-        <AppointmentRow key={appt.id} appt={appt} onDelete={() => deleteAppointment(appt.id)} />
+        <AppointmentRow
+          key={appt.id}
+          appt={appt}
+          onDelete={() => deleteAppointment(appt.id)}
+          onUpdate={(updates) => updateAppointment(appt.id, updates)}
+        />
       ))}
 
       {showForm ? (
@@ -427,7 +439,10 @@ function ScheduleSection() {
                 type="time"
                 className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sage-400"
                 value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
+                onChange={(e) => {
+                  setStartTime(e.target.value);
+                  setEndTime(addOneHour(e.target.value));
+                }}
               />
             </div>
             <div className="flex-1">
@@ -512,12 +527,150 @@ function ScheduleSection() {
   );
 }
 
-function AppointmentRow({ appt, onDelete }: { appt: Appointment; onDelete: () => void }) {
+function AppointmentRow({
+  appt,
+  onDelete,
+  onUpdate,
+}: {
+  appt: Appointment;
+  onDelete: () => void;
+  onUpdate: (updates: Partial<Omit<Appointment, "id" | "createdAt">>) => void;
+}) {
   const [expanded, setExpanded] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
+  const [editTitle, setEditTitle] = useState(appt.title);
+  const [editStartTime, setEditStartTime] = useState(appt.startTime);
+  const [editEndTime, setEditEndTime] = useState(appt.endTime ?? "");
+  const [editNotes, setEditNotes] = useState(appt.notes ?? "");
+  const [editShowOn, setEditShowOn] = useState<("day" | "week" | "month")[]>(
+    appt.showOn ?? ["day", "week", "month"]
+  );
+
+  const toggleEditShowOn = (view: "day" | "week" | "month") => {
+    setEditShowOn((prev) =>
+      prev.includes(view) ? prev.filter((v) => v !== view) : [...prev, view]
+    );
+  };
+
+  const handleSave = () => {
+    if (!editTitle.trim()) return;
+    onUpdate({
+      title: editTitle.trim(),
+      startTime: editStartTime,
+      endTime: editEndTime || undefined,
+      notes: editNotes.trim() || undefined,
+      showOn: editShowOn,
+    });
+    setShowEdit(false);
+    setExpanded(false);
+  };
+
+  const openEdit = () => {
+    setEditTitle(appt.title);
+    setEditStartTime(appt.startTime);
+    setEditEndTime(appt.endTime ?? "");
+    setEditNotes(appt.notes ?? "");
+    setEditShowOn(appt.showOn ?? ["day", "week", "month"]);
+    setShowEdit(true);
+    setExpanded(false);
+  };
 
   const timeLabel = appt.endTime
     ? `${formatTimeStr(appt.startTime)} – ${formatTimeStr(appt.endTime)}`
     : formatTimeStr(appt.startTime);
+
+  if (showEdit) {
+    return (
+      <div className="bg-cream-50 border border-slate-200 rounded-2xl p-4 space-y-3">
+        <input
+          className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-400"
+          placeholder="Appointment title"
+          value={editTitle}
+          onChange={(e) => setEditTitle(e.target.value)}
+          autoFocus
+          onKeyDown={(e) => e.key === "Enter" && handleSave()}
+        />
+        <div className="flex gap-3">
+          <div className="flex-1">
+            <label className="block text-xs text-slate-400 mb-1">Start time</label>
+            <input
+              type="time"
+              className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sage-400"
+              value={editStartTime}
+              onChange={(e) => {
+                setEditStartTime(e.target.value);
+                setEditEndTime(addOneHour(e.target.value));
+              }}
+            />
+          </div>
+          <div className="flex-1">
+            <label className="block text-xs text-slate-400 mb-1">End time</label>
+            <input
+              type="time"
+              className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sage-400"
+              value={editEndTime}
+              onChange={(e) => setEditEndTime(e.target.value)}
+            />
+          </div>
+        </div>
+        {calcDuration(editStartTime, editEndTime) && (
+          <p className="text-xs text-slate-400 flex items-center gap-1">
+            <Clock size={11} />
+            {calcDuration(editStartTime, editEndTime)}
+          </p>
+        )}
+        <input
+          className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-400"
+          placeholder="Notes (optional)"
+          value={editNotes}
+          onChange={(e) => setEditNotes(e.target.value)}
+        />
+        <div>
+          <p className="text-xs text-slate-400 mb-1.5">Show on</p>
+          <div className="flex gap-2">
+            {(["day", "week", "month"] as const).map((v) => (
+              <button
+                key={v}
+                type="button"
+                onClick={() => toggleEditShowOn(v)}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border-2 transition-all",
+                  editShowOn.includes(v)
+                    ? "border-sage-400 bg-sage-50 text-sage-700"
+                    : "border-transparent bg-slate-100 text-slate-500"
+                )}
+              >
+                <div
+                  className={cn(
+                    "w-3 h-3 rounded border-2 flex items-center justify-center shrink-0",
+                    editShowOn.includes(v) ? "bg-sage-500 border-sage-500" : "border-slate-300"
+                  )}
+                >
+                  {editShowOn.includes(v) && <Check size={7} className="text-white" strokeWidth={3} />}
+                </div>
+                {v.charAt(0).toUpperCase() + v.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={handleSave}
+            disabled={!editTitle.trim()}
+            className="flex-1 bg-sage-600 hover:bg-sage-700 disabled:bg-slate-100 disabled:text-slate-400 text-white text-sm font-semibold rounded-xl py-2 transition-all"
+          >
+            Save
+          </button>
+          <button
+            onClick={() => setShowEdit(false)}
+            className="px-4 py-2 rounded-xl text-sm text-slate-500 hover:bg-slate-100 transition-all"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-cream-50 border border-slate-100 rounded-2xl px-4 py-3">
@@ -532,6 +685,9 @@ function AppointmentRow({ appt, onDelete }: { appt: Appointment; onDelete: () =>
               {expanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
             </button>
           )}
+          <button onClick={openEdit} className="p-1 text-slate-300 hover:text-sage-500 transition-colors" aria-label="Edit appointment">
+            <Pencil size={15} />
+          </button>
           <button onClick={onDelete} className="p-1 text-slate-300 hover:text-red-400 transition-colors">
             <Trash2 size={15} />
           </button>
@@ -909,7 +1065,10 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
                   type="time"
                   className="w-full min-h-[44px] border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sage-400"
                   value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
+                  onChange={(e) => {
+                    setStartTime(e.target.value);
+                    setEndTime(addOneHour(e.target.value));
+                  }}
                 />
               </div>
               <div className="flex-1">
