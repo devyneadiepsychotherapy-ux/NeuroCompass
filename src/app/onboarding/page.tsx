@@ -7,7 +7,7 @@ import {
   Compass, Cat, Star, Moon, Leaf, Zap, Sparkles, Mountain,
   Flower2, BookOpen, Music, Gamepad2, Heart, Telescope, Feather, Waves,
   ArrowRight, Check, Wrench, Gift, ListChecks, Flame,
-  ShoppingBag, Brain, CalendarDays, User, Bell, BellRing, BellOff,
+  ShoppingBag, CalendarDays, User, Bell, BellRing, BellOff,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -190,8 +190,8 @@ const OVERVIEW_TOPICS = [
     bg: "bg-sage-100",
     color: "text-sage-700",
     heading: "My Lists & Special Interests",
-    tldr: "Build lists for anything on your home screen and log your current special interests.",
-    detail: "On your home screen, you can make as many lists as you like: safe foods, shows to watch, things to research, comfort media. Whatever fits your brain. Lists are quick to add to and easy to scroll through. You can also log your current special interests or hyperfocuses, with an intensity slider to track how deep you are at any given time.",
+    tldr: "Build lists for anything on the Me page and log your current special interests.",
+    detail: "On the Me page, you can make as many lists as you like: safe foods, shows to watch, things to research, comfort media. Whatever fits your brain. Lists are quick to add to and easy to scroll through. You can also log your current special interests or hyperfocuses, with an intensity slider to track how deep you are at any given time.",
     tutorial: "Your lists and special interests are accessible from the Me page. Create lists for anything and track your current hyperfocuses with intensity levels.",
   },
   {
@@ -213,15 +213,6 @@ const OVERVIEW_TOPICS = [
     tutorial: "Okay Mode lives on the Shop page. When you're having a rough time and need support now, turn it on to access any reward for free, no coins needed.",
   },
   {
-    icon: Brain,
-    bg: "bg-fuchsia-100",
-    color: "text-fuchsia-600",
-    heading: "Emotion Regulation Tools",
-    tldr: "New emotion tools -- Emotion Wheel, Emotion Matrix, and Feelings Thermometer -- in the Emotion Regulation section of Tools.",
-    detail: "Three new tools have been added to the Emotion Regulation section of Tools. The Emotion Wheel helps you identify and name what you're feeling. The Emotion Matrix lets you map emotions by intensity and type. The Feelings Thermometer gives you a quick visual check-in on your current emotional state.",
-    tutorial: "Three new tools are in the Emotion Regulation section: Emotion Wheel, Emotion Matrix, and Feelings Thermometer. Each one helps you identify and understand what you're feeling in a different way.",
-  },
-  {
     icon: CalendarDays,
     bg: "bg-blue-100",
     color: "text-blue-600",
@@ -235,7 +226,7 @@ const OVERVIEW_TOPICS = [
     bg: "bg-indigo-100",
     color: "text-indigo-600",
     heading: "Me Page",
-    tldr: "Your Me page is your personal hub -- ND strengths, sensory profile summary, special interests, and your lists, all in one place.",
+    tldr: "Your Me page is your personal hub: ND strengths, sensory profile summary, special interests, and your lists, all in one place.",
     detail: "The Me page is your personal neurodivergent profile, bringing together your ND strengths, a summary of your sensory profile, and your special interests in one dedicated space. Your sensory profile is built in Tools and displayed in summary form here, so your key sensory info is always close at hand. Your custom lists and current hyperfocuses also live on the Me page, making it the central hub for everything that defines how you work best.",
     tutorial: "Your Me page is your personal hub. Your ND strengths, sensory profile summary, special interests, and lists all live here in one place.",
   },

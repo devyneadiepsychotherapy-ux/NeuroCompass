@@ -22,9 +22,14 @@ const TOUR_STEPS: TourStep[] = [
     body: "This is your home. You'll see your streak, quick tools, and everything at a glance.",
   },
   {
+    path: "/",
+    heading: "Sidebar",
+    body: "Tap the menu icon at the top left to open the sidebar. From here you can navigate home, switch themes, access settings, and learn about NeuroCompass.",
+  },
+  {
     path: "/tools",
     heading: "Tools",
-    body: "Browse all your tools here. Use the search bar to find what you need.",
+    body: "Browse all your tools here. Use the search bar to find what you need, or browse by category. Tap the heart icon on any tool to favourite it; favourited tools appear on your Home and Me pages.",
   },
   {
     path: "/shop",
@@ -34,7 +39,7 @@ const TOUR_STEPS: TourStep[] = [
   {
     path: "/me",
     heading: "Your Me Page",
-    body: "Your Me page has your ND strengths, a sensory profile summary, your lists, special interests, and energy tracking -- all in one place.",
+    body: "Your Me page has your ND strengths, a sensory profile summary, your lists, and special interests, all in one place.",
   },
   {
     path: "/",
