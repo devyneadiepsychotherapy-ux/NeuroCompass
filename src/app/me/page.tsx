@@ -109,9 +109,9 @@ function MyToolboxCard({ favorites }: { favorites: ToolFavorite[] }) {
         <div className="flex items-center gap-2">
           <div
             className="w-8 h-8 rounded-xl flex items-center justify-center"
-            style={{ background: "#EAE8F2" }}
+            style={{ background: "#EDD5C8" }}
           >
-            <Heart size={16} style={{ color: "#7775A4" }} />
+            <Heart size={16} style={{ color: "#A0523A" }} />
           </div>
           <p className="text-sm font-semibold text-slate-800">My Toolbox</p>
         </div>
