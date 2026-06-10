@@ -431,7 +431,7 @@ export const useAppStore = create<AppState>()(
           appointments: [
             ...s.appointments,
             { ...appt, id: generateId(), createdAt: new Date().toISOString() },
-          ].sort((a, b) => a.time.localeCompare(b.time)),
+          ].sort((a, b) => a.startTime.localeCompare(b.startTime)),
         })),
 
       deleteAppointment: (id) =>

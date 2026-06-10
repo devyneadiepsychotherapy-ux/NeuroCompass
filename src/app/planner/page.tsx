@@ -369,16 +369,32 @@ function Section({
 function ScheduleSection() {
   const { appointments, addAppointment, deleteAppointment } = useAppStore();
   const [showForm, setShowForm] = useState(false);
-  const [time, setTime] = useState("09:00");
+  const [startTime, setStartTime] = useState("09:00");
+  const [endTime, setEndTime] = useState("10:00");
   const [title, setTitle] = useState("");
   const [notes, setNotes] = useState("");
+  const [showOn, setShowOn] = useState<("day" | "week" | "month")[]>(["day", "week", "month"]);
+
+  const toggleShowOn = (view: "day" | "week" | "month") => {
+    setShowOn((prev) =>
+      prev.includes(view) ? prev.filter((v) => v !== view) : [...prev, view]
+    );
+  };
 
   const handleAdd = () => {
     if (!title.trim()) return;
-    addAppointment({ time, title: title.trim(), notes: notes.trim() || undefined });
+    addAppointment({
+      startTime,
+      endTime: endTime || undefined,
+      title: title.trim(),
+      notes: notes.trim() || undefined,
+      showOn,
+    });
     setTitle("");
     setNotes("");
-    setTime("09:00");
+    setStartTime("09:00");
+    setEndTime("10:00");
+    setShowOn(["day", "week", "month"]);
     setShowForm(false);
   };
 
@@ -394,28 +410,79 @@ function ScheduleSection() {
 
       {showForm ? (
         <div className="bg-cream-50 border border-slate-200 rounded-2xl p-4 space-y-3">
+          {/* Title */}
+          <input
+            className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-400"
+            placeholder="Appointment title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            autoFocus
+            onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+          />
+          {/* Start / End time */}
           <div className="flex gap-3">
-            <input
-              type="time"
-              className="border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sage-400"
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-            />
-            <input
-              className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-400"
-              placeholder="Appointment title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              autoFocus
-              onKeyDown={(e) => e.key === "Enter" && handleAdd()}
-            />
+            <div className="flex-1">
+              <label className="block text-xs text-slate-400 mb-1">Start time</label>
+              <input
+                type="time"
+                className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sage-400"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+              />
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs text-slate-400 mb-1">End time</label>
+              <input
+                type="time"
+                className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sage-400"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+              />
+            </div>
           </div>
+          {calcDuration(startTime, endTime) && (
+            <p className="text-xs text-slate-400 flex items-center gap-1">
+              <Clock size={11} />
+              {calcDuration(startTime, endTime)}
+            </p>
+          )}
+          {/* Notes */}
           <input
             className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-400"
             placeholder="Notes (optional)"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
           />
+          {/* Show On */}
+          <div>
+            <p className="text-xs text-slate-400 mb-1.5">Show on</p>
+            <div className="flex gap-2">
+              {(["day", "week", "month"] as const).map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => toggleShowOn(v)}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border-2 transition-all",
+                    showOn.includes(v)
+                      ? "border-sage-400 bg-sage-50 text-sage-700"
+                      : "border-transparent bg-slate-100 text-slate-500"
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "w-3 h-3 rounded border-2 flex items-center justify-center shrink-0",
+                      showOn.includes(v) ? "bg-sage-500 border-sage-500" : "border-slate-300"
+                    )}
+                  >
+                    {showOn.includes(v) && <Check size={7} className="text-white" strokeWidth={3} />}
+                  </div>
+                  {v.charAt(0).toUpperCase() + v.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
+          {/* Actions */}
           <div className="flex gap-2">
             <button
               onClick={handleAdd}
@@ -448,18 +515,15 @@ function ScheduleSection() {
 function AppointmentRow({ appt, onDelete }: { appt: Appointment; onDelete: () => void }) {
   const [expanded, setExpanded] = useState(false);
 
-  const formatTime = (t: string) => {
-    const [h, m] = t.split(":").map(Number);
-    const ampm = h >= 12 ? "PM" : "AM";
-    const hour = h % 12 || 12;
-    return `${hour}:${m.toString().padStart(2, "0")} ${ampm}`;
-  };
+  const timeLabel = appt.endTime
+    ? `${formatTimeStr(appt.startTime)} – ${formatTimeStr(appt.endTime)}`
+    : formatTimeStr(appt.startTime);
 
   return (
     <div className="bg-cream-50 border border-slate-100 rounded-2xl px-4 py-3">
       <div className="flex items-center gap-3">
-        <span className="text-xs font-mono font-semibold text-sage-600 min-w-[60px]">
-          {formatTime(appt.time)}
+        <span className="text-xs font-mono font-semibold text-sage-600 shrink-0">
+          {timeLabel}
         </span>
         <p className="flex-1 text-sm font-medium text-slate-800">{appt.title}</p>
         <div className="flex items-center gap-1">
@@ -474,7 +538,7 @@ function AppointmentRow({ appt, onDelete }: { appt: Appointment; onDelete: () =>
         </div>
       </div>
       {expanded && appt.notes && (
-        <p className="mt-1.5 text-xs text-slate-500 ml-[72px] leading-relaxed">{appt.notes}</p>
+        <p className="mt-1.5 text-xs text-slate-500 leading-relaxed">{appt.notes}</p>
       )}
     </div>
   );

@@ -69,9 +69,11 @@ export interface ToolFavorite {
 
 export interface Appointment {
   id: string;
-  time: string; // "HH:MM"
+  startTime: string; // "HH:MM"
+  endTime?: string;  // "HH:MM"
   title: string;
   notes?: string;
+  showOn?: ("day" | "week" | "month")[];
   createdAt: string;
 }
 
