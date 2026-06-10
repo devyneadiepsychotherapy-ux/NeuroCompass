@@ -1553,12 +1553,12 @@ function TasksSection({
       {filter === "today" && tasks.length === 0 && (
         <div className="bg-gradient-to-br from-sage-50 to-stone-100 rounded-2xl p-5 text-center">
           <p className="font-semibold text-slate-700 text-sm">Start somewhere</p>
-          <p className="text-xs text-slate-500 mt-1">Even one small activity is progress.</p>
+          <p className="text-xs text-slate-500 mt-1">Even one small task is progress.</p>
           <button
             onClick={onAddTask}
             className="mt-3 bg-sage-600 text-white px-5 py-1.5 rounded-2xl text-xs font-medium hover:bg-sage-700 transition-all"
           >
-            Add your first activity
+            Add your first task
           </button>
         </div>
       )}
@@ -1566,12 +1566,12 @@ function TasksSection({
       {filtered.length === 0 && tasks.length > 0 && (
         <div className="bg-cream-50 rounded-2xl p-5 text-center border border-slate-100">
           <p className="font-semibold text-slate-700 text-sm">
-            {filter === "done" ? "No completed activities yet" : "All caught up!"}
+            {filter === "done" ? "No completed tasks yet" : "All caught up!"}
           </p>
           <p className="text-xs text-slate-400 mt-1">
             {filter === "done"
-              ? "Complete an activity to see it here"
-              : "Great work! Add a new activity anytime."}
+              ? "Complete a task to see it here"
+              : "Great work! Add a new task anytime."}
           </p>
         </div>
       )}
@@ -1638,7 +1638,7 @@ export default function PlannerPage() {
                 const labels: Record<string, string> = {
                   schedule: "Schedule",
                   top3: "Top 3",
-                  tasks: "Activities",
+                  tasks: "Tasks",
                   habits: "Habits",
                 };
                 return (
@@ -1684,7 +1684,7 @@ export default function PlannerPage() {
             <Section
               id="tasks"
               icon={<ListTodo size={16} />}
-              title="Activities"
+              title="Tasks"
               onToggle={() => toggleSection("tasks")}
               action={
                 <button
@@ -1692,7 +1692,7 @@ export default function PlannerPage() {
                   className="flex items-center gap-1 text-xs text-sage-600 font-medium hover:text-sage-700 transition-all"
                 >
                   <Plus size={13} />
-                  Add activity
+                  Add task
                 </button>
               }
             >
@@ -1733,7 +1733,7 @@ export default function PlannerPage() {
               className="flex items-center gap-1 text-xs text-sage-600 font-medium hover:text-sage-700 transition-all"
             >
               <Plus size={13} />
-              Add activity
+              Add task
             </button>
           </div>
           <WeekView date={selectedDate} />
