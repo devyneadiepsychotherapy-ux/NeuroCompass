@@ -2260,13 +2260,13 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
                       onChange={(e) => setEpDrainLabel(e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && epDrainLabel.trim()) {
-                          addEnergyDrain({ label: epDrainLabel.trim() });
+                          addEnergyDrain({ label: epDrainLabel.trim(), intensity: "medium" });
                           setEpDrainLabel("");
                         }
                       }}
                     />
                     <button
-                      onClick={() => { if (epDrainLabel.trim()) { addEnergyDrain({ label: epDrainLabel.trim() }); setEpDrainLabel(""); } }}
+                      onClick={() => { if (epDrainLabel.trim()) { addEnergyDrain({ label: epDrainLabel.trim(), intensity: "medium" }); setEpDrainLabel(""); } }}
                       className="px-3 py-2 rounded-xl text-sm font-medium bg-rose-100 text-rose-700 border border-rose-200 hover:bg-rose-200 transition-all"
                     >
                       <Plus size={16} />
@@ -2297,13 +2297,13 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
                       onChange={(e) => setEpRestoreLabel(e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && epRestoreLabel.trim()) {
-                          addEnergyRestorer({ label: epRestoreLabel.trim() });
+                          addEnergyRestorer({ label: epRestoreLabel.trim(), intensity: "medium" });
                           setEpRestoreLabel("");
                         }
                       }}
                     />
                     <button
-                      onClick={() => { if (epRestoreLabel.trim()) { addEnergyRestorer({ label: epRestoreLabel.trim() }); setEpRestoreLabel(""); } }}
+                      onClick={() => { if (epRestoreLabel.trim()) { addEnergyRestorer({ label: epRestoreLabel.trim(), intensity: "medium" }); setEpRestoreLabel(""); } }}
                       className="px-3 py-2 rounded-xl text-sm font-medium bg-sage-100 text-sage-700 border border-sage-200 hover:bg-sage-200 transition-all"
                     >
                       <Plus size={16} />
