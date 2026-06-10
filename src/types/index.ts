@@ -72,8 +72,9 @@ export interface ToolFavorite {
 export interface Appointment {
   id: string;
   date: string;      // "YYYY-MM-DD"
-  startTime: string; // "HH:MM"
+  startTime: string; // "HH:MM" or "" when allDay
   endTime?: string;  // "HH:MM"
+  allDay?: boolean;
   title: string;
   notes?: string;
   showOn?: ("day" | "week" | "month")[];

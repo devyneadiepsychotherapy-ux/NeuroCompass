@@ -401,6 +401,7 @@ function scheduleNotification(title: string, fireAt: Date) {
 function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
   const { appointments, addAppointment, deleteAppointment, updateAppointment } = useAppStore();
   const [showForm, setShowForm] = useState(false);
+  const [allDay, setAllDay] = useState(false);
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("10:00");
   const [title, setTitle] = useState("");
@@ -421,14 +422,15 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
     if (!title.trim()) return;
     addAppointment({
       date: selectedKey,
-      startTime,
-      endTime: endTime || undefined,
+      startTime: allDay ? "" : startTime,
+      endTime: allDay ? undefined : (endTime || undefined),
+      allDay: allDay || undefined,
       title: title.trim(),
       notes: notes.trim() || undefined,
       showOn,
-      reminderMinsBefore: reminderMins,
+      reminderMinsBefore: allDay ? undefined : reminderMins,
     });
-    if (reminderMins !== undefined) {
+    if (!allDay && reminderMins !== undefined) {
       requestNotificationPermission();
       const [h, m] = startTime.split(":").map(Number);
       const fireAt = new Date(selectedDate);
@@ -437,6 +439,7 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
     }
     setTitle("");
     setNotes("");
+    setAllDay(false);
     setStartTime("09:00");
     setEndTime("10:00");
     setShowOn(["day", "week", "month"]);
@@ -470,7 +473,30 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
             autoFocus
             onKeyDown={(e) => e.key === "Enter" && handleAdd()}
           />
+          {/* All day toggle */}
+          <button
+            type="button"
+            onClick={() => setAllDay(!allDay)}
+            className={cn(
+              "flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium border-2 transition-all w-fit",
+              allDay
+                ? "border-sage-400 bg-sage-50 text-sage-700"
+                : "border-transparent bg-slate-100 text-slate-500"
+            )}
+          >
+            <div
+              className={cn(
+                "w-3 h-3 rounded border-2 flex items-center justify-center shrink-0",
+                allDay ? "bg-sage-500 border-sage-500" : "border-slate-300"
+              )}
+            >
+              {allDay && <Check size={7} className="text-white" strokeWidth={3} />}
+            </div>
+            All day
+          </button>
+
           {/* Start / End time */}
+          {!allDay && (
           <div className="flex gap-3">
             <div className="flex-1">
               <label className="block text-xs text-slate-400 mb-1">Start time</label>
@@ -494,7 +520,8 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
               />
             </div>
           </div>
-          {calcDuration(startTime, endTime) && (
+          )}
+          {!allDay && calcDuration(startTime, endTime) && (
             <p className="text-xs text-slate-400 flex items-center gap-1">
               <Clock size={11} />
               {calcDuration(startTime, endTime)}
@@ -508,6 +535,7 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
             onChange={(e) => setNotes(e.target.value)}
           />
           {/* Reminder */}
+          {!allDay && (
           <div>
             <label className="block text-xs text-slate-400 mb-1">Reminder</label>
             <select
@@ -522,6 +550,7 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
               ))}
             </select>
           </div>
+          )}
           {/* Show On */}
           <div>
             <p className="text-xs text-slate-400 mb-1.5">Show on</p>
@@ -593,6 +622,7 @@ function AppointmentRow({
   const [expanded, setExpanded] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [editTitle, setEditTitle] = useState(appt.title);
+  const [editAllDay, setEditAllDay] = useState(appt.allDay ?? false);
   const [editStartTime, setEditStartTime] = useState(appt.startTime);
   const [editEndTime, setEditEndTime] = useState(appt.endTime ?? "");
   const [editNotes, setEditNotes] = useState(appt.notes ?? "");
@@ -611,11 +641,12 @@ function AppointmentRow({
     if (!editTitle.trim()) return;
     onUpdate({
       title: editTitle.trim(),
-      startTime: editStartTime,
-      endTime: editEndTime || undefined,
+      allDay: editAllDay || undefined,
+      startTime: editAllDay ? "" : editStartTime,
+      endTime: editAllDay ? undefined : (editEndTime || undefined),
       notes: editNotes.trim() || undefined,
       showOn: editShowOn,
-      reminderMinsBefore: editReminderMins,
+      reminderMinsBefore: editAllDay ? undefined : editReminderMins,
     });
     if (editReminderMins !== undefined) {
       requestNotificationPermission();
@@ -630,6 +661,7 @@ function AppointmentRow({
 
   const openEdit = () => {
     setEditTitle(appt.title);
+    setEditAllDay(appt.allDay ?? false);
     setEditStartTime(appt.startTime);
     setEditEndTime(appt.endTime ?? "");
     setEditNotes(appt.notes ?? "");
@@ -639,9 +671,11 @@ function AppointmentRow({
     setExpanded(false);
   };
 
-  const timeLabel = appt.endTime
+  const timeLabel = appt.allDay
+    ? "All day"
+    : appt.endTime
     ? `${formatTimeStr(appt.startTime)} – ${formatTimeStr(appt.endTime)}`
-    : formatTimeStr(appt.startTime);
+    : appt.startTime ? formatTimeStr(appt.startTime) : "All day";
 
   if (showEdit) {
     return (
@@ -654,6 +688,29 @@ function AppointmentRow({
           autoFocus
           onKeyDown={(e) => e.key === "Enter" && handleSave()}
         />
+        {/* All day toggle */}
+        <button
+          type="button"
+          onClick={() => setEditAllDay(!editAllDay)}
+          className={cn(
+            "flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium border-2 transition-all w-fit",
+            editAllDay
+              ? "border-sage-400 bg-sage-50 text-sage-700"
+              : "border-transparent bg-slate-100 text-slate-500"
+          )}
+        >
+          <div
+            className={cn(
+              "w-3 h-3 rounded border-2 flex items-center justify-center shrink-0",
+              editAllDay ? "bg-sage-500 border-sage-500" : "border-slate-300"
+            )}
+          >
+            {editAllDay && <Check size={7} className="text-white" strokeWidth={3} />}
+          </div>
+          All day
+        </button>
+
+        {!editAllDay && (
         <div className="flex gap-3">
           <div className="flex-1">
             <label className="block text-xs text-slate-400 mb-1">Start time</label>
@@ -677,7 +734,8 @@ function AppointmentRow({
             />
           </div>
         </div>
-        {calcDuration(editStartTime, editEndTime) && (
+        )}
+        {!editAllDay && calcDuration(editStartTime, editEndTime) && (
           <p className="text-xs text-slate-400 flex items-center gap-1">
             <Clock size={11} />
             {calcDuration(editStartTime, editEndTime)}
@@ -689,6 +747,7 @@ function AppointmentRow({
           value={editNotes}
           onChange={(e) => setEditNotes(e.target.value)}
         />
+        {!editAllDay && (
         <div>
           <label className="block text-xs text-slate-400 mb-1">Reminder</label>
           <select
@@ -703,6 +762,7 @@ function AppointmentRow({
             ))}
           </select>
         </div>
+        )}
         <div>
           <p className="text-xs text-slate-400 mb-1.5">Show on</p>
           <div className="flex gap-2">
@@ -1022,7 +1082,6 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
   const [title, setTitle] = useState(taskToEdit?.title ?? "");
   const [description, setDescription] = useState(taskToEdit?.description ?? "");
   const [priority, setPriority] = useState<TaskPriority>(taskToEdit?.priority ?? "medium");
-  const [taskType, setTaskType] = useState<TaskItemType>(taskToEdit?.type ?? "task");
   const [duration, setDuration] = useState(taskToEdit?.duration ?? "");
   const [dueDate, setDueDate] = useState(taskToEdit?.dueDate ?? "");
   const [isRecurring, setIsRecurring] = useState(taskToEdit?.isRecurring ?? false);
@@ -1034,10 +1093,7 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
   const [showOn, setShowOn] = useState<("day" | "week" | "month")[]>(
     taskToEdit?.showOn ?? ["day", "week", "month"]
   );
-  const [startTime, setStartTime] = useState(taskToEdit?.startTime ?? "");
-  const [endTime, setEndTime] = useState(taskToEdit?.endTime ?? "");
   const [carryOver, setCarryOver] = useState(taskToEdit?.carryOver ?? false);
-  const [reminderMins, setReminderMins] = useState<number | undefined>(taskToEdit?.reminderMinsBefore);
 
   const toggleShowOn = (view: "day" | "week" | "month") => {
     setShowOn((prev) =>
@@ -1052,7 +1108,7 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
         title: title.trim(),
         description,
         priority,
-        type: taskType,
+        type: "task",
         duration: duration.trim() || undefined,
         xpReward: rewardAmount,
         rewardType,
@@ -1062,17 +1118,14 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
         timeEstimate,
         category,
         showOn,
-        startTime: startTime.trim() || undefined,
-        endTime: endTime.trim() || undefined,
         carryOver: carryOver || undefined,
-        reminderMinsBefore: reminderMins,
       });
     } else {
       addTask({
         title: title.trim(),
         description,
         priority,
-        type: taskType,
+        type: "task",
         duration: duration.trim() || undefined,
         status: "todo",
         xpReward: rewardAmount,
@@ -1084,10 +1137,7 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
         timeEstimate,
         category,
         showOn,
-        startTime: startTime.trim() || undefined,
-        endTime: endTime.trim() || undefined,
         carryOver: carryOver || undefined,
-        reminderMinsBefore: reminderMins,
       });
     }
     onClose();
@@ -1097,7 +1147,7 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
     <div className="fixed inset-0 z-50 bg-black/40 flex items-end justify-center p-0">
       <div className="bg-cream-50 rounded-t-3xl w-full max-w-lg p-6 pb-10 space-y-4 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-slate-800">{isEditing ? "Edit Activity" : "New Activity"}</h2>
+          <h2 className="text-lg font-bold text-slate-800">{isEditing ? "Edit Task" : "New Task"}</h2>
           <button onClick={onClose} className="p-2 rounded-xl hover:bg-slate-100">
             <X size={20} className="text-slate-500" />
           </button>
@@ -1119,96 +1169,18 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
           onChange={(e) => setDescription(e.target.value)}
         />
 
-        {/* Type */}
+        {/* Duration */}
         <div>
-          <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">Type</p>
-          <div className="flex gap-2">
-            {(["task", "appointment", "time-block"] as TaskItemType[]).map((t) => (
-              <button
-                key={t}
-                onClick={() => setTaskType(t)}
-                className={cn(
-                  "flex-1 py-2 rounded-xl text-xs font-semibold border-2 transition-all",
-                  taskType === t
-                    ? "border-sage-500 " + taskTypeConfig[t].color
-                    : "border-transparent bg-slate-50 text-slate-500"
-                )}
-              >
-                {taskTypeConfig[t].label}
-              </button>
-            ))}
-          </div>
+          <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">Duration</p>
+          <input
+            className="w-full min-h-[44px] border border-slate-200 rounded-xl px-4 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-400"
+            placeholder="e.g. 30 min, 1 hour"
+            value={duration}
+            onChange={(e) => setDuration(e.target.value)}
+          />
         </div>
 
-        {/* Start / End Time - appointment & time-block only */}
-        {(taskType === "appointment" || taskType === "time-block") && (
-          <div className="space-y-2">
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Time</p>
-            <div className="flex gap-3">
-              <div className="flex-1">
-                <label className="block text-xs text-slate-400 mb-1">Start</label>
-                <input
-                  type="time"
-                  className="w-full min-h-[44px] border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sage-400"
-                  value={startTime}
-                  onChange={(e) => {
-                    setStartTime(e.target.value);
-                    setEndTime(addOneHour(e.target.value));
-                  }}
-                />
-              </div>
-              <div className="flex-1">
-                <label className="block text-xs text-slate-400 mb-1">End</label>
-                <input
-                  type="time"
-                  className="w-full min-h-[44px] border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sage-400"
-                  value={endTime}
-                  onChange={(e) => setEndTime(e.target.value)}
-                />
-              </div>
-            </div>
-            {calcDuration(startTime, endTime) && (
-              <p className="text-xs text-slate-400 flex items-center gap-1">
-                <Clock size={11} />
-                {calcDuration(startTime, endTime)}
-              </p>
-            )}
-          </div>
-        )}
-
-        {/* Reminder - appointment & time-block only */}
-        {(taskType === "appointment" || taskType === "time-block") && (
-          <div>
-            <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">Reminder</p>
-            <select
-              className="w-full min-h-[44px] border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sage-400 bg-white"
-              value={reminderMins === undefined ? "" : String(reminderMins)}
-              onChange={(e) => setReminderMins(e.target.value === "" ? undefined : Number(e.target.value))}
-            >
-              {REMINDER_OPTIONS.map((opt) => (
-                <option key={String(opt.value)} value={opt.value === undefined ? "" : String(opt.value)}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        {/* Duration - task type only */}
-        {taskType === "task" && (
-          <div>
-            <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">Duration</p>
-            <input
-              className="w-full min-h-[44px] border border-slate-200 rounded-xl px-4 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-400"
-              placeholder="e.g. 30 min, 1 hour"
-              value={duration}
-              onChange={(e) => setDuration(e.target.value)}
-            />
-          </div>
-        )}
-
-        {/* Priority - Activity only */}
-        {taskType === "task" && (
+        {/* Priority */}
         <div>
           <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">Priority</p>
           <div className="grid grid-cols-4 gap-2">
@@ -1230,10 +1202,8 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
             )}
           </div>
         </div>
-        )}
 
-        {/* Reward - only for Activity type */}
-        {taskType === "task" && (
+        {/* Reward */}
         <div>
           <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">
             Reward on completion
@@ -1277,10 +1247,8 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
             <span className="text-xs text-slate-400">{rewardType === "xp" ? "XP" : "coins"}</span>
           </div>
         </div>
-        )}
 
-        {/* Category - Activity only */}
-        {taskType === "task" && (
+        {/* Category */}
         <div>
           <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">Category</p>
           <div className="flex flex-wrap gap-2">
@@ -1300,10 +1268,8 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
             ))}
           </div>
         </div>
-        )}
 
-        {/* Time estimate - Activity only */}
-        {taskType === "task" && (
+        {/* Time estimate */}
         <div>
           <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">
             Time estimate
@@ -1323,10 +1289,8 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
             ))}
           </div>
         </div>
-        )}
 
-        {/* Due date - Activity only (optional) */}
-        {taskType === "task" && (
+        {/* Due date */}
         <div>
           <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">Due date</p>
           <input
@@ -1336,7 +1300,6 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
             onChange={(e) => setDueDate(e.target.value)}
           />
         </div>
-        )}
 
         {/* Show on */}
         <div>
@@ -1396,35 +1359,33 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
           )}
         </div>
 
-        {/* Carry over - task type only */}
-        {taskType === "task" && (
-          <div>
-            <button
-              onClick={() => setCarryOver(!carryOver)}
-              className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all border",
-                carryOver
-                  ? "bg-blue-50 text-blue-700 border-blue-300"
-                  : "bg-slate-100 text-slate-600 border-transparent"
-              )}
-            >
-              <Repeat size={15} />
-              Carry over
-            </button>
-            {carryOver && (
-              <p className="text-xs text-slate-400 mt-1.5 ml-1">
-                This task will reappear on days after its due date.
-              </p>
+        {/* Carry over */}
+        <div>
+          <button
+            onClick={() => setCarryOver(!carryOver)}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all border",
+              carryOver
+                ? "bg-blue-50 text-blue-700 border-blue-300"
+                : "bg-slate-100 text-slate-600 border-transparent"
             )}
-          </div>
-        )}
+          >
+            <Repeat size={15} />
+            Carry over
+          </button>
+          {carryOver && (
+            <p className="text-xs text-slate-400 mt-1.5 ml-1">
+              This task will reappear on days after its due date.
+            </p>
+          )}
+        </div>
 
         <button
           onClick={handleSubmit}
           disabled={!title.trim()}
           className="w-full bg-sage-600 hover:bg-sage-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-semibold rounded-2xl py-3 transition-all"
         >
-          {isEditing ? "Save Changes" : "Add Activity"}
+          {isEditing ? "Save Changes" : "Add Task"}
         </button>
       </div>
     </div>
