@@ -1771,20 +1771,11 @@ export default function PlannerPage() {
       {/* Week view */}
       {activeView === "week" && (
         <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-slate-400">
-                <CalendarDays size={16} />
-              </span>
-              <h2 className="text-base font-bold text-slate-800">This Week</h2>
-            </div>
-            <button
-              onClick={() => setShowTaskModal(true)}
-              className="flex items-center gap-1 text-xs text-sage-600 font-medium hover:text-sage-700 transition-all"
-            >
-              <Plus size={13} />
-              Add task
-            </button>
+          <div className="flex items-center gap-2">
+            <span className="text-slate-400">
+              <CalendarDays size={16} />
+            </span>
+            <h2 className="text-base font-bold text-slate-800">This Week</h2>
           </div>
           <WeekView date={selectedDate} />
         </div>
