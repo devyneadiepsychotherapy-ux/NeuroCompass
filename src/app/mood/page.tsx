@@ -13,9 +13,11 @@ import {
   Meh,
   Smile,
   SmilePlus,
+  ChevronDown,
+  ChevronUp,
   type LucideIcon,
 } from "lucide-react";
-import { EnergyLevel, PleasantnessLevel } from "@/types";
+import { EnergyLevel, PleasantnessLevel, MoodEntry } from "@/types";
 
 // Emotion matrix quadrants (based on Russell's circumplex model)
 const emotions: Record<string, { x: PleasantnessLevel; y: EnergyLevel }> = {
@@ -101,6 +103,112 @@ function XpToast({ amount }: { amount: number }) {
     >
       <Heart size={13} className="fill-white" />
       +{amount} XP
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Past check-ins component
+// ---------------------------------------------------------------------------
+
+function PastCheckIns({ entries }: { entries: MoodEntry[] }) {
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const [showAll, setShowAll] = useState(false);
+
+  const displayed = showAll ? entries : entries.slice(0, 5);
+
+  const dot = (p: number) =>
+    p >= 4 ? "bg-emerald-400" : p >= 3 ? "bg-stone-400" : "bg-rose-400";
+
+  return (
+    <div className="space-y-3 pt-2">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Past check-ins</p>
+        <span className="text-xs text-slate-400">{entries.length} total</span>
+      </div>
+
+      <div className="space-y-2">
+        {displayed.map((entry) => {
+          const isOpen = expanded === entry.id;
+          return (
+            <div key={entry.id} className="bg-cream-50 rounded-2xl border border-slate-100 overflow-hidden">
+              <button
+                className="w-full flex items-center gap-3 px-4 py-3 text-left"
+                onClick={() => setExpanded(isOpen ? null : entry.id)}
+              >
+                <div className={cn("w-2.5 h-2.5 rounded-full shrink-0", dot(entry.pleasantness))} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-slate-700 truncate">
+                    {PLEASANT_LABELS[entry.pleasantness - 1]}
+                    {entry.emotions?.length > 0 && (
+                      <span className="text-slate-400 font-normal"> · {entry.emotions.slice(0, 2).join(", ")}{entry.emotions.length > 2 ? ` +${entry.emotions.length - 2}` : ""}</span>
+                    )}
+                  </p>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    {new Date(entry.timestamp).toLocaleDateString("en-CA", { weekday: "short", month: "short", day: "numeric" })}
+                    {" · "}
+                    {new Date(entry.timestamp).toLocaleTimeString("en-CA", { hour: "2-digit", minute: "2-digit" })}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  {entry.energy && (
+                    <span className="text-xs text-slate-400">{ENERGY_OPTIONS.find(o => o.value === entry.energy)?.label}</span>
+                  )}
+                  {isOpen ? <ChevronUp size={14} className="text-slate-300" /> : <ChevronDown size={14} className="text-slate-300" />}
+                </div>
+              </button>
+
+              {isOpen && (
+                <div className="px-4 pb-4 space-y-2 border-t border-slate-100 pt-3">
+                  {entry.energy && (
+                    <p className="text-xs text-slate-600">
+                      <span className="font-medium">Energy:</span> {ENERGY_OPTIONS.find(o => o.value === entry.energy)?.label}
+                    </p>
+                  )}
+                  {entry.emotions?.length > 0 && (
+                    <div>
+                      <p className="text-xs font-medium text-slate-600 mb-1">Emotions:</p>
+                      <div className="flex flex-wrap gap-1">
+                        {entry.emotions.map((e) => (
+                          <span key={e} className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">{e}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {entry.bodyAreas && entry.bodyAreas.length > 0 && (
+                    <div>
+                      <p className="text-xs font-medium text-slate-600 mb-1">Body areas:</p>
+                      <div className="flex flex-wrap gap-1">
+                        {entry.bodyAreas.map((a) => (
+                          <span key={a} className="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-100">{a}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {entry.bodyNotes && (
+                    <p className="text-xs text-slate-500 italic">{entry.bodyNotes}</p>
+                  )}
+                  {entry.notes && (
+                    <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                      <p className="text-xs font-medium text-slate-500 mb-1">Notes:</p>
+                      <p className="text-sm text-slate-700 leading-relaxed">{entry.notes}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {entries.length > 5 && (
+        <button
+          onClick={() => setShowAll((v) => !v)}
+          className="w-full text-xs text-slate-500 hover:text-slate-700 py-2 border border-slate-200 rounded-xl transition-all hover:bg-slate-50"
+        >
+          {showAll ? "Show fewer" : `Show all ${entries.length} check-ins`}
+        </button>
+      )}
     </div>
   );
 }
@@ -329,6 +437,11 @@ export default function MoodPage() {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Past check-ins — always visible on flow step */}
+      {step === "flow" && moodEntries.length > 0 && (
+        <PastCheckIns entries={moodEntries} />
       )}
 
       {/* Step: Emotion matrix */}
