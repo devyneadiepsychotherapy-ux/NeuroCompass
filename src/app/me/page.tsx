@@ -694,7 +694,7 @@ function MyListsCard() {
 // ---------------------------------------------------------------------------
 
 export default function MePage() {
-  const { profile, sensoryProfile, specialInterests, favorites } =
+  const { profile, sensoryProfile, favorites } =
     useAppStore();
   const [mounted, setMounted] = useState(false);
 
@@ -751,20 +751,47 @@ export default function MePage() {
         />
       )}
 
-      {/* My Lists + Special Interests (2-col grid) */}
+      {/* My Lists + Special Interests (2-col link buttons) */}
       {mounted ? (
         <div className="grid grid-cols-2 gap-3">
-          <SpecialInterestsCard interests={specialInterests} />
-          <MyListsCard />
+          {/* Special Interests link card */}
+          <Link
+            href="/special-interests"
+            className="flex items-center justify-between bg-cream-50 rounded-2xl border shadow-sm p-4 active:scale-[0.98] transition-transform"
+            style={{ borderColor: "#D8D0CA" }}
+          >
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "#E8E0D8" }}>
+                <Sparkles size={16} style={{ color: "#9B6B60" }} />
+              </div>
+              <p className="text-sm font-semibold text-slate-800">Special Interests</p>
+            </div>
+            <ChevronRight size={14} className="text-slate-300 shrink-0" />
+          </Link>
+
+          {/* My Lists link card */}
+          <Link
+            href="/lists"
+            className="flex items-center justify-between bg-cream-50 rounded-2xl border shadow-sm p-4 active:scale-[0.98] transition-transform"
+            style={{ borderColor: "#C8D4E0" }}
+          >
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "#E2E8F0" }}>
+                <ListChecks size={16} className="text-violet-600" />
+              </div>
+              <p className="text-sm font-semibold text-slate-800">My Lists</p>
+            </div>
+            <ChevronRight size={14} className="text-slate-300 shrink-0" />
+          </Link>
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-3">
           <div
-            className="bg-cream-50 rounded-2xl border h-24 animate-pulse"
+            className="bg-cream-50 rounded-2xl border h-16 animate-pulse"
             style={{ borderColor: "#D8D0CA" }}
           />
           <div
-            className="bg-cream-50 rounded-2xl border h-24 animate-pulse"
+            className="bg-cream-50 rounded-2xl border h-16 animate-pulse"
             style={{ borderColor: "#C8D4E0" }}
           />
         </div>

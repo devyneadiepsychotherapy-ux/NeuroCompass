@@ -129,6 +129,251 @@ function SavedList({
 }
 
 // ─────────────────────────────────────────────
+// TOOL SUB-COMPONENTS (need own useState)
+// ─────────────────────────────────────────────
+
+function EmotionWheelTool() {
+  const CORE_EMOTIONS = [
+    { name: "Joy",      color: "#F6D56C", textColor: "#7A5A00" },
+    { name: "Surprise", color: "#A8D8B9", textColor: "#2A5A3A" },
+    { name: "Fear",     color: "#9DC3E6", textColor: "#1A3D5C" },
+    { name: "Sadness",  color: "#B0C4DE", textColor: "#2A3B5C" },
+    { name: "Disgust",  color: "#B5C99A", textColor: "#3A4A2A" },
+    { name: "Anger",    color: "#E8A09A", textColor: "#6A1A1A" },
+  ];
+  const SECONDARY_EMOTIONS: Record<string, { name: string; color: string }[]> = {
+    Joy:      [{ name: "Gratitude", color: "#FBE897" }, { name: "Serenity", color: "#FAE0A0" }],
+    Surprise: [{ name: "Amazement", color: "#BDE8CB" }, { name: "Confusion", color: "#C5E4D0" }],
+    Fear:     [{ name: "Anxiety",   color: "#B4D0E8" }, { name: "Dread",     color: "#A8C8E0" }],
+    Sadness:  [{ name: "Grief",     color: "#C0CFEA" }, { name: "Loneliness",color: "#B8CADF" }],
+    Disgust:  [{ name: "Boredom",   color: "#C4D6AE" }, { name: "Contempt",  color: "#BBC9A2" }],
+    Anger:    [{ name: "Frustration",color: "#EDB8B0"}, { name: "Irritable", color: "#E8AEA8" }],
+  };
+  const [selectedEmotion, setSelectedEmotion] = useState<string | null>(null);
+  const cx = 150, cy = 150, r1 = 55, r2 = 95, r3 = 130;
+  const n = CORE_EMOTIONS.length;
+  const sliceAngle = (2 * Math.PI) / n;
+
+  const describeArc = (cx: number, cy: number, r: number, startAngle: number, endAngle: number) => {
+    const x1 = cx + r * Math.cos(startAngle);
+    const y1 = cy + r * Math.sin(startAngle);
+    const x2 = cx + r * Math.cos(endAngle);
+    const y2 = cy + r * Math.sin(endAngle);
+    const largeArc = endAngle - startAngle > Math.PI ? 1 : 0;
+    return `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`;
+  };
+
+  const describeAnnulusSector = (cx: number, cy: number, innerR: number, outerR: number, startAngle: number, endAngle: number) => {
+    const x1 = cx + innerR * Math.cos(startAngle), y1 = cy + innerR * Math.sin(startAngle);
+    const x2 = cx + outerR * Math.cos(startAngle), y2 = cy + outerR * Math.sin(startAngle);
+    const x3 = cx + outerR * Math.cos(endAngle),   y3 = cy + outerR * Math.sin(endAngle);
+    const x4 = cx + innerR * Math.cos(endAngle),   y4 = cy + innerR * Math.sin(endAngle);
+    const largeArc = endAngle - startAngle > Math.PI ? 1 : 0;
+    return `M ${x1} ${y1} L ${x2} ${y2} A ${outerR} ${outerR} 0 ${largeArc} 1 ${x3} ${y3} L ${x4} ${y4} A ${innerR} ${innerR} 0 ${largeArc} 0 ${x1} ${y1} Z`;
+  };
+
+  return (
+    <div className="space-y-3">
+      <p className="text-sm font-semibold text-slate-700">Tap a segment to explore</p>
+      <div className="flex justify-center">
+        <svg width="300" height="300" viewBox="0 0 300 300">
+          {CORE_EMOTIONS.map((emotion, i) => {
+            const start = i * sliceAngle - Math.PI / 2;
+            const end = start + sliceAngle;
+            const mid = (start + end) / 2;
+            const textR = r1 * 0.6;
+            const tx = cx + textR * Math.cos(mid);
+            const ty = cy + textR * Math.sin(mid);
+            const isSelected = selectedEmotion === emotion.name;
+            const secondary = SECONDARY_EMOTIONS[emotion.name] ?? [];
+            return (
+              <g key={emotion.name}>
+                <path d={describeArc(cx, cy, r1, start, end)} fill={emotion.color} stroke="white" strokeWidth="2"
+                  opacity={selectedEmotion && !isSelected ? 0.5 : 1}
+                  style={{ cursor: "pointer", transition: "opacity 0.2s" }}
+                  onClick={() => setSelectedEmotion(isSelected ? null : emotion.name)} />
+                <text x={tx} y={ty} textAnchor="middle" dominantBaseline="middle"
+                  fontSize="7" fontWeight="600" fill={emotion.textColor} style={{ pointerEvents: "none" }}>
+                  {emotion.name}
+                </text>
+                {secondary.map((sec, j) => {
+                  const secSlice = sliceAngle / secondary.length;
+                  const s2 = start + j * secSlice;
+                  const e2 = s2 + secSlice;
+                  const m2 = (s2 + e2) / 2;
+                  const tr = r1 + (r2 - r1) / 2;
+                  const tx2 = cx + tr * Math.cos(m2);
+                  const ty2 = cy + tr * Math.sin(m2);
+                  const isSecSelected = selectedEmotion === sec.name;
+                  return (
+                    <g key={sec.name}>
+                      <path d={describeAnnulusSector(cx, cy, r1 + 1, r2, s2, e2)} fill={sec.color} stroke="white" strokeWidth="1.5"
+                        opacity={selectedEmotion && !isSecSelected ? 0.5 : 1}
+                        style={{ cursor: "pointer", transition: "opacity 0.2s" }}
+                        onClick={() => setSelectedEmotion(isSecSelected ? null : sec.name)} />
+                      <text x={tx2} y={ty2} textAnchor="middle" dominantBaseline="middle"
+                        fontSize="5.5" fontWeight="500" fill="#444" style={{ pointerEvents: "none" }}>
+                        {sec.name}
+                      </text>
+                    </g>
+                  );
+                })}
+                <path d={describeAnnulusSector(cx, cy, r2 + 1, r3, start, end)}
+                  fill={emotion.color + "60"} stroke="white" strokeWidth="1"
+                  style={{ pointerEvents: "none" }} />
+              </g>
+            );
+          })}
+          <circle cx={cx} cy={cy} r="12" fill="white" stroke="#e2e8f0" strokeWidth="1" />
+          <text x={cx} y={cy} textAnchor="middle" dominantBaseline="middle" fontSize="8" fill="#94a3b8">😶</text>
+        </svg>
+      </div>
+      {selectedEmotion ? (
+        <div className="bg-slate-50 border border-slate-100 rounded-2xl px-5 py-4 text-center">
+          <p className="text-xl font-bold text-slate-800">{selectedEmotion}</p>
+          <p className="text-sm text-slate-500 mt-1">That&apos;s what you&apos;re noticing.</p>
+          <button onClick={() => setSelectedEmotion(null)} className="mt-2 text-xs text-slate-400 underline">Clear</button>
+        </div>
+      ) : (
+        <p className="text-xs text-slate-400 text-center">Tap any segment to identify how you feel</p>
+      )}
+    </div>
+  );
+}
+
+function EmotionMatrixTool() {
+  const [marker, setMarker] = useState<{ qx: number; qy: number; px: number; py: number } | null>(null);
+  const QUADRANTS = [
+    { qx: 0, qy: 1, label: "High energy\nUnpleasant", sublabel: "Tense / Anxious", bg: "#FBF0EE", border: "#E8C4BC" },
+    { qx: 1, qy: 1, label: "High energy\nPleasant",   sublabel: "Excited / Happy", bg: "#F0F7EF", border: "#B8D4B5" },
+    { qx: 0, qy: 0, label: "Low energy\nUnpleasant",  sublabel: "Sad / Bored",     bg: "#F0F2F8", border: "#C0CAE0" },
+    { qx: 1, qy: 0, label: "Low energy\nPleasant",    sublabel: "Calm / Content",  bg: "#F8F5EF", border: "#D8CEB8" },
+  ];
+
+  const handleQuadrantClick = (e: React.MouseEvent<HTMLDivElement>, qx: number, qy: number) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const px = ((e.clientX - rect.left) / rect.width) * 100;
+    const py = ((e.clientY - rect.top) / rect.height) * 100;
+    setMarker({ qx, qy, px, py });
+  };
+
+  const activeQ = marker ? QUADRANTS.find(q => q.qx === marker.qx && q.qy === marker.qy) : null;
+
+  return (
+    <div className="space-y-3">
+      <div>
+        <p className="text-sm font-semibold text-slate-700">Where are you right now?</p>
+        <p className="text-xs text-slate-500">Tap anywhere in a quadrant to place yourself</p>
+      </div>
+      <div className="relative">
+        <div className="text-center text-xs text-slate-400 mb-1 font-medium">↑ High Energy</div>
+        <div className="flex items-center gap-1">
+          <div className="text-xs text-slate-400 font-medium w-14 text-center leading-tight flex-shrink-0"
+            style={{ writingMode: "vertical-rl" as const, transform: "rotate(180deg)", height: 140 }}>
+            Unpleasant ←
+          </div>
+          <div className="flex-1 grid grid-cols-2 gap-1">
+            {QUADRANTS.map((q) => (
+              <div key={`${q.qx}-${q.qy}`}
+                className="relative rounded-xl border cursor-pointer select-none overflow-hidden"
+                style={{ height: 120, background: q.bg, borderColor: q.border }}
+                onClick={(e) => handleQuadrantClick(e, q.qx, q.qy)}>
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-2">
+                  <p className="text-xs font-semibold text-slate-600 text-center leading-tight whitespace-pre-line">{q.label}</p>
+                  <p className="text-[10px] text-slate-400 text-center mt-0.5">{q.sublabel}</p>
+                </div>
+                {marker && marker.qx === q.qx && marker.qy === q.qy && (
+                  <div className="absolute w-5 h-5 rounded-full bg-slate-700 border-2 border-white shadow-md -translate-x-1/2 -translate-y-1/2 z-10"
+                    style={{ left: `${marker.px}%`, top: `${marker.py}%` }} />
+                )}
+              </div>
+            ))}
+          </div>
+          <div className="text-xs text-slate-400 font-medium w-14 text-center leading-tight flex-shrink-0"
+            style={{ writingMode: "vertical-rl" as const, height: 140 }}>
+            → Pleasant
+          </div>
+        </div>
+        <div className="text-center text-xs text-slate-400 mt-1 font-medium">↓ Low Energy</div>
+      </div>
+      {activeQ ? (
+        <div className="rounded-2xl px-5 py-4 text-center border" style={{ background: activeQ.bg, borderColor: activeQ.border }}>
+          <p className="text-base font-bold text-slate-800">{activeQ.sublabel}</p>
+          <p className="text-xs text-slate-500 mt-0.5 whitespace-pre-line">{activeQ.label}</p>
+          <button onClick={() => setMarker(null)} className="mt-2 text-xs text-slate-400 underline">Clear</button>
+        </div>
+      ) : (
+        <p className="text-xs text-slate-400 text-center">Tap a quadrant to mark where you are</p>
+      )}
+    </div>
+  );
+}
+
+function FeelingsThermometerTool() {
+  const [level, setLevel] = useState<number | null>(null);
+  const LEVELS = [
+    { n: 1,  label: "Calm",        color: "#6DB56D" },
+    { n: 2,  label: "Peaceful",    color: "#7EC07E" },
+    { n: 3,  label: "Relaxed",     color: "#8FCC8F" },
+    { n: 4,  label: "Okay",        color: "#C4CC7A" },
+    { n: 5,  label: "Unsettled",   color: "#D9CC66" },
+    { n: 6,  label: "Worried",     color: "#E8C46A" },
+    { n: 7,  label: "Anxious",     color: "#E8A85A" },
+    { n: 8,  label: "Stressed",    color: "#E87A5A" },
+    { n: 9,  label: "Overwhelmed", color: "#D85A4A" },
+    { n: 10, label: "Overwhelmed", color: "#C03030" },
+  ];
+  const activeLevel = level !== null ? LEVELS[level - 1] : null;
+  const fillHeight = level !== null ? (level / 10) * 200 : 0;
+
+  return (
+    <div className="space-y-4">
+      <p className="text-sm font-semibold text-slate-700">How intense does this feeling feel?</p>
+      <div className="flex items-start justify-center gap-6">
+        <svg width="60" height="260" viewBox="0 0 60 260">
+          <rect x="22" y="20" width="16" height="200" rx="8" fill="#f0f0f0" stroke="#d0d0d0" strokeWidth="1.5" />
+          {level !== null && (
+            <rect x="24" y={220 - fillHeight} width="12" height={fillHeight} rx="4"
+              fill={activeLevel?.color ?? "#ccc"} style={{ transition: "all 0.4s ease" }} />
+          )}
+          {LEVELS.map((l) => {
+            const y = 220 - (l.n / 10) * 200;
+            return <line key={l.n} x1="38" y1={y} x2="43" y2={y} stroke="#ccc" strokeWidth="1" />;
+          })}
+          <circle cx="30" cy="235" r="14" fill={activeLevel?.color ?? "#e0e0e0"} stroke="#d0d0d0" strokeWidth="1.5"
+            style={{ transition: "fill 0.4s ease" }} />
+          <text x="30" y="239" textAnchor="middle" fontSize="11" fill="white" fontWeight="700">{level ?? ""}</text>
+        </svg>
+        <div className="flex flex-col gap-1.5 pt-2">
+          {[...LEVELS].reverse().map((l) => {
+            const active = level === l.n;
+            return (
+              <button key={l.n} onClick={() => setLevel(l.n)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-left transition-all"
+                style={{ background: active ? l.color + "30" : "#f8f8f8", border: `1.5px solid ${active ? l.color : "#e5e7eb"}`, minWidth: 150 }}>
+                <span className="text-sm font-bold w-4 text-slate-500">{l.n}</span>
+                <span className="w-3 h-3 rounded-full shrink-0" style={{ background: l.color }} />
+                <span className="text-xs font-medium" style={{ color: active ? "#333" : "#666" }}>{l.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+      {activeLevel ? (
+        <div className="rounded-2xl px-5 py-4 text-center border"
+          style={{ background: activeLevel.color + "15", borderColor: activeLevel.color + "60" }}>
+          <p className="text-3xl font-bold" style={{ color: activeLevel.color }}>{level}</p>
+          <p className="text-base font-semibold text-slate-800 mt-0.5">{activeLevel.label}</p>
+          <button onClick={() => setLevel(null)} className="mt-2 text-xs text-slate-400 underline">Clear</button>
+        </div>
+      ) : (
+        <p className="text-xs text-slate-400 text-center">Tap a level to calibrate your intensity</p>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────
 // MAIN MODAL
 // ─────────────────────────────────────────────
 export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }) {
@@ -509,7 +754,7 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
   // SUPPRESS DEFAULTS FOR SPECIFIC TOOLS
   // (tools where we render steps differently in the interactive panel)
   // ─────────────────────────────────────────
-  const suppressDefaultSteps = ["fawn-response", "rsd-perfectionism", "masking-costs", "weekly-review", "body-scan", "burnout-signs", "focus-ritual", "easy-food", "eating-routine"].includes(tool.id);
+  const suppressDefaultSteps = ["fawn-response", "rsd-perfectionism", "masking-costs", "weekly-review", "body-scan", "burnout-signs", "focus-ritual", "easy-food", "eating-routine", "emotion-wheel", "emotion-matrix", "feelings-thermometer"].includes(tool.id);
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-end justify-center">
@@ -2620,6 +2865,15 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
               )}
             </div>
           )}
+
+          {/* ── emotion-wheel: interactive SVG wheel ── */}
+          {tool.id === "emotion-wheel" && <EmotionWheelTool />}
+
+          {/* ── emotion-matrix: fillable 2×2 quadrant ── */}
+          {tool.id === "emotion-matrix" && <EmotionMatrixTool />}
+
+          {/* ── feelings-thermometer: visual SVG thermometer ── */}
+          {tool.id === "feelings-thermometer" && <FeelingsThermometerTool />}
 
           {/* ══════════════════════════════════
               EXISTING CONTENT SECTIONS
