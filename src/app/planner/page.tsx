@@ -768,6 +768,7 @@ function Top3Item({
           placeholder="What matters most today?"
           value={priority.text}
           onChange={(e) => onUpdate({ text: e.target.value })}
+          onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }}
         />
       </div>
     </div>
@@ -778,11 +779,11 @@ function Top3Item({
 // Habits section
 // ---------------------------------------------------------------------------
 
-function HabitsSection() {
+function HabitsSection({ selectedDate }: { selectedDate: Date }) {
   const { habits, addHabit, deleteHabit, toggleHabitToday } = useAppStore();
   const [showInput, setShowInput] = useState(false);
   const [newHabitName, setNewHabitName] = useState("");
-  const today = getTodayKey();
+  const today = dateKey(selectedDate);
 
   const handleAdd = () => {
     if (!newHabitName.trim()) return;
@@ -802,7 +803,7 @@ function HabitsSection() {
           key={habit.id}
           habit={habit}
           today={today}
-          onToggle={() => toggleHabitToday(habit.id)}
+          onToggle={() => toggleHabitToday(habit.id, today)}
           onDelete={() => deleteHabit(habit.id)}
         />
       ))}
@@ -1711,7 +1712,7 @@ export default function PlannerPage() {
               title="Habits"
               onToggle={() => toggleSection("habits")}
             >
-              <HabitsSection />
+              <HabitsSection selectedDate={selectedDate} />
             </Section>
           )}
         </>

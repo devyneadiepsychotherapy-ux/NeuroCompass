@@ -77,7 +77,7 @@ interface AppState {
   // Habits
   addHabit: (name: string) => void;
   deleteHabit: (id: string) => void;
-  toggleHabitToday: (id: string) => void;
+  toggleHabitToday: (id: string, date?: string) => void;
 
   // Section visibility
   toggleSection: (section: keyof SectionVisibility) => void;
@@ -484,17 +484,17 @@ export const useAppStore = create<AppState>()(
       deleteHabit: (id) =>
         set((s) => ({ habits: s.habits.filter((h) => h.id !== id) })),
 
-      toggleHabitToday: (id) => {
-        const today = getTodayKey();
+      toggleHabitToday: (id, date) => {
+        const key = date ?? getTodayKey();
         set((s) => ({
           habits: s.habits.map((h) => {
             if (h.id !== id) return h;
-            const done = h.completedDates.includes(today);
+            const done = h.completedDates.includes(key);
             return {
               ...h,
               completedDates: done
-                ? h.completedDates.filter((d) => d !== today)
-                : [...h.completedDates, today],
+                ? h.completedDates.filter((d) => d !== key)
+                : [...h.completedDates, key],
             };
           }),
         }));
