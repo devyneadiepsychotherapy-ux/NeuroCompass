@@ -39,7 +39,7 @@ const TOUR_STEPS: TourStep[] = [
   {
     path: "/me",
     heading: "Your Me Page",
-    body: "Your Me page has your ND strengths and sensory profile summary, all in one place.",
+    body: "Your Me page has your ND strengths and sensory profile summary, all in one place. It also includes a space to log your special interests and your personal lists.",
   },
   {
     path: "/",
