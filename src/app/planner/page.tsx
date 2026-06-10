@@ -875,6 +875,8 @@ function Top3Section({ date }: { date: string }) {
   );
 }
 
+const TOP3_XP = [20, 15, 10];
+
 function Top3Item({
   priority,
   label,
@@ -886,18 +888,35 @@ function Top3Item({
   index: number;
   onUpdate: (updates: Partial<Omit<TopPriority, "id">>) => void;
 }) {
+  const { addXP } = useAppStore();
+  const [toast, setToast] = useState<string | null>(null);
   const accentColors = ["border-l-sage-500", "border-l-[#B8897A]", "border-l-rose-300"];
+  const xp = TOP3_XP[index];
+
+  const handleToggle = () => {
+    if (!priority.completed) {
+      addXP(xp);
+      setToast(`+${xp} XP`);
+      setTimeout(() => setToast(null), 1500);
+    }
+    onUpdate({ completed: !priority.completed });
+  };
 
   return (
     <div
       className={cn(
-        "bg-cream-50 border border-slate-100 border-l-4 rounded-2xl px-4 py-3 flex items-center gap-3 transition-all",
+        "bg-cream-50 border border-slate-100 border-l-4 rounded-2xl px-4 py-3 flex items-center gap-3 transition-all relative",
         accentColors[index],
         priority.completed && "opacity-60"
       )}
     >
+      {toast && (
+        <div className="absolute -top-7 left-10 bg-emerald-600 text-white text-xs font-bold px-2.5 py-1 rounded-full z-10 animate-fade-in-up whitespace-nowrap">
+          {toast}
+        </div>
+      )}
       <button
-        onClick={() => onUpdate({ completed: !priority.completed })}
+        onClick={handleToggle}
         className={cn(
           "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
           priority.completed ? "bg-sage-500 border-sage-500" : "border-slate-300 hover:border-sage-400"
@@ -919,6 +938,13 @@ function Top3Item({
           onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }}
         />
       </div>
+
+      {!priority.completed && priority.text && (
+        <span className="text-[10px] text-[#B8A96A] font-semibold flex items-center gap-0.5 shrink-0">
+          <Star size={9} fill="currentColor" />
+          {xp} XP
+        </span>
+      )}
     </div>
   );
 }
