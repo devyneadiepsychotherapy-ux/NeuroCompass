@@ -592,24 +592,24 @@ export default function OnboardingPage() {
       )}
 
       {step === 3 && (
-        <StepOverview onNext={() => setStep(4)} onTutorial={startTour} />
-      )}
-
-      {step === 4 && (
         <StepAvatar
           selectedAvatar={avatar}
           onSelect={setAvatar}
-          onFinish={() => setStep(5)}
-          onSkip={() => setStep(5)}
+          onFinish={() => setStep(4)}
+          onSkip={() => setStep(4)}
+        />
+      )}
+
+      {step === 4 && (
+        <StepNotification
+          selected={notifStyle}
+          onSelect={setNotifStyle}
+          onNext={() => setStep(5)}
         />
       )}
 
       {step === 5 && (
-        <StepNotification
-          selected={notifStyle}
-          onSelect={setNotifStyle}
-          onNext={() => finish(name, avatar, notifStyle)}
-        />
+        <StepOverview onNext={() => finish(name, avatar, notifStyle)} onTutorial={startTour} />
       )}
     </div>
   );
