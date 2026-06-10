@@ -1,0 +1,20 @@
+/**
+ * Generate PNG icons from public/icon.svg
+ * Requires: npm install sharp --save-dev
+ * Run with: node scripts/generate-icons.mjs
+ */
+import sharp from 'sharp';
+import { readFileSync } from 'fs';
+
+const svg = readFileSync('public/icon.svg');
+
+await sharp(svg).resize(512).png().toFile('public/icon-512.png');
+console.log('✓ icon-512.png');
+
+await sharp(svg).resize(192).png().toFile('public/icon-192.png');
+console.log('✓ icon-192.png');
+
+await sharp(svg).resize(180).png().toFile('public/apple-touch-icon.png');
+console.log('✓ apple-touch-icon.png');
+
+console.log('Done.');
