@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { Menu } from "lucide-react";
+import Image from "next/image";
 import Sidebar from "@/components/layout/Sidebar";
 
 export default function SidebarWrapper() {
@@ -17,9 +18,18 @@ export default function SidebarWrapper() {
         >
           <Menu size={18} className="text-sage-600" />
         </button>
-        <span className="absolute left-1/2 -translate-x-1/2 text-[15px] font-semibold tracking-wide text-[var(--foreground)]/80 select-none">
-          NeuroCompass
-        </span>
+        <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1.5 select-none">
+          <Image
+            src="/compass.png"
+            alt="NeuroCompass"
+            width={24}
+            height={24}
+            className="shrink-0"
+          />
+          <span className="text-[15px] font-semibold tracking-wide text-[var(--foreground)]/80">
+            NeuroCompass
+          </span>
+        </div>
       </header>
     </>
   );
