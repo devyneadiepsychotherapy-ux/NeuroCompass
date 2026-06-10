@@ -31,12 +31,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" style={{ colorScheme: "light" }}>
-      <body className="min-h-screen pb-20">
+    <html lang="en" style={{ colorScheme: "light", height: "100%", overflow: "hidden" }}>
+      <body className="pb-20" style={{ height: "100%", overflow: "hidden" }}>
         <ThemeProvider>
           <TourProvider>
             <SidebarWrapper />
-            <main className="max-w-lg mx-auto min-h-screen pt-14">{children}</main>
+            <main
+              className="max-w-lg mx-auto pt-14"
+              style={{
+                height: "100%",
+                overflowY: "auto",
+                overscrollBehavior: "none",
+                WebkitOverflowScrolling: "touch",
+              }}
+            >
+              {children}
+            </main>
             <BottomNav />
           </TourProvider>
         </ThemeProvider>

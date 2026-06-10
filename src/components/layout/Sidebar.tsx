@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useAppStore } from "@/store/useAppStore";
 import { getAvatarOption } from "@/app/onboarding/page";
 import { getTheme } from "@/lib/themes";
-import { X, Settings, Info, User, ChevronRight, Star, Palette } from "lucide-react";
+import { X, Settings, Info, User, ChevronRight, Star, Palette, Home } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface SidebarProps {
@@ -99,6 +99,13 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
 
         {/* Nav links */}
         <nav className="flex-1 px-4 space-y-1">
+          <SidebarLink
+            href="/"
+            icon={Home}
+            label="Home"
+            onClose={onClose}
+          />
+
           {/* Themes */}
           <Link
             href="/themes"

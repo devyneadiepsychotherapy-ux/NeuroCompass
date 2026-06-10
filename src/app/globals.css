@@ -64,6 +64,12 @@
   --color-mauve-700: #8a5e65;
 }
 
+html, body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -78,6 +84,7 @@ body {
 html {
   scroll-behavior: smooth;
 }
+
 
 ::-webkit-scrollbar {
   width: 4px;

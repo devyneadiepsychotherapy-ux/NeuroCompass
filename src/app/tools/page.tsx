@@ -22,6 +22,7 @@ const CATEGORY_ICON_BG: Record<string, string> = {
   people:        "bg-stone-100",
   burnout:       "bg-sage-100",
   interoception: "bg-sage-100",
+  emotion:       "bg-rose-100",
 };
 
 // Left-border accent color per category
@@ -38,6 +39,7 @@ const CATEGORY_BORDER_ACCENT: Record<string, string> = {
   people:        "border-l-stone-300",
   burnout:       "border-l-sage-300",
   interoception: "border-l-sage-300",
+  emotion:       "border-l-rose-300",
 };
 
 // --------------- Recommendation logic ---------------

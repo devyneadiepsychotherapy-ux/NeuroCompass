@@ -32,6 +32,7 @@ export const TOOL_CATEGORIES = [
   { id: "people", label: "People Pleasing", icon: "Users", color: "bg-stone-100 text-stone-700" },
   { id: "burnout", label: "Burnout Prevention", icon: "Battery", color: "bg-sage-100 text-sage-700" },
   { id: "interoception", label: "Interoception", icon: "Activity", color: "bg-sage-100 text-sage-700" },
+  { id: "emotion", label: "Emotion Regulation", icon: "Heart", color: "bg-rose-100 text-rose-700" },
 ];
 
 export const TOOLS: Tool[] = [
@@ -1032,6 +1033,95 @@ export const TOOLS: Tool[] = [
         "Notice and name the sensation, write it down",
         "Over time, you'll start to notice patterns and earlier cues",
       ],
+    }
+  },
+
+  // EMOTION REGULATION
+  {
+    id: "emotion-wheel",
+    title: "Emotion Wheel",
+    description: "Identify and name your emotions with precision using a structured wheel",
+    category: "emotion",
+    icon: "Target",
+    type: "guided",
+    content: {
+      intro: "Naming emotions precisely reduces their intensity. The emotion wheel helps you move from vague feelings ('bad', 'fine') to specific words ('frustrated', 'disappointed', 'overwhelmed').",
+      steps: [
+        "Start with the core: Am I feeling something Joyful, Sad, Angry, Fearful, Disgusted, or Surprised?",
+        "Go one layer deeper: e.g. Angry → Frustrated? Irritated? Jealous? Hurt?",
+        "Go one more layer: e.g. Frustrated → Exasperated? Agitated? Grumpy?",
+        "Say the word out loud or write it down: 'I feel ___'",
+        "Notice what shifts when you name it accurately",
+      ],
+      prompts: [
+        "Where do you feel this in your body?",
+        "What triggered this feeling?",
+        "What does this emotion need you to know?",
+        "Is there a secondary emotion underneath?",
+      ],
+      tips: [
+        "ND brains often experience alexithymia (difficulty identifying emotions) — this is very common",
+        "Starting with body sensations (tight chest, heavy arms) can help when words don't come",
+        "There is no wrong emotion. Naming it is the first step to working with it.",
+      ],
+      affirmation: "Emotions are information, not problems to fix. You are listening to yours."
+    }
+  },
+  {
+    id: "emotion-matrix",
+    title: "Emotion Matrix",
+    description: "Map your emotions by energy level and pleasantness to choose your response",
+    category: "emotion",
+    icon: "LayoutGrid",
+    type: "info",
+    content: {
+      intro: "From Russ Harris's ACT work: emotions can be mapped on two axes — energy (high/low) and valence (pleasant/unpleasant). This helps you respond to emotions instead of reacting.",
+      variants: [
+        { label: "High energy + unpleasant", description: "Anxious, angry, panicked, overwhelmed → needs grounding and nervous system down-regulation" },
+        { label: "Low energy + unpleasant", description: "Sad, numb, shut down, hopeless → needs gentle activation, warmth, and compassion" },
+        { label: "High energy + pleasant", description: "Excited, joyful, enthusiastic → can be channelled into action and connection" },
+        { label: "Low energy + pleasant", description: "Calm, content, peaceful, safe → protective and restorative, worth cultivating intentionally" },
+      ],
+      tips: [
+        "Different quadrants need different tools: activation for low-energy states, regulation for high-energy ones",
+        "Notice which quadrant you spend the most time in — it's useful data about your nervous system",
+        "The goal isn't to feel pleasant all the time, it's to have flexibility across the matrix",
+      ],
+      prompts: [
+        "Which quadrant am I in right now?",
+        "Which quadrant do I most want to move toward?",
+        "What has helped me shift states in the past?",
+      ],
+    }
+  },
+  {
+    id: "feelings-thermometer",
+    title: "Feelings Thermometer",
+    description: "Track the intensity of your emotions on a 1–10 scale to choose the right response",
+    category: "emotion",
+    icon: "Thermometer",
+    type: "guided",
+    content: {
+      intro: "Not all emotions need the same response. A '3' frustration needs a different tool than an '8' panic. The feelings thermometer helps you calibrate your response to the actual intensity.",
+      steps: [
+        "Notice the emotion — what are you feeling right now?",
+        "Rate the intensity from 1 to 10 (1 = barely noticeable, 10 = overwhelming)",
+        "1–3: Mild — gentle awareness, continue with what you're doing",
+        "4–6: Moderate — pause, take 3 breaths, use a grounding tool",
+        "7–8: High — step away if possible, regulate before responding",
+        "9–10: Crisis level — do NOT make decisions, focus only on safety and nervous system regulation",
+      ],
+      tips: [
+        "Regular check-ins throughout the day build interoceptive awareness over time",
+        "For ND brains: emotions can escalate very fast — early detection (catching a 4 before it becomes an 8) is the skill",
+        "Intensity doesn't tell you the emotion is wrong. It tells you how much support you need.",
+      ],
+      prompts: [
+        "What number am I at right now?",
+        "What does this level feel like in my body?",
+        "What do I need at this intensity level?",
+      ],
+      affirmation: "High intensity emotions are not a character flaw. They are a signal. You are learning to read it."
     }
   },
 
