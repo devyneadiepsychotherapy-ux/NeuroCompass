@@ -1670,12 +1670,6 @@ export default function PlannerPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-slate-800">Planner</h1>
-        <button
-          onClick={() => setShowTaskModal(true)}
-          className="w-11 h-11 rounded-2xl bg-sage-600 flex items-center justify-center shadow-md hover:bg-sage-700 transition-all active:scale-95"
-        >
-          <Plus size={22} className="text-white" />
-        </button>
       </div>
 
       {/* View toggle + date navigation */}
