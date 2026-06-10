@@ -75,6 +75,7 @@ export interface Appointment {
   startTime: string; // "HH:MM" or "" when allDay
   endTime?: string;  // "HH:MM"
   allDay?: boolean;
+  type?: "appointment" | "activity" | "time-block";
   title: string;
   notes?: string;
   showOn?: ("day" | "week" | "month")[];
