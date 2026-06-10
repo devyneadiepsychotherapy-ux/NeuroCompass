@@ -550,7 +550,9 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
 
   // ── energy profile: add form ──────────────
   const [epDrainLabel, setEpDrainLabel] = useState("");
+  const [epDrainValue, setEpDrainValue] = useState<number>(5);
   const [epRestoreLabel, setEpRestoreLabel] = useState("");
+  const [epRestoreValue, setEpRestoreValue] = useState<number>(5);
 
   // ── body-scan: step-by-step ───────────────
   const [bsStep, setBsStep] = useState(0);
@@ -2260,23 +2262,36 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
                       onChange={(e) => setEpDrainLabel(e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && epDrainLabel.trim()) {
-                          addEnergyDrain({ label: epDrainLabel.trim(), intensity: "medium" });
+                          addEnergyDrain({ label: epDrainLabel.trim(), intensity: "medium", value: epDrainValue });
                           setEpDrainLabel("");
                         }
                       }}
                     />
+                    <div className="flex items-center gap-1 shrink-0">
+                      <span className="text-xs text-slate-400 w-4 text-right">{epDrainValue}</span>
+                      <input
+                        type="range" min={1} max={10} step={1}
+                        value={epDrainValue}
+                        onChange={(e) => setEpDrainValue(Number(e.target.value))}
+                        className="w-16 accent-rose-400"
+                      />
+                    </div>
                     <button
-                      onClick={() => { if (epDrainLabel.trim()) { addEnergyDrain({ label: epDrainLabel.trim(), intensity: "medium" }); setEpDrainLabel(""); } }}
+                      onClick={() => { if (epDrainLabel.trim()) { addEnergyDrain({ label: epDrainLabel.trim(), intensity: "medium", value: epDrainValue }); setEpDrainLabel(""); } }}
                       className="px-3 py-2 rounded-xl text-sm font-medium bg-rose-100 text-rose-700 border border-rose-200 hover:bg-rose-200 transition-all"
                     >
                       <Plus size={16} />
                     </button>
                   </div>
+                  <p className="text-xs text-slate-400">Slider: 1 (barely drains) → 10 (completely drains)</p>
                   {energyDrains.length > 0 && (
                     <div className="flex flex-wrap gap-1.5">
                       {energyDrains.map((d) => (
                         <span key={d.id} className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full" style={{ color: '#8f6559', background: '#C4897A22', border: '1px solid #8f655966' }}>
                           {d.label}
+                          {d.value !== undefined && (
+                            <span className="font-bold opacity-70">−{d.value}</span>
+                          )}
                           <button onClick={() => removeEnergyDrain(d.id)} className="ml-0.5 opacity-60 hover:opacity-100">
                             <X size={10} />
                           </button>
@@ -2297,23 +2312,36 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
                       onChange={(e) => setEpRestoreLabel(e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && epRestoreLabel.trim()) {
-                          addEnergyRestorer({ label: epRestoreLabel.trim(), intensity: "medium" });
+                          addEnergyRestorer({ label: epRestoreLabel.trim(), intensity: "medium", value: epRestoreValue });
                           setEpRestoreLabel("");
                         }
                       }}
                     />
+                    <div className="flex items-center gap-1 shrink-0">
+                      <span className="text-xs text-slate-400 w-4 text-right">{epRestoreValue}</span>
+                      <input
+                        type="range" min={1} max={10} step={1}
+                        value={epRestoreValue}
+                        onChange={(e) => setEpRestoreValue(Number(e.target.value))}
+                        className="w-16 accent-sage-500"
+                      />
+                    </div>
                     <button
-                      onClick={() => { if (epRestoreLabel.trim()) { addEnergyRestorer({ label: epRestoreLabel.trim(), intensity: "medium" }); setEpRestoreLabel(""); } }}
+                      onClick={() => { if (epRestoreLabel.trim()) { addEnergyRestorer({ label: epRestoreLabel.trim(), intensity: "medium", value: epRestoreValue }); setEpRestoreLabel(""); } }}
                       className="px-3 py-2 rounded-xl text-sm font-medium bg-sage-100 text-sage-700 border border-sage-200 hover:bg-sage-200 transition-all"
                     >
                       <Plus size={16} />
                     </button>
                   </div>
+                  <p className="text-xs text-slate-400">Slider: 1 (slight boost) → 10 (fully recharging)</p>
                   {energyRestorers.length > 0 && (
                     <div className="flex flex-wrap gap-1.5">
                       {energyRestorers.map((r) => (
                         <span key={r.id} className="flex items-center gap-1 text-xs px-2.5 py-1 rounded-full" style={{ color: '#4d6e5e', background: '#7FA88222', border: '1px solid #4d6e5e66' }}>
                           {r.label}
+                          {r.value !== undefined && (
+                            <span className="font-bold opacity-70">+{r.value}</span>
+                          )}
                           <button onClick={() => removeEnergyRestorer(r.id)} className="ml-0.5 opacity-60 hover:opacity-100">
                             <X size={10} />
                           </button>

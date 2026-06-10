@@ -269,4 +269,5 @@ export interface EnergyItem {
   id: string;
   label: string;
   intensity: "low" | "medium" | "high";
+  value?: number; // 1–10 numeric energy cost/gain
 }
