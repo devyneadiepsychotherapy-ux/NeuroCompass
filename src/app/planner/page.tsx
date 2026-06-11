@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import {
   Plus, Check, Trash2, Star, Clock, ChevronDown, ChevronUp, X, Repeat,
   Eye, EyeOff, Flame, CalendarClock, Target, ListTodo, Activity, Coins,
-  ChevronLeft, ChevronRight, Calendar, CalendarDays, Pencil, UtensilsCrossed,
+  ChevronLeft, ChevronRight, Calendar, CalendarDays, Pencil, UtensilsCrossed, Gift,
 } from "lucide-react";
 
 // ---------------------------------------------------------------------------
@@ -961,7 +961,7 @@ function Top3Item({
   return (
     <div
       className={cn(
-        "bg-cream-50 border border-slate-100 border-l-4 rounded-2xl px-4 py-3 flex items-center gap-3 transition-all relative",
+        "bg-cream-50 border border-slate-100 border-l-4 rounded-2xl px-4 py-3 transition-all relative",
         accentColors[index],
         priority.completed && "opacity-60"
       )}
@@ -971,36 +971,50 @@ function Top3Item({
           {toast}
         </div>
       )}
-      <button
-        onClick={handleToggle}
-        className={cn(
-          "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
-          priority.completed ? "bg-sage-500 border-sage-500" : "border-slate-300 hover:border-sage-400"
-        )}
-      >
-        {priority.completed && <Check size={10} className="text-white" strokeWidth={3} />}
-      </button>
-
-      <div className="flex-1">
-        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide mb-0.5">{label}</p>
-        <input
+      <div className="flex items-center gap-3">
+        <button
+          onClick={handleToggle}
           className={cn(
-            "w-full bg-transparent text-sm font-medium text-slate-800 placeholder-slate-300 focus:outline-none",
-            priority.completed && "line-through text-slate-400"
+            "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
+            priority.completed ? "bg-sage-500 border-sage-500" : "border-slate-300 hover:border-sage-400"
           )}
-          placeholder="What matters most today?"
-          value={priority.text}
-          onChange={(e) => onUpdate({ text: e.target.value })}
+        >
+          {priority.completed && <Check size={10} className="text-white" strokeWidth={3} />}
+        </button>
+
+        <div className="flex-1">
+          <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide mb-0.5">{label}</p>
+          <input
+            className={cn(
+              "w-full bg-transparent text-sm font-medium text-slate-800 placeholder-slate-300 focus:outline-none",
+              priority.completed && "line-through text-slate-400"
+            )}
+            placeholder="What matters most today?"
+            value={priority.text}
+            onChange={(e) => onUpdate({ text: e.target.value })}
+            onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }}
+          />
+        </div>
+
+        {!priority.completed && priority.text && (
+          <span className="text-[10px] text-[#B8A96A] font-semibold flex items-center gap-0.5 shrink-0">
+            <Star size={9} fill="currentColor" />
+            {xp} XP
+          </span>
+        )}
+      </div>
+
+      {/* Custom reward */}
+      <div className="flex items-center gap-1.5 mt-2 pl-8">
+        <Gift size={11} className="text-slate-300 shrink-0" />
+        <input
+          className="flex-1 bg-transparent text-xs text-slate-400 placeholder-slate-300 focus:outline-none focus:text-slate-600"
+          placeholder="Your reward when done..."
+          value={priority.reward ?? ""}
+          onChange={(e) => onUpdate({ reward: e.target.value })}
           onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }}
         />
       </div>
-
-      {!priority.completed && priority.text && (
-        <span className="text-[10px] text-[#B8A96A] font-semibold flex items-center gap-0.5 shrink-0">
-          <Star size={9} fill="currentColor" />
-          {xp} XP
-        </span>
-      )}
     </div>
   );
 }
@@ -1010,7 +1024,7 @@ function Top3Item({
 // ---------------------------------------------------------------------------
 
 function HabitsSection({ selectedDate }: { selectedDate: Date }) {
-  const { habits, addHabit, deleteHabit, toggleHabitToday } = useAppStore();
+  const { habits, addHabit, updateHabit, deleteHabit, toggleHabitToday } = useAppStore();
   const [showInput, setShowInput] = useState(false);
   const [newHabitName, setNewHabitName] = useState("");
   const today = dateKey(selectedDate);
@@ -1034,6 +1048,7 @@ function HabitsSection({ selectedDate }: { selectedDate: Date }) {
           habit={habit}
           today={today}
           onToggle={() => toggleHabitToday(habit.id, today)}
+          onUpdate={(name) => updateHabit(habit.id, name)}
           onDelete={() => deleteHabit(habit.id)}
         />
       ))}
@@ -1082,17 +1097,22 @@ function HabitRow({
   habit,
   today,
   onToggle,
+  onUpdate,
   onDelete,
 }: {
   habit: Habit;
   today: string;
   onToggle: () => void;
+  onUpdate: (name: string) => void;
   onDelete: () => void;
 }) {
   const { addXP } = useAppStore();
   const doneToday = habit.completedDates.includes(today);
   const [xpToast, setXpToast] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editName, setEditName] = useState(habit.name);
   const toastRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleToggle = () => {
     onToggle();
@@ -1102,6 +1122,17 @@ function HabitRow({
       setXpToast(true);
       toastRef.current = setTimeout(() => setXpToast(false), 1500);
     }
+  };
+
+  const startEdit = () => {
+    setEditName(habit.name);
+    setEditing(true);
+    setTimeout(() => inputRef.current?.focus(), 0);
+  };
+
+  const saveEdit = () => {
+    if (editName.trim()) onUpdate(editName.trim());
+    setEditing(false);
   };
 
   useEffect(() => () => { if (toastRef.current) clearTimeout(toastRef.current); }, []);
@@ -1149,20 +1180,42 @@ function HabitRow({
         {doneToday && <Check size={12} className="text-white" strokeWidth={3} />}
       </button>
 
-      <p className={cn("flex-1 text-sm font-medium text-slate-800", doneToday && "line-through text-slate-400")}>
-        {habit.name}
-      </p>
+      {editing ? (
+        <input
+          ref={inputRef}
+          className="flex-1 bg-white border border-sage-300 rounded-lg px-2 py-1 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-sage-400"
+          value={editName}
+          onChange={(e) => setEditName(e.target.value)}
+          onBlur={saveEdit}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") saveEdit();
+            if (e.key === "Escape") setEditing(false);
+          }}
+        />
+      ) : (
+        <p className={cn("flex-1 text-sm font-medium text-slate-800", doneToday && "line-through text-slate-400")}>
+          {habit.name}
+        </p>
+      )}
 
-      {streak > 0 && (
+      {!editing && streak > 0 && (
         <span className="flex items-center gap-1 text-xs font-semibold text-[#B8897A]">
           <Flame size={12} fill="currentColor" />
           {streak}
         </span>
       )}
 
-      <button onClick={onDelete} className="p-1 text-slate-300 hover:text-red-400 transition-colors">
-        <Trash2 size={14} />
-      </button>
+      {!editing && (
+        <button onClick={startEdit} className="p-1 text-slate-300 hover:text-sage-500 transition-colors">
+          <Pencil size={13} />
+        </button>
+      )}
+
+      {!editing && (
+        <button onClick={onDelete} className="p-1 text-slate-300 hover:text-red-400 transition-colors">
+          <Trash2 size={14} />
+        </button>
+      )}
     </div>
   );
 }

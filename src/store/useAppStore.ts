@@ -76,6 +76,7 @@ interface AppState {
 
   // Habits
   addHabit: (name: string) => void;
+  updateHabit: (id: string, name: string) => void;
   deleteHabit: (id: string) => void;
   toggleHabitToday: (id: string, date?: string) => void;
 
@@ -480,6 +481,11 @@ export const useAppStore = create<AppState>()(
               createdAt: new Date().toISOString(),
             },
           ],
+        })),
+
+      updateHabit: (id, name) =>
+        set((s) => ({
+          habits: s.habits.map((h) => h.id === id ? { ...h, name: name.trim() } : h),
         })),
 
       deleteHabit: (id) =>
