@@ -2290,7 +2290,7 @@ export default function PlannerPage() {
           )}
 
           {/* Meal Plan */}
-          {(!mounted || sectionVisibility.meal) && (
+          {(!mounted || sectionVisibility.meal !== false) && (
             <Section
               id="meal"
               icon={<UtensilsCrossed size={16} />}
