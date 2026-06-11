@@ -93,7 +93,7 @@ function StreakCelebrationModal({ streak, onDismiss }: { streak: number; onDismi
   }, [onDismiss]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center p-4" style={{ background: "rgba(0,0,0,0.45)" }}>
+    <div className="fixed inset-0 z-50 flex items-end justify-center px-4 pb-28" style={{ background: "rgba(0,0,0,0.45)" }}>
       <div className="w-full max-w-sm rounded-3xl border border-stone-200 shadow-2xl p-8 flex flex-col items-center gap-5 text-center" style={{ background: "linear-gradient(160deg, #f5efec 0%, #ece7e4 60%, #e0d8d4 100%)" }}>
         <div className="w-20 h-20 rounded-3xl bg-stone-100 flex items-center justify-center">
           <Flame size={44} className="text-[#B8897A] fill-[#d4b8b0]" />
@@ -472,8 +472,8 @@ export default function HomePage() {
   }, [mounted, hasOnboarded, router]);
 
   useEffect(() => {
-    checkAndUpdateStreak();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    if (mounted) checkAndUpdateStreak();
+  }, [mounted]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [openTool, setOpenTool] = useState<Tool | null>(null);
 
