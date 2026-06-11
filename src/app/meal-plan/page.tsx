@@ -45,13 +45,18 @@ export default function MealPlanPage() {
   const [shopInput, setShopInput] = useState("");
   const [showShop, setShowShop] = useState(false);
   const [checkedItems, setCheckedItems] = useState<Set<number>>(new Set());
+  const [customMeals, setCustomMeals] = useState<string[]>([]);
+  const [addingCustom, setAddingCustom] = useState(false);
+  const [customMealInput, setCustomMealInput] = useState("");
 
   useEffect(() => {
     try {
       const p = localStorage.getItem(STORAGE_KEY);
       const s = localStorage.getItem(SHOP_KEY);
+      const c = localStorage.getItem("nd-meal-plan-custom");
       if (p) setPlan(JSON.parse(p));
       if (s) setShopping(JSON.parse(s));
+      if (c) setCustomMeals(JSON.parse(c));
     } catch { /* ignore */ }
     setLoaded(true);
   }, []);
@@ -88,6 +93,20 @@ export default function MealPlanPage() {
     setMeal(editingCell.day, editingCell.meal, value);
     setEditingCell(null);
     setInputText("");
+    setAddingCustom(false);
+    setCustomMealInput("");
+  };
+
+  const addCustomMeal = (selectAfterAdd: boolean) => {
+    const trimmed = customMealInput.trim();
+    if (!trimmed) return;
+    if (!customMeals.includes(trimmed)) {
+      const next = [...customMeals, trimmed];
+      setCustomMeals(next);
+      localStorage.setItem("nd-meal-plan-custom", JSON.stringify(next));
+    }
+    if (selectAfterAdd) selectMealDirectly(trimmed);
+    else { setAddingCustom(false); setCustomMealInput(""); }
   };
 
   const addShopItem = () => {
@@ -253,7 +272,7 @@ export default function MealPlanPage() {
                     onKeyDown={e => e.key === "Enter" && commitEdit()}
                   />
                   <div className="flex flex-wrap gap-1.5">
-                    {EASY_MEALS.map(m => (
+                    {[...EASY_MEALS, ...customMeals].map(m => (
                       <button
                         key={m}
                         type="button"
@@ -264,8 +283,35 @@ export default function MealPlanPage() {
                       </button>
                     ))}
                   </div>
+
+                  {addingCustom ? (
+                    <div className="flex gap-1.5">
+                      <input
+                        autoFocus
+                        className="flex-1 border border-slate-200 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-sage-400 placeholder-slate-300"
+                        placeholder="Name your meal..."
+                        value={customMealInput}
+                        onChange={e => setCustomMealInput(e.target.value)}
+                        onKeyDown={e => {
+                          if (e.key === "Enter") addCustomMeal(true);
+                          if (e.key === "Escape") { setAddingCustom(false); setCustomMealInput(""); }
+                        }}
+                      />
+                      <button type="button" onClick={() => addCustomMeal(true)} className="bg-sage-500 text-white text-xs px-3 py-1.5 rounded-xl font-semibold shrink-0">
+                        Add & select
+                      </button>
+                      <button type="button" onClick={() => { setAddingCustom(false); setCustomMealInput(""); }} className="text-slate-400 hover:text-slate-600 px-1">
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ) : (
+                    <button type="button" onClick={() => setAddingCustom(true)} className="flex items-center gap-1 text-xs text-sage-600 font-medium hover:text-sage-700 transition-colors">
+                      <Plus size={11} /> Add custom meal
+                    </button>
+                  )}
+
                   <div className="flex gap-2">
-                    <button onClick={() => setEditingCell(null)} className="flex-1 border border-slate-200 text-slate-600 py-2 rounded-xl text-sm">Cancel</button>
+                    <button onClick={() => { setEditingCell(null); setAddingCustom(false); setCustomMealInput(""); }} className="flex-1 border border-slate-200 text-slate-600 py-2 rounded-xl text-sm">Cancel</button>
                     <button onClick={commitEdit} className="flex-1 bg-sage-600 text-white py-2 rounded-xl text-sm font-semibold hover:bg-sage-700">Save</button>
                   </div>
                 </div>
