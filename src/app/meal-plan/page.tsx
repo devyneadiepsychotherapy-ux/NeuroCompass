@@ -19,7 +19,7 @@ const EASY_MEALS = [
   "Sandwich", "Leftovers", "Frozen meal", "Mac & cheese", "Soup (canned)",
   "Rice + whatever", "Crackers + cheese", "Smoothie", "Oatmeal", "Wrap",
   "Scrambled eggs + toast", "Pasta + sauce", "Stir fry", "Bean bowl",
-  "Skip (no appetite)", "Snack plate", "Takeout", "Batch cook leftovers"
+  "Skip (no appetite)", "Snack plate", "Takeout", "Batch cook leftovers",
 ];
 
 const SHOP_CATEGORIES = [
@@ -34,7 +34,7 @@ const SHOP_CATEGORIES = [
 ];
 
 export default function MealPlanPage() {
-  const { toggleFavorite, isFavorite } = useAppStore();
+  const { toggleFavorite, isFavorite, savedNDMeals, toggleSavedNDMeal } = useAppStore();
   const favorite = isFavorite("meal-planner");
   const [plan, setPlan] = useState<MealPlan>({});
   const [shopping, setShopping] = useState<ShoppingList>([]);
@@ -138,7 +138,7 @@ export default function MealPlanPage() {
 
       <div className="bg-gradient-to-br from-stone-100 to-sage-50 rounded-2xl p-4 border border-stone-200">
         <p className="text-sm text-slate-600 leading-relaxed">
-          <strong>ND meal tip:</strong> Aim for &ldquo;good enough&rdquo; meals, not perfect ones. Having a plan reduces the daily decision fatigue of &ldquo;what&apos;s for dinner?&rdquo;, even if you don&apos;t follow it exactly.
+          <strong>ND meal tip: </strong>Aim for &ldquo;good enough&rdquo; meals, not perfect ones. Having a plan reduces the daily decision fatigue of &ldquo;what&apos;s for dinner?&rdquo;, even if you don&apos;t follow it exactly.
         </p>
       </div>
 
@@ -244,14 +244,39 @@ export default function MealPlanPage() {
                     onChange={e => setInputText(e.target.value)}
                     onKeyDown={e => e.key === "Enter" && commitEdit()}
                   />
-                  <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto">
-                    {EASY_MEALS.map(m => (
-                      <button key={m} onClick={() => { setInputText(m); commitEdit(); }}
-                        className="text-xs px-2.5 py-1 bg-sage-50 text-sage-700 rounded-full border border-sage-200 hover:bg-sage-100">
-                        {m}
-                      </button>
-                    ))}
+                  {/* Go-to meal options */}
+                  <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto">
+                    {(savedNDMeals.length > 0 ? savedNDMeals : EASY_MEALS).map(m => {
+                      const isSaved = savedNDMeals.includes(m);
+                      return (
+                        <div key={m} className="flex items-center gap-0">
+                          <button
+                            type="button"
+                            onMouseDown={(e) => { e.preventDefault(); setInputText(m); commitEdit(); }}
+                            onTouchEnd={(e) => { e.preventDefault(); setInputText(m); commitEdit(); }}
+                            className="text-xs px-2.5 py-1.5 bg-sage-50 text-sage-700 rounded-l-full border border-sage-200 active:bg-sage-100"
+                          >
+                            {m}
+                          </button>
+                          <button
+                            type="button"
+                            onMouseDown={(e) => { e.preventDefault(); toggleSavedNDMeal(m); }}
+                            onTouchEnd={(e) => { e.preventDefault(); toggleSavedNDMeal(m); }}
+                            className={cn(
+                              "text-xs px-1.5 py-1.5 rounded-r-full border border-l-0 border-sage-200 transition-colors",
+                              isSaved ? "bg-rose-50 text-rose-400" : "bg-sage-50 text-slate-300"
+                            )}
+                            aria-label={isSaved ? "Remove from go-to" : "Save as go-to"}
+                          >
+                            ♡
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
+                  {savedNDMeals.length === 0 && (
+                    <p className="text-[10px] text-slate-400">Tap ♡ to save meals as go-to options — they&apos;ll appear at the top next time.</p>
+                  )}
                   <div className="flex gap-2">
                     <button onClick={() => setEditingCell(null)} className="flex-1 border border-slate-200 text-slate-600 py-2 rounded-xl text-sm">Cancel</button>
                     <button onClick={commitEdit} className="flex-1 bg-sage-600 text-white py-2 rounded-xl text-sm font-semibold hover:bg-sage-700">Save</button>
