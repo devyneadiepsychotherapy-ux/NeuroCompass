@@ -205,7 +205,7 @@ export default function MindMapPage() {
 
       <div className="bg-gradient-to-br from-sage-50 to-stone-50 rounded-2xl p-4 border border-sage-100">
         <p className="text-sm text-slate-600 leading-relaxed">
-          🧠 <strong>ND tip:</strong> Mind maps work with radial thinking, not linear, which is how many ND brains naturally process. Use it for brain dumps, planning, decisions, or feeling exploration.
+          <strong>ND tip:</strong> Mind maps work with radial thinking, not linear, which is how many ND brains naturally process. Use it for brain dumps, planning, decisions, or feeling exploration.
         </p>
       </div>
 
@@ -238,7 +238,7 @@ export default function MindMapPage() {
 
       <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
         <p className="text-xs text-slate-500">
-          💡 Tap any node to edit it. Use <strong>+</strong> to add branches. Mind maps are not saved between sessions, screenshot to keep your work.
+          Tap any node to edit it. Use <strong>+</strong> to add branches. Mind maps are not saved between sessions, screenshot to keep your work.
         </p>
       </div>
     </div>

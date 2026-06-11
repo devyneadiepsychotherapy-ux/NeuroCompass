@@ -92,7 +92,7 @@ export default function EisenhowerPage() {
 
       <div className="bg-gradient-to-br from-sage-50 to-stone-100 rounded-2xl p-4 border border-sage-100">
         <p className="text-sm text-slate-600 leading-relaxed">
-          💡 <strong>ND tip:</strong> Everything can feel urgent when you have ADHD. Use this matrix to reality-check, does this actually need to happen TODAY, or does it just feel that way?
+          <strong>ND tip:</strong> Everything can feel urgent when you have ADHD. Use this matrix to reality-check, does this actually need to happen TODAY, or does it just feel that way?
         </p>
       </div>
 

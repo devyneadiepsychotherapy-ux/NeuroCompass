@@ -23,14 +23,14 @@ const EASY_MEALS = [
 ];
 
 const SHOP_CATEGORIES = [
-  { label: "Produce", emoji: "🥦" },
-  { label: "Protein", emoji: "🥚" },
-  { label: "Grains", emoji: "🍞" },
-  { label: "Dairy", emoji: "🧀" },
-  { label: "Pantry", emoji: "🥫" },
-  { label: "Snacks", emoji: "🍎" },
-  { label: "Frozen", emoji: "🧊" },
-  { label: "Other", emoji: "🛒" },
+  { label: "Produce" },
+  { label: "Protein" },
+  { label: "Grains" },
+  { label: "Dairy" },
+  { label: "Pantry" },
+  { label: "Snacks" },
+  { label: "Frozen" },
+  { label: "Other" },
 ];
 
 export default function MealPlanPage() {
@@ -138,7 +138,7 @@ export default function MealPlanPage() {
 
       <div className="bg-gradient-to-br from-stone-100 to-sage-50 rounded-2xl p-4 border border-stone-200">
         <p className="text-sm text-slate-600 leading-relaxed">
-          🍽️ <strong>ND meal tip:</strong> Aim for &ldquo;good enough&rdquo; meals, not perfect ones. Having a plan reduces the daily decision fatigue of &ldquo;what&apos;s for dinner?&rdquo;, even if you don&apos;t follow it exactly.
+          <strong>ND meal tip:</strong> Aim for &ldquo;good enough&rdquo; meals, not perfect ones. Having a plan reduces the daily decision fatigue of &ldquo;what&apos;s for dinner?&rdquo;, even if you don&apos;t follow it exactly.
         </p>
       </div>
 
@@ -146,7 +146,7 @@ export default function MealPlanPage() {
       {showShop && (
         <div className="bg-cream-50 rounded-2xl border border-emerald-200 p-4 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
-            <p className="font-semibold text-slate-800">🛒 Shopping List</p>
+            <p className="font-semibold text-slate-800">Shopping List</p>
             {checkedItems.size > 0 && (
               <button onClick={clearChecked} className="text-xs text-red-500 hover:text-red-700 font-medium">
                 Remove checked ({checkedItems.size})
@@ -167,9 +167,9 @@ export default function MealPlanPage() {
           </div>
           <div className="flex flex-wrap gap-2">
             {SHOP_CATEGORIES.map(c => (
-              <button key={c.label} onClick={() => { setShopInput(c.emoji + " "); }}
+              <button key={c.label} onClick={() => { setShopInput(c.label + " "); }}
                 className="text-xs px-3 py-1 bg-slate-50 rounded-full border border-slate-200 text-slate-600 hover:border-emerald-300">
-                {c.emoji} {c.label}
+                {c.label}
               </button>
             ))}
           </div>

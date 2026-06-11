@@ -116,7 +116,7 @@ export default function DopamineMenuPage() {
         </div>
       ) : (
         <div className="bg-slate-50 rounded-2xl p-6 text-center border border-slate-100">
-          <p className="text-3xl mb-2">🍽️</p>
+          <p className="text-3xl mb-2"></p>
           <p className="text-slate-600 font-medium">Your menu is empty</p>
           <p className="text-sm text-slate-400 mt-1">Add activities above or tap the starter ideas</p>
         </div>

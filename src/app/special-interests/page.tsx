@@ -249,7 +249,7 @@ export default function SpecialInterestsPage() {
       {/* Empty state */}
       {specialInterests.length === 0 && !showForm && (
         <div className="bg-stone-50 border border-stone-200 rounded-2xl p-8 text-center space-y-2">
-          <p className="text-2xl">✨</p>
+          <p className="text-2xl"></p>
           <p className="font-semibold text-slate-700 text-sm">What are you into right now?</p>
           <p className="text-xs text-slate-400 leading-relaxed">Add your current obsessions, hobbies, and deep dives.</p>
         </div>

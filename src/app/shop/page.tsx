@@ -528,7 +528,7 @@ export default function ShopPage() {
         <div className="space-y-3">
           {purchased.length === 0 ? (
             <div className="bg-stone-50 border border-stone-200 rounded-2xl p-8 text-center">
-              <p className="text-3xl mb-2">🎁</p>
+              <p className="text-3xl mb-2"></p>
               <p className="font-semibold text-slate-700 text-sm">No rewards yet</p>
               <p className="text-xs text-slate-400 mt-1">Redeem something from the shop to see it here.</p>
             </div>

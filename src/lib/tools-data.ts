@@ -704,7 +704,7 @@ export const TOOLS: Tool[] = [
       intro: "For brains that don't reliably feel hunger, eating by schedule is a valid and helpful strategy.",
       steps: [
         "Choose 3 anchor meal times (not precise, approximate)",
-        "Set gentle phone reminders with a kind message: 'Hey, time to fuel up 🌟'",
+        "Set gentle phone reminders with a kind message: 'Hey, time to fuel up'",
         "Plan a few 'default' meals for each time (reduces decision fatigue)",
         "Don't wait for hunger, eat at the time regardless",
         "Allow flexibility, the goal is consistent nourishment, not perfection",
