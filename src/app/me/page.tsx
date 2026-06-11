@@ -694,7 +694,7 @@ function MyListsCard() {
 // ---------------------------------------------------------------------------
 
 export default function MePage() {
-  const { profile, sensoryProfile, favorites } =
+  const { profile, sensoryProfile, favorites, userName } =
     useAppStore();
   const [mounted, setMounted] = useState(false);
 
@@ -708,7 +708,7 @@ export default function MePage() {
       <div className="rounded-3xl bg-gradient-to-br from-white/70 to-sage-100/40 border border-white/80 shadow-sm px-5 py-5">
         <p className="text-xs font-bold uppercase tracking-widest text-sage-600 mb-0.5">Profile</p>
         <h1 className="text-3xl font-extrabold text-slate-800 leading-tight">
-          {mounted && profile.name ? profile.name : "Me"}
+          {mounted && userName ? userName : "My Profile"}
         </h1>
         <p className="text-sm text-slate-500 mt-1">Your profile at a glance</p>
       </div>
