@@ -15,6 +15,7 @@ import {
   SmilePlus,
   ChevronDown,
   ChevronUp,
+  Bell,
   type LucideIcon,
 } from "lucide-react";
 import { EnergyLevel, PleasantnessLevel, MoodEntry } from "@/types";
@@ -208,6 +209,106 @@ function PastCheckIns({ entries }: { entries: MoodEntry[] }) {
         >
           {showAll ? "Show fewer" : `Show all ${entries.length} check-ins`}
         </button>
+      )}
+    </div>
+  );
+}
+
+// ── Check-in reminder settings ────────────────────────────────
+function CheckInReminderSettings() {
+  const { checkInReminders, updateCheckInReminder, setReminderPermissionState } = useAppStore();
+  const [open, setOpen] = useState(false);
+
+  const TYPES = [
+    { key: "mood" as const, label: "Mood check-in", sub: "How you're feeling emotionally" },
+    { key: "body" as const, label: "Body check-in", sub: "Physical sensations" },
+    { key: "full" as const, label: "Full check-in", sub: "Emotions, body scan, and notes" },
+  ];
+
+  const anyEnabled = TYPES.some((t) => checkInReminders[t.key].enabled);
+
+  async function requestPermission() {
+    if (typeof Notification === "undefined") return;
+    const result = await Notification.requestPermission();
+    setReminderPermissionState(result as "granted" | "denied" | "default");
+  }
+
+  return (
+    <div className="bg-cream-50 rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
+      >
+        <div className="w-8 h-8 rounded-xl bg-sage-100 flex items-center justify-center shrink-0">
+          <Bell size={15} className={anyEnabled ? "text-sage-600" : "text-slate-400"} />
+        </div>
+        <div className="flex-1">
+          <p className="text-sm font-semibold text-slate-700">Reminders</p>
+          <p className="text-xs text-slate-400">
+            {anyEnabled
+              ? TYPES.filter((t) => checkInReminders[t.key].enabled).map((t) => t.label).join(", ")
+              : "Set daily reminder times"}
+          </p>
+        </div>
+        {open ? <ChevronUp size={15} className="text-slate-400" /> : <ChevronDown size={15} className="text-slate-400" />}
+      </button>
+
+      {open && (
+        <div className="px-4 pb-4 space-y-2 border-t border-slate-100 pt-3">
+          {/* Permission prompt */}
+          {checkInReminders.permissionState !== "granted" && (
+            <div className="bg-sage-50 border border-sage-100 rounded-xl px-3 py-2.5 mb-3 flex items-center justify-between gap-3">
+              <p className="text-xs text-slate-600 flex-1">
+                {checkInReminders.permissionState === "denied"
+                  ? "Notifications blocked — enable in device settings."
+                  : "Allow notifications to get reminders when the app is closed."}
+              </p>
+              {checkInReminders.permissionState !== "denied" && (
+                <button
+                  onClick={requestPermission}
+                  className="text-xs font-semibold text-sage-700 underline shrink-0"
+                >
+                  Allow
+                </button>
+              )}
+            </div>
+          )}
+
+          {TYPES.map(({ key, label, sub }) => {
+            const r = checkInReminders[key];
+            return (
+              <div key={key} className="flex items-center gap-3 py-1">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-slate-700">{label}</p>
+                  <p className="text-xs text-slate-400">{sub}</p>
+                </div>
+                {r.enabled && (
+                  <input
+                    type="time"
+                    value={r.time}
+                    onChange={(e) => updateCheckInReminder(key, { time: e.target.value })}
+                    className="text-xs font-semibold text-sage-700 bg-white border border-sage-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-sage-400"
+                  />
+                )}
+                <button
+                  onClick={() => updateCheckInReminder(key, { enabled: !r.enabled })}
+                  className={cn(
+                    "w-10 h-6 rounded-full transition-all relative shrink-0",
+                    r.enabled ? "bg-sage-500" : "bg-slate-200"
+                  )}
+                >
+                  <span className={cn(
+                    "absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all",
+                    r.enabled ? "left-[18px]" : "left-0.5"
+                  )} />
+                </button>
+              </div>
+            );
+          })}
+          <p className="text-xs text-slate-400 pt-1">
+            Reminders appear as banners when you open the app, or as native notifications if allowed above.
+          </p>
+        </div>
       )}
     </div>
   );
@@ -439,6 +540,9 @@ export default function MoodPage() {
           </div>
         </div>
       )}
+
+      {/* Reminder settings — collapsible, only on flow step */}
+      {step === "flow" && <CheckInReminderSettings />}
 
       {/* Past check-ins — always visible on flow step */}
       {step === "flow" && moodEntries.length > 0 && (
