@@ -210,7 +210,7 @@ export default function SpecialInterestsPage() {
   const casual = sorted.filter((i) => i.intensity === "casual");
 
   return (
-    <div className="px-4 pt-12 pb-24 space-y-5 min-h-screen bg-stone-100">
+    <div className="px-4 pt-12 pb-24 space-y-5 min-h-screen">
       {/* Header */}
       <div className="flex items-center gap-3">
         <Link href="/" className="p-2 -ml-2 text-slate-400 hover:text-slate-600 transition-colors">

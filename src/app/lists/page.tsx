@@ -43,7 +43,7 @@ export default function ListsPage() {
     const doneCount = openList.items.filter((i) => i.checked).length;
 
     return (
-      <div className="min-h-screen bg-cream-50 pb-24">
+      <div className="min-h-screen pb-24">
         <div className="max-w-lg mx-auto px-4 pt-6 space-y-4">
           {/* Header */}
           <div className="flex items-center gap-3">

@@ -406,7 +406,7 @@ export default function ShopPage() {
     : [];
 
   return (
-    <div className="px-4 pt-12 pb-24 space-y-5 min-h-screen bg-stone-100">
+    <div className="px-4 pt-12 pb-24 space-y-5 min-h-screen">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

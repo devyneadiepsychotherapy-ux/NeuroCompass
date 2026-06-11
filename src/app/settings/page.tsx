@@ -104,9 +104,9 @@ export default function SettingsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-cream-50 pb-24">
+    <div className="min-h-screen pb-24">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-cream-50/90 backdrop-blur-sm border-b border-slate-100 px-4 py-3 flex items-center gap-3">
+      <div className="sticky top-0 z-10 bg-[var(--background)]/90 backdrop-blur-sm border-b border-slate-100 px-4 py-3 flex items-center gap-3">
         <button
           onClick={() => router.back()}
           className="w-9 h-9 rounded-xl bg-stone-100 flex items-center justify-center hover:bg-stone-200 transition-colors"
