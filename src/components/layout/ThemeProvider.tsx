@@ -11,6 +11,11 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
   const setPendingLevelUp = useAppStore((s) => s.setPendingLevelUp);
   const theme = getTheme(activeTheme);
 
+  // Apply data-theme to <html> so [data-theme="x"] CSS overrides cascade to all Tailwind classes
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", activeTheme);
+  }, [activeTheme]);
+
   const cssVars = {
     "--bg": theme.background,
     "--card": theme.card,

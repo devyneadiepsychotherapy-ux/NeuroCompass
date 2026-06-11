@@ -64,6 +64,170 @@
   --color-mauve-700: #8a5e65;
 }
 
+/* ── Per-theme CSS variable overrides ───────────────────────────────────────
+   Setting data-theme on <html> in ThemeProvider causes these to cascade to
+   every Tailwind utility class that references the --color-* variables.      */
+
+[data-theme="monochrome"] {
+  --background: #F2EBE0;
+  --foreground: #2E1A08;
+  --color-white: #FFF8F3;
+  --color-cream-50: #FAF7F4;
+  --color-cream-100: #F3EDE5;
+  --color-cream-200: #E8DDD0;
+  --color-cream-300: #D8C9B8;
+  --color-sage-50: #F5EFE6;
+  --color-sage-100: #E8DDD0;
+  --color-sage-200: #D4C4B0;
+  --color-sage-300: #BE9E84;
+  --color-sage-400: #A87D60;
+  --color-sage-500: #8C6548;
+  --color-sage-600: #6F4E35;
+  --color-sage-700: #543B28;
+  --color-sage-800: #3A2A1A;
+  --color-sage-900: #221608;
+}
+
+[data-theme="pastel-dream"] {
+  --background: #FDF0F8;
+  --foreground: #3D2B38;
+  --color-white: #FFF9FE;
+  --color-cream-50: #FFF5FB;
+  --color-cream-100: #FDE8F5;
+  --color-cream-200: #F8D4EE;
+  --color-cream-300: #F0C0E4;
+  --color-sage-50: #FFF0FA;
+  --color-sage-100: #F5D8EE;
+  --color-sage-200: #E8B8D8;
+  --color-sage-300: #D898C4;
+  --color-sage-400: #C878AE;
+  --color-sage-500: #BC6BA0;
+  --color-sage-600: #C17BAC;
+  --color-sage-700: #8C4A7C;
+  --color-sage-800: #5E2A52;
+  --color-sage-900: #3A1530;
+}
+
+[data-theme="midnight-ocean"] {
+  --background: #0D1B2A;
+  --foreground: #E8F4F8;
+  --color-white: #243344;
+  --color-cream-50: #1B2D3E;
+  --color-cream-100: #203548;
+  --color-cream-200: #2A3F55;
+  --color-cream-300: #35506A;
+  --color-sage-50: #142232;
+  --color-sage-100: #1E3042;
+  --color-sage-200: #2E4A60;
+  --color-sage-300: #3E6480;
+  --color-sage-400: #4A7E9A;
+  --color-sage-500: #4A9EBF;
+  --color-sage-600: #3A8EAF;
+  --color-sage-700: #2A7A9F;
+  --color-sage-800: #1A5A7F;
+  --color-sage-900: #0A3A5A;
+}
+
+[data-theme="autumn-leaves"] {
+  --background: #FBF1E9;
+  --foreground: #3B2010;
+  --color-white: #FFF8F2;
+  --color-cream-50: #FDF6EF;
+  --color-cream-100: #F8EAD8;
+  --color-cream-200: #F0D8BA;
+  --color-cream-300: #E5C89E;
+  --color-sage-50: #FFF2E8;
+  --color-sage-100: #FFD8B8;
+  --color-sage-200: #F5BC8A;
+  --color-sage-300: #E8A062;
+  --color-sage-400: #D88440;
+  --color-sage-500: #C4622D;
+  --color-sage-600: #A84E20;
+  --color-sage-700: #8A3C14;
+  --color-sage-800: #6A2C0A;
+  --color-sage-900: #4A1E04;
+}
+
+[data-theme="earthy-green"] {
+  --background: #EAF0E6;
+  --foreground: #1E3025;
+  --color-white: #F4F8F2;
+  --color-cream-50: #F0F5EC;
+  --color-cream-100: #E4EDE0;
+  --color-cream-200: #D2E4CC;
+  --color-cream-300: #BCCFB5;
+  --color-sage-50: #E8F0E4;
+  --color-sage-100: #D0E4C8;
+  --color-sage-200: #B0CCA4;
+  --color-sage-300: #8EAE82;
+  --color-sage-400: #6A9460;
+  --color-sage-500: #4A7C59;
+  --color-sage-600: #3A6448;
+  --color-sage-700: #2C4E38;
+  --color-sage-800: #1E3828;
+  --color-sage-900: #102418;
+}
+
+[data-theme="botanical"] {
+  --background: #EEF4EC;
+  --foreground: #1A2E1C;
+  --color-white: #F4F8F3;
+  --color-cream-50: #F5F9F4;
+  --color-cream-100: #E8F0E5;
+  --color-cream-200: #D4E4CE;
+  --color-cream-300: #BCCFB4;
+  --color-sage-50: #E8F2E5;
+  --color-sage-100: #CCE4C5;
+  --color-sage-200: #A8CCA0;
+  --color-sage-300: #82B07A;
+  --color-sage-400: #5C9454;
+  --color-sage-500: #3D6B47;
+  --color-sage-600: #2E5438;
+  --color-sage-700: #224028;
+  --color-sage-800: #162C1A;
+  --color-sage-900: #0A1A0E;
+}
+
+[data-theme="holographic"] {
+  --background: #F0EEF8;
+  --foreground: #1E1530;
+  --color-white: #FAF9FE;
+  --color-cream-50: #F8F7FC;
+  --color-cream-100: #EEE8F8;
+  --color-cream-200: #E0D8F0;
+  --color-cream-300: #CEC0E4;
+  --color-sage-50: #F0EEFC;
+  --color-sage-100: #DDD8F0;
+  --color-sage-200: #C4BAE4;
+  --color-sage-300: #A898D4;
+  --color-sage-400: #9A7CCC;
+  --color-sage-500: #8B6FBF;
+  --color-sage-600: #7558A8;
+  --color-sage-700: #5E4490;
+  --color-sage-800: #483278;
+  --color-sage-900: #302060;
+}
+
+[data-theme="rainbow"] {
+  --background: #FFF8F0;
+  --foreground: #1A1A2E;
+  --color-white: #FFFCF8;
+  --color-cream-50: #FFFCF8;
+  --color-cream-100: #FFEED8;
+  --color-cream-200: #FFE0C0;
+  --color-cream-300: #FFD0A8;
+  --color-sage-50: #FFEEEE;
+  --color-sage-100: #FFD0D0;
+  --color-sage-200: #FFB0B0;
+  --color-sage-300: #FF9090;
+  --color-sage-400: #FF7070;
+  --color-sage-500: #E06B6B;
+  --color-sage-600: #CC5555;
+  --color-sage-700: #AA4040;
+  --color-sage-800: #882C2C;
+  --color-sage-900: #661818;
+}
+
 html, body {
   overscroll-behavior: none;
 }
