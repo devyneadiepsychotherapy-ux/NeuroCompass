@@ -202,7 +202,7 @@ function DateNavigation({
 const WEEK_DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 function WeekView({ date }: { date: Date }) {
-  const { tasks } = useAppStore();
+  const { tasks, appointments } = useAppStore();
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
   const todayKey = getTodayKey();
   const weekDays = getWeekDays(date);
@@ -217,7 +217,10 @@ function WeekView({ date }: { date: Date }) {
         const doneTasks = tasks.filter(
           (t) => taskMatchesView(t, "week") && t.status === "done" && t.dueDate === key
         );
-        const totalCount = pendingTasks.length + doneTasks.length;
+        const dayAppts = appointments.filter(
+          (a) => a.date === key && (!a.showOn || a.showOn.includes("week"))
+        );
+        const totalCount = pendingTasks.length + doneTasks.length + dayAppts.length;
         const isToday = key === todayKey;
         const isExpanded = expandedDay === key;
 
@@ -238,10 +241,12 @@ function WeekView({ date }: { date: Date }) {
               </div>
               <span className="flex-1 text-sm text-slate-500">
                 {totalCount === 0
-                  ? "No activities"
-                  : `${pendingTasks.length} activit${pendingTasks.length !== 1 ? "ies" : "y"}${
-                      doneTasks.length > 0 ? `, ${doneTasks.length} done` : ""
-                    }`}
+                  ? "Nothing scheduled"
+                  : [
+                      dayAppts.length > 0 ? `${dayAppts.length} scheduled` : "",
+                      pendingTasks.length > 0 ? `${pendingTasks.length} task${pendingTasks.length !== 1 ? "s" : ""}` : "",
+                      doneTasks.length > 0 ? `${doneTasks.length} done` : "",
+                    ].filter(Boolean).join(", ")}
               </span>
               {totalCount > 0 &&
                 (isExpanded ? (
@@ -252,6 +257,27 @@ function WeekView({ date }: { date: Date }) {
             </button>
             {isExpanded && totalCount > 0 && (
               <div className="px-4 pb-3 pt-3 space-y-2 border-t border-slate-100">
+                {dayAppts.map((appt) => {
+                  const typeColors: Record<string, string> = {
+                    appointment: "bg-blue-100 text-blue-700",
+                    activity: "bg-sage-100 text-sage-700",
+                    "time-block": "bg-violet-100 text-violet-700",
+                  };
+                  const colorClass = typeColors[appt.type ?? "appointment"] ?? typeColors.appointment;
+                  return (
+                    <div key={appt.id} className="flex items-center gap-2 py-1.5 px-3 bg-white rounded-xl border border-slate-100">
+                      <span className={cn("text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0", colorClass)}>
+                        {appt.type === "time-block" ? "Time Block" : (appt.type ?? "Appointment").charAt(0).toUpperCase() + (appt.type ?? "appointment").slice(1)}
+                      </span>
+                      <span className="text-sm text-slate-700 font-medium flex-1 min-w-0 truncate">{appt.title}</span>
+                      {appt.allDay ? (
+                        <span className="text-xs text-slate-400 shrink-0">All day</span>
+                      ) : appt.startTime ? (
+                        <span className="text-xs text-slate-400 shrink-0">{appt.startTime}</span>
+                      ) : null}
+                    </div>
+                  );
+                })}
                 {pendingTasks.map((task) => (
                   <TaskCard key={task.id} task={task} />
                 ))}
@@ -274,7 +300,7 @@ function WeekView({ date }: { date: Date }) {
 const MONTH_DAY_HEADERS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 function MonthView({ date, onDaySelect }: { date: Date; onDaySelect: (d: Date) => void }) {
-  const { tasks } = useAppStore();
+  const { tasks, appointments } = useAppStore();
   const cells = getMonthGrid(date);
   const todayKey = getTodayKey();
 
@@ -297,6 +323,10 @@ function MonthView({ date, onDaySelect }: { date: Date; onDaySelect: (d: Date) =
           const dayTaskCount = tasks.filter(
             (t) => taskMatchesView(t, "month") && t.dueDate === key && t.status !== "done"
           ).length;
+          const dayApptCount = appointments.filter(
+            (a) => a.date === key && (!a.showOn || a.showOn.includes("month"))
+          ).length;
+          const hasItems = dayTaskCount + dayApptCount > 0;
           const isToday = key === todayKey;
           return (
             <button
@@ -310,7 +340,7 @@ function MonthView({ date, onDaySelect }: { date: Date; onDaySelect: (d: Date) =
               )}
             >
               <span>{cell.getDate()}</span>
-              {dayTaskCount > 0 && (
+              {hasItems && (
                 <span
                   className={cn(
                     "w-1.5 h-1.5 rounded-full mt-0.5 shrink-0",
