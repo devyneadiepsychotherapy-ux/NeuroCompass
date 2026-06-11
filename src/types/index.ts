@@ -101,8 +101,8 @@ export interface Habit {
 
 export interface CheckInReminderEntry {
   enabled: boolean;
-  time: string; // "HH:MM" 24-hour
-  lastNotifiedDate: string; // "YYYY-MM-DD" — prevents repeat notifications same day
+  times: string[]; // array of "HH:MM" 24-hour
+  lastNotifiedDates: Record<string, string>; // time -> "YYYY-MM-DD" — prevents repeat per slot
 }
 
 export interface CheckInReminders {

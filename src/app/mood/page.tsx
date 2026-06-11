@@ -16,6 +16,8 @@ import {
   ChevronDown,
   ChevronUp,
   Bell,
+  Plus,
+  X,
   type LucideIcon,
 } from "lucide-react";
 import { EnergyLevel, PleasantnessLevel, MoodEntry } from "@/types";
@@ -216,8 +218,11 @@ function PastCheckIns({ entries }: { entries: MoodEntry[] }) {
 
 // ── Check-in reminder settings ────────────────────────────────
 function CheckInReminderSettings() {
-  const { checkInReminders, updateCheckInReminder, setReminderPermissionState } = useAppStore();
+  const { checkInReminders, updateCheckInReminder, addReminderTime, removeReminderTime, setReminderPermissionState } = useAppStore();
   const [open, setOpen] = useState(false);
+  // Track which type is showing the "add time" input
+  const [addingFor, setAddingFor] = useState<"mood" | "body" | "full" | null>(null);
+  const [newTime, setNewTime] = useState("08:00");
 
   const TYPES = [
     { key: "mood" as const, label: "Mood check-in", sub: "How you're feeling emotionally" },
@@ -231,6 +236,14 @@ function CheckInReminderSettings() {
     if (typeof Notification === "undefined") return;
     const result = await Notification.requestPermission();
     setReminderPermissionState(result as "granted" | "denied" | "default");
+  }
+
+  function handleAddTime(key: "mood" | "body" | "full") {
+    if (newTime) {
+      addReminderTime(key, newTime);
+      setAddingFor(null);
+      setNewTime("08:00");
+    }
   }
 
   return (
@@ -254,10 +267,10 @@ function CheckInReminderSettings() {
       </button>
 
       {open && (
-        <div className="px-4 pb-4 space-y-2 border-t border-slate-100 pt-3">
+        <div className="px-4 pb-4 space-y-4 border-t border-slate-100 pt-3">
           {/* Permission prompt */}
           {checkInReminders.permissionState !== "granted" && (
-            <div className="bg-sage-50 border border-sage-100 rounded-xl px-3 py-2.5 mb-3 flex items-center justify-between gap-3">
+            <div className="bg-sage-50 border border-sage-100 rounded-xl px-3 py-2.5 flex items-center justify-between gap-3">
               <p className="text-xs text-slate-600 flex-1">
                 {checkInReminders.permissionState === "denied"
                   ? "Notifications blocked — enable in device settings."
@@ -277,35 +290,91 @@ function CheckInReminderSettings() {
           {TYPES.map(({ key, label, sub }) => {
             const r = checkInReminders[key];
             return (
-              <div key={key} className="flex items-center gap-3 py-1">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-slate-700">{label}</p>
-                  <p className="text-xs text-slate-400">{sub}</p>
+              <div key={key} className="space-y-2">
+                {/* Header row: label + toggle */}
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-slate-700">{label}</p>
+                    <p className="text-xs text-slate-400">{sub}</p>
+                  </div>
+                  <button
+                    onClick={() => updateCheckInReminder(key, { enabled: !r.enabled })}
+                    className={cn(
+                      "w-10 h-6 rounded-full transition-all relative shrink-0",
+                      r.enabled ? "bg-sage-500" : "bg-slate-200"
+                    )}
+                  >
+                    <span className={cn(
+                      "absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all",
+                      r.enabled ? "left-[18px]" : "left-0.5"
+                    )} />
+                  </button>
                 </div>
+
+                {/* Time slots (only when enabled) */}
                 {r.enabled && (
-                  <input
-                    type="time"
-                    value={r.time}
-                    onChange={(e) => updateCheckInReminder(key, { time: e.target.value })}
-                    className="text-xs font-semibold text-sage-700 bg-white border border-sage-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-sage-400"
-                  />
+                  <div className="pl-0 space-y-1.5">
+                    {r.times.map((t) => (
+                      <div key={t} className="flex items-center gap-2">
+                        <input
+                          type="time"
+                          value={t}
+                          onChange={(e) => {
+                            removeReminderTime(key, t);
+                            addReminderTime(key, e.target.value);
+                          }}
+                          className="text-xs font-semibold text-sage-700 bg-white border border-sage-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-sage-400"
+                        />
+                        {r.times.length > 1 && (
+                          <button
+                            onClick={() => removeReminderTime(key, t)}
+                            className="text-slate-300 hover:text-rose-400 transition-colors"
+                          >
+                            <X size={14} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+
+                    {/* Add time slot */}
+                    {addingFor === key ? (
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="time"
+                          value={newTime}
+                          onChange={(e) => setNewTime(e.target.value)}
+                          className="text-xs font-semibold text-sage-700 bg-white border border-sage-300 rounded-lg px-2 py-1.5 focus:outline-none focus:border-sage-400"
+                          autoFocus
+                        />
+                        <button
+                          onClick={() => handleAddTime(key)}
+                          className="text-xs font-semibold text-sage-600 bg-sage-50 border border-sage-200 rounded-lg px-2.5 py-1.5 hover:bg-sage-100 transition-all"
+                        >
+                          Add
+                        </button>
+                        <button
+                          onClick={() => { setAddingFor(null); setNewTime("08:00"); }}
+                          className="text-slate-300 hover:text-slate-500 transition-colors"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => { setAddingFor(key); setNewTime("08:00"); }}
+                        className="flex items-center gap-1 text-xs text-sage-600 font-medium hover:text-sage-700 transition-colors"
+                      >
+                        <Plus size={13} />
+                        Add another time
+                      </button>
+                    )}
+                  </div>
                 )}
-                <button
-                  onClick={() => updateCheckInReminder(key, { enabled: !r.enabled })}
-                  className={cn(
-                    "w-10 h-6 rounded-full transition-all relative shrink-0",
-                    r.enabled ? "bg-sage-500" : "bg-slate-200"
-                  )}
-                >
-                  <span className={cn(
-                    "absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all",
-                    r.enabled ? "left-[18px]" : "left-0.5"
-                  )} />
-                </button>
               </div>
             );
           })}
-          <p className="text-xs text-slate-400 pt-1">
+
+          <p className="text-xs text-slate-400">
             Reminders appear as banners when you open the app, or as native notifications if allowed above.
           </p>
         </div>

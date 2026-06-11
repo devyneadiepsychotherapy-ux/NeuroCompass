@@ -58,10 +58,11 @@ export default function ReminderManager() {
     (["mood", "body", "full"] as ReminderType[]).forEach((type) => {
       const r = checkInReminders[type];
       if (!r.enabled) return;
-      if (r.lastNotifiedDate === today) return; // already notified today
-      if (!isTimePast(r.time)) return; // not time yet
-
-      due.push(type);
+      // Fire for each time slot that has passed and hasn't been notified today
+      const hasSlotDue = r.times.some(
+        (t) => isTimePast(t) && r.lastNotifiedDates[t] !== today
+      );
+      if (hasSlotDue) due.push(type);
     });
 
     if (due.length === 0) return;
@@ -69,23 +70,34 @@ export default function ReminderManager() {
     if (checkInReminders.permissionState === "granted" && typeof Notification !== "undefined") {
       // Fire native notifications
       due.forEach((type) => {
+        const r = checkInReminders[type];
         const cfg = REMINDER_CONFIG[type];
-        try {
-          new Notification(cfg.label, {
-            body: cfg.body,
-            icon: "/icon-192.png",
-            badge: "/icon-192.png",
-            tag: `checkin-${type}`,
-          });
-        } catch {
-          // Fallback to in-app banner if native notification fails
-        }
-        markReminderNotified(type, today);
+        r.times.forEach((t) => {
+          if (!isTimePast(t) || r.lastNotifiedDates[t] === today) return;
+          try {
+            new Notification(cfg.label, {
+              body: cfg.body,
+              icon: "/icon-192.png",
+              badge: "/icon-192.png",
+              tag: `checkin-${type}-${t}`,
+            });
+          } catch {
+            // Fallback to in-app banner if native notification fails
+          }
+          markReminderNotified(type, t, today);
+        });
       });
     } else {
-      // Show in-app banners
+      // Show in-app banners (one per type, mark all due slots)
       setBanners(due);
-      due.forEach((type) => markReminderNotified(type, today));
+      due.forEach((type) => {
+        const r = checkInReminders[type];
+        r.times.forEach((t) => {
+          if (isTimePast(t) && r.lastNotifiedDates[t] !== today) {
+            markReminderNotified(type, t, today);
+          }
+        });
+      });
     }
   }
 

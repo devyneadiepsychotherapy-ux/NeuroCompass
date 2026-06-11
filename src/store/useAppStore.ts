@@ -227,8 +227,10 @@ interface AppState {
   // Check-in reminders
   checkInReminders: CheckInReminders;
   updateCheckInReminder: (type: keyof Omit<CheckInReminders, "permissionState">, updates: Partial<import("@/types").CheckInReminderEntry>) => void;
+  addReminderTime: (type: keyof Omit<CheckInReminders, "permissionState">, time: string) => void;
+  removeReminderTime: (type: keyof Omit<CheckInReminders, "permissionState">, time: string) => void;
   setReminderPermissionState: (state: CheckInReminders["permissionState"]) => void;
-  markReminderNotified: (type: keyof Omit<CheckInReminders, "permissionState">, date: string) => void;
+  markReminderNotified: (type: keyof Omit<CheckInReminders, "permissionState">, time: string, date: string) => void;
 
   // Habit Builder
   habitBuilderItems: HabitBuilderItem[];
@@ -354,9 +356,9 @@ export const useAppStore = create<AppState>()(
       energyRestorers: [],
       habitBuilderItems: [],
       checkInReminders: {
-        mood: { enabled: false, time: "09:00", lastNotifiedDate: "" },
-        body: { enabled: false, time: "12:00", lastNotifiedDate: "" },
-        full: { enabled: false, time: "20:00", lastNotifiedDate: "" },
+        mood: { enabled: false, times: ["09:00"], lastNotifiedDates: {} },
+        body: { enabled: false, times: ["12:00"], lastNotifiedDates: {} },
+        full: { enabled: false, times: ["20:00"], lastNotifiedDates: {} },
         permissionState: "default",
       },
       okayMode: false,
@@ -905,13 +907,40 @@ export const useAppStore = create<AppState>()(
             [type]: { ...s.checkInReminders[type], ...updates },
           },
         })),
+      addReminderTime: (type, time) =>
+        set((s) => {
+          const entry = s.checkInReminders[type];
+          if (entry.times.includes(time)) return s;
+          return {
+            checkInReminders: {
+              ...s.checkInReminders,
+              [type]: { ...entry, times: [...entry.times, time].sort() },
+            },
+          };
+        }),
+      removeReminderTime: (type, time) =>
+        set((s) => {
+          const entry = s.checkInReminders[type];
+          const times = entry.times.filter((t) => t !== time);
+          const lastNotifiedDates = { ...entry.lastNotifiedDates };
+          delete lastNotifiedDates[time];
+          return {
+            checkInReminders: {
+              ...s.checkInReminders,
+              [type]: { ...entry, times: times.length ? times : ["09:00"], lastNotifiedDates },
+            },
+          };
+        }),
       setReminderPermissionState: (state) =>
         set((s) => ({ checkInReminders: { ...s.checkInReminders, permissionState: state } })),
-      markReminderNotified: (type, date) =>
+      markReminderNotified: (type, time, date) =>
         set((s) => ({
           checkInReminders: {
             ...s.checkInReminders,
-            [type]: { ...s.checkInReminders[type], lastNotifiedDate: date },
+            [type]: {
+              ...s.checkInReminders[type],
+              lastNotifiedDates: { ...s.checkInReminders[type].lastNotifiedDates, [time]: date },
+            },
           },
         })),
 
@@ -963,7 +992,7 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: "neurocompass-store",
-      version: 2,
+      version: 3,
       storage:
         typeof window !== "undefined"
           ? createJSONStorage(() => localStorage)
@@ -1000,6 +1029,22 @@ export const useAppStore = create<AppState>()(
           delete state.topPriorities;
           if (!state.topPrioritiesByDate) {
             state.topPrioritiesByDate = {};
+          }
+        }
+        if (version < 3) {
+          // CheckInReminderEntry changed from single time/lastNotifiedDate
+          // to times[] / lastNotifiedDates map.
+          const reminders = state.checkInReminders as Record<string, unknown> | undefined;
+          if (reminders) {
+            for (const key of ["mood", "body", "full"]) {
+              const entry = reminders[key] as Record<string, unknown> | undefined;
+              if (entry && typeof entry.time === "string") {
+                entry.times = [entry.time];
+                entry.lastNotifiedDates = {};
+                delete entry.time;
+                delete entry.lastNotifiedDate;
+              }
+            }
           }
         }
         return state;
