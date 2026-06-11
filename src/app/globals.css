@@ -89,23 +89,23 @@
 }
 
 [data-theme="pastel-dream"] {
-  --background: #FDF0F8;
-  --foreground: #3D2B38;
+  --background: #FBF2FD;
+  --foreground: #3A2040;
   --color-white: #FFF9FE;
-  --color-cream-50: #FFF5FB;
-  --color-cream-100: #FDE8F5;
-  --color-cream-200: #F8D4EE;
-  --color-cream-300: #F0C0E4;
-  --color-sage-50: #FFF0FA;
-  --color-sage-100: #F5D8EE;
-  --color-sage-200: #E8B8D8;
-  --color-sage-300: #D898C4;
-  --color-sage-400: #C878AE;
-  --color-sage-500: #BC6BA0;
-  --color-sage-600: #C17BAC;
-  --color-sage-700: #8C4A7C;
-  --color-sage-800: #5E2A52;
-  --color-sage-900: #3A1530;
+  --color-cream-50: #FFF7FE;
+  --color-cream-100: #FAEAF8;
+  --color-cream-200: #F4D8F2;
+  --color-cream-300: #ECC4EA;
+  --color-sage-50: #FDF0FC;
+  --color-sage-100: #F5D8F0;
+  --color-sage-200: #EAB8E4;
+  --color-sage-300: #DC94D4;
+  --color-sage-400: #CC78C6;
+  --color-sage-500: #C06AB8;
+  --color-sage-600: #D080BE;
+  --color-sage-700: #A0508E;
+  --color-sage-800: #703060;
+  --color-sage-900: #421838;
 }
 
 [data-theme="midnight-ocean"] {
@@ -169,23 +169,23 @@
 }
 
 [data-theme="botanical"] {
-  --background: #EEF4EC;
-  --foreground: #1A2E1C;
-  --color-white: #F4F8F3;
-  --color-cream-50: #F5F9F4;
-  --color-cream-100: #E8F0E5;
-  --color-cream-200: #D4E4CE;
-  --color-cream-300: #BCCFB4;
-  --color-sage-50: #E8F2E5;
-  --color-sage-100: #CCE4C5;
-  --color-sage-200: #A8CCA0;
-  --color-sage-300: #82B07A;
-  --color-sage-400: #5C9454;
-  --color-sage-500: #3D6B47;
-  --color-sage-600: #2E5438;
-  --color-sage-700: #224028;
-  --color-sage-800: #162C1A;
-  --color-sage-900: #0A1A0E;
+  --background: #EDF3EE;
+  --foreground: #1A2420;
+  --color-white: #F4F9F4;
+  --color-cream-50: #F4F9F4;
+  --color-cream-100: #E4EFE5;
+  --color-cream-200: #D0E4D2;
+  --color-cream-300: #B8D4BB;
+  --color-sage-50: #F2EEF8;
+  --color-sage-100: #E0D4F0;
+  --color-sage-200: #C8B4E4;
+  --color-sage-300: #AC90D4;
+  --color-sage-400: #9070BE;
+  --color-sage-500: #7856A3;
+  --color-sage-600: #6444A8;
+  --color-sage-700: #4E3290;
+  --color-sage-800: #392278;
+  --color-sage-900: #261460;
 }
 
 [data-theme="holographic"] {

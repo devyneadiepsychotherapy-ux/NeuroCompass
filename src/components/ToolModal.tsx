@@ -375,53 +375,113 @@ function FeelingsThermometerTool() {
     { n: 7,  label: "Anxious",     color: "#E8A85A" },
     { n: 8,  label: "Stressed",    color: "#E87A5A" },
     { n: 9,  label: "Overwhelmed", color: "#D85A4A" },
-    { n: 10, label: "Overwhelmed", color: "#C03030" },
+    { n: 10, label: "Crisis",      color: "#C03030" },
   ];
   const activeLevel = level !== null ? LEVELS[level - 1] : null;
-  const fillHeight = level !== null ? (level / 10) * 200 : 0;
+  // Tube spans y=18 to y=228 (height=210). Fill rises from y=228 upward.
+  const TUBE_TOP = 18;
+  const TUBE_BOTTOM = 228;
+  const TUBE_H = TUBE_BOTTOM - TUBE_TOP; // 210
+  const BULB_CY = 256;
+  const BULB_R = 22;
+  const fillHeight = level !== null ? (level / 10) * TUBE_H : 0;
+  const mercuryTop = TUBE_BOTTOM - fillHeight;
 
   return (
     <div className="space-y-4">
       <p className="text-sm font-semibold text-slate-700">How intense does this feeling feel?</p>
-      <div className="flex items-start justify-center gap-6">
-        <svg width="60" height="260" viewBox="0 0 60 260">
-          <rect x="22" y="20" width="16" height="200" rx="8" fill="#f0f0f0" stroke="#d0d0d0" strokeWidth="1.5" />
-          {level !== null && (
-            <rect x="24" y={220 - fillHeight} width="12" height={fillHeight} rx="4"
-              fill={activeLevel?.color ?? "#ccc"} style={{ transition: "all 0.4s ease" }} />
-          )}
+      <div className="flex items-start justify-center gap-4">
+
+        {/* ── Actual thermometer SVG ── */}
+        <svg width="72" height="300" viewBox="0 0 72 300" style={{ flexShrink: 0 }}>
+          <defs>
+            {/* Clip path = tube + bulb combined so mercury flows seamlessly */}
+            <clipPath id="therm-clip">
+              <rect x="27" y={TUBE_TOP} width="18" height={TUBE_H + 4} rx="9" />
+              <circle cx="36" cy={BULB_CY} r={BULB_R} />
+            </clipPath>
+          </defs>
+
+          {/* Glass tube — empty background */}
+          <rect x="27" y={TUBE_TOP} width="18" height={TUBE_H} rx="9"
+            fill="#F0F0F0" stroke="#D0D0D0" strokeWidth="1.5" />
+
+          {/* Bulb — empty background */}
+          <circle cx="36" cy={BULB_CY} r={BULB_R}
+            fill="#E4E4E4" stroke="#D0D0D0" strokeWidth="1.5" />
+
+          {/* Mercury fill — clipped to tube+bulb shape */}
+          <g clipPath="url(#therm-clip)">
+            <rect
+              x="20" y={mercuryTop}
+              width="32" height={300 - mercuryTop}
+              fill={activeLevel?.color ?? "#E4E4E4"}
+              style={{ transition: "y 0.4s ease, height 0.4s ease, fill 0.4s ease" }}
+            />
+          </g>
+
+          {/* Tube outline drawn over fill */}
+          <rect x="27" y={TUBE_TOP} width="18" height={TUBE_H} rx="9"
+            fill="none" stroke="#C0C0C0" strokeWidth="1.5" />
+          {/* Bulb outline drawn over fill */}
+          <circle cx="36" cy={BULB_CY} r={BULB_R}
+            fill="none" stroke="#C0C0C0" strokeWidth="1.5" />
+
+          {/* Glass shine (left highlight stripe) */}
+          <rect x="29.5" y={TUBE_TOP + 4} width="5" height={TUBE_H - 8} rx="2.5"
+            fill="white" opacity="0.5" />
+
+          {/* Tick marks */}
           {LEVELS.map((l) => {
-            const y = 220 - (l.n / 10) * 200;
-            return <line key={l.n} x1="38" y1={y} x2="43" y2={y} stroke="#ccc" strokeWidth="1" />;
+            const y = TUBE_BOTTOM - (l.n / 10) * TUBE_H;
+            return (
+              <g key={l.n}>
+                <line x1="45" y1={y} x2={l.n % 5 === 0 ? 54 : 50} y2={y}
+                  stroke="#B0B0B0" strokeWidth={l.n % 5 === 0 ? 1.5 : 1} />
+                {l.n % 5 === 0 && (
+                  <text x="57" y={y + 3.5} fontSize="9" fill="#999" fontWeight="600">{l.n}</text>
+                )}
+              </g>
+            );
           })}
-          <circle cx="30" cy="235" r="14" fill={activeLevel?.color ?? "#e0e0e0"} stroke="#d0d0d0" strokeWidth="1.5"
-            style={{ transition: "fill 0.4s ease" }} />
-          <text x="30" y="239" textAnchor="middle" fontSize="11" fill="white" fontWeight="700">{level ?? ""}</text>
+
+          {/* Level number inside bulb */}
+          <text x="36" y={BULB_CY + 5} textAnchor="middle" fontSize="13"
+            fill={level !== null ? "white" : "#bbb"} fontWeight="800">
+            {level ?? "·"}
+          </text>
         </svg>
-        <div className="flex flex-col gap-1.5 pt-2">
+
+        {/* Level buttons */}
+        <div className="flex flex-col gap-1.5 pt-1">
           {[...LEVELS].reverse().map((l) => {
             const active = level === l.n;
             return (
               <button key={l.n} onClick={() => setLevel(l.n)}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-left transition-all"
-                style={{ background: active ? l.color + "30" : "#f8f8f8", border: `1.5px solid ${active ? l.color : "#e5e7eb"}`, minWidth: 150 }}>
-                <span className="text-sm font-bold w-4 text-slate-500">{l.n}</span>
+                style={{
+                  background: active ? l.color + "28" : "#f8f8f8",
+                  border: `1.5px solid ${active ? l.color : "#e5e7eb"}`,
+                  minWidth: 148,
+                }}>
+                <span className="text-sm font-bold w-4 text-slate-400">{l.n}</span>
                 <span className="w-3 h-3 rounded-full shrink-0" style={{ background: l.color }} />
-                <span className="text-xs font-medium" style={{ color: active ? "#333" : "#666" }}>{l.label}</span>
+                <span className="text-xs font-semibold" style={{ color: active ? "#333" : "#777" }}>{l.label}</span>
               </button>
             );
           })}
         </div>
       </div>
+
       {activeLevel ? (
         <div className="rounded-2xl px-5 py-4 text-center border"
-          style={{ background: activeLevel.color + "15", borderColor: activeLevel.color + "60" }}>
+          style={{ background: activeLevel.color + "15", borderColor: activeLevel.color + "55" }}>
           <p className="text-3xl font-bold" style={{ color: activeLevel.color }}>{level}</p>
           <p className="text-base font-semibold text-slate-800 mt-0.5">{activeLevel.label}</p>
           <button onClick={() => setLevel(null)} className="mt-2 text-xs text-slate-400 underline">Clear</button>
         </div>
       ) : (
-        <p className="text-xs text-slate-400 text-center">Tap a level to calibrate your intensity</p>
+        <p className="text-xs text-slate-400 text-center">Tap a level to fill the thermometer</p>
       )}
     </div>
   );
