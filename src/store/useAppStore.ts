@@ -289,6 +289,7 @@ const defaultSectionVisibility: SectionVisibility = {
   top3: true,
   tasks: true,
   habits: true,
+  meal: true,
 };
 
 export const useAppStore = create<AppState>()(

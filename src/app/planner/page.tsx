@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import { useAppStore, defaultTopPriorities } from "@/store/useAppStore";
 import { Task, TaskPriority, RecurType, RewardType, TaskItemType, Appointment, TopPriority, Habit } from "@/types";
 import { getTodayKey, formatMinutes } from "@/lib/utils";
@@ -7,7 +8,7 @@ import { cn } from "@/lib/utils";
 import {
   Plus, Check, Trash2, Star, Clock, ChevronDown, ChevronUp, X, Repeat,
   Eye, EyeOff, Flame, CalendarClock, Target, ListTodo, Activity, Coins,
-  ChevronLeft, ChevronRight, Calendar, CalendarDays, Pencil,
+  ChevronLeft, ChevronRight, Calendar, CalendarDays, Pencil, UtensilsCrossed,
 } from "lucide-react";
 
 // ---------------------------------------------------------------------------
@@ -220,16 +221,15 @@ function WeekView({ date }: { date: Date }) {
         const dayAppts = appointments.filter(
           (a) => a.date === key && (!a.showOn || a.showOn.includes("week"))
         );
-        const totalCount = pendingTasks.length + doneTasks.length + dayAppts.length;
+        const taskCount = pendingTasks.length + doneTasks.length;
         const isToday = key === todayKey;
         const isExpanded = expandedDay === key;
+        const hasAnything = dayAppts.length > 0 || taskCount > 0;
 
         return (
           <div key={key} className="bg-cream-50 border border-slate-100 rounded-2xl overflow-hidden">
-            <button
-              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition-all text-left"
-              onClick={() => setExpandedDay(isExpanded ? null : key)}
-            >
+            {/* Day header row */}
+            <div className="flex items-center gap-3 px-4 pt-3 pb-2">
               <div
                 className={cn(
                   "w-9 h-9 rounded-xl flex flex-col items-center justify-center shrink-0",
@@ -239,45 +239,43 @@ function WeekView({ date }: { date: Date }) {
                 <span className="text-[9px] font-bold uppercase leading-none">{WEEK_DAY_LABELS[i]}</span>
                 <span className="text-sm font-bold leading-tight">{day.getDate()}</span>
               </div>
-              <span className="flex-1 text-sm text-slate-500">
-                {totalCount === 0
-                  ? "Nothing scheduled"
-                  : [
-                      dayAppts.length > 0 ? `${dayAppts.length} scheduled` : "",
-                      pendingTasks.length > 0 ? `${pendingTasks.length} task${pendingTasks.length !== 1 ? "s" : ""}` : "",
-                      doneTasks.length > 0 ? `${doneTasks.length} done` : "",
-                    ].filter(Boolean).join(", ")}
-              </span>
-              {totalCount > 0 &&
-                (isExpanded ? (
-                  <ChevronUp size={14} className="text-slate-400 shrink-0" />
-                ) : (
-                  <ChevronDown size={14} className="text-slate-400 shrink-0" />
-                ))}
-            </button>
-            {isExpanded && totalCount > 0 && (
-              <div className="px-4 pb-3 pt-3 space-y-2 border-t border-slate-100">
+              {!hasAnything && (
+                <span className="text-sm text-slate-400 italic">Nothing scheduled</span>
+              )}
+              {taskCount > 0 && (
+                <button
+                  onClick={() => setExpandedDay(isExpanded ? null : key)}
+                  className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 transition-colors ml-auto"
+                >
+                  {taskCount} task{taskCount !== 1 ? "s" : ""}
+                  {isExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                </button>
+              )}
+            </div>
+
+            {/* Appointment chips — always visible */}
+            {dayAppts.length > 0 && (
+              <div className="px-4 pb-3 space-y-1.5">
                 {dayAppts.map((appt) => {
-                  const typeColors: Record<string, string> = {
-                    appointment: "bg-blue-100 text-blue-700",
-                    activity: "bg-sage-100 text-sage-700",
-                    "time-block": "bg-violet-100 text-violet-700",
-                  };
-                  const colorClass = typeColors[appt.type ?? "appointment"] ?? typeColors.appointment;
+                  const c = appt.color ?? DEFAULT_APPT_COLOR;
+                  const opt = APPT_COLOR_OPTIONS.find((o) => o.hex === c) ?? APPT_COLOR_OPTIONS[0];
                   return (
-                    <div key={appt.id} className="flex items-center gap-2 py-1.5 px-3 bg-white rounded-xl border border-slate-100">
-                      <span className={cn("text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0", colorClass)}>
-                        {appt.type === "time-block" ? "Time Block" : (appt.type ?? "Appointment").charAt(0).toUpperCase() + (appt.type ?? "appointment").slice(1)}
-                      </span>
-                      <span className="text-sm text-slate-700 font-medium flex-1 min-w-0 truncate">{appt.title}</span>
+                    <div key={appt.id} className="flex items-center gap-2 py-1.5 px-3 rounded-xl border" style={{ background: opt.bg, borderColor: c + "30" }}>
+                      <span className="text-sm font-semibold flex-1 min-w-0 truncate" style={{ color: c }}>{appt.title}</span>
                       {appt.allDay ? (
-                        <span className="text-xs text-slate-400 shrink-0">All day</span>
+                        <span className="text-xs font-medium shrink-0" style={{ color: c + "aa" }}>All day</span>
                       ) : appt.startTime ? (
-                        <span className="text-xs text-slate-400 shrink-0">{appt.startTime}</span>
+                        <span className="text-xs font-medium shrink-0" style={{ color: c + "aa" }}>{appt.startTime}</span>
                       ) : null}
                     </div>
                   );
                 })}
+              </div>
+            )}
+
+            {/* Tasks — collapsible */}
+            {isExpanded && taskCount > 0 && (
+              <div className="px-4 pb-3 space-y-2 border-t border-slate-100 pt-3">
                 {pendingTasks.map((task) => (
                   <TaskCard key={task.id} task={task} />
                 ))}
@@ -323,10 +321,9 @@ function MonthView({ date, onDaySelect }: { date: Date; onDaySelect: (d: Date) =
           const dayTaskCount = tasks.filter(
             (t) => taskMatchesView(t, "month") && t.dueDate === key && t.status !== "done"
           ).length;
-          const dayApptCount = appointments.filter(
+          const dayAppts = appointments.filter(
             (a) => a.date === key && (!a.showOn || a.showOn.includes("month"))
-          ).length;
-          const hasItems = dayTaskCount + dayApptCount > 0;
+          );
           const isToday = key === todayKey;
           return (
             <button
@@ -340,14 +337,18 @@ function MonthView({ date, onDaySelect }: { date: Date; onDaySelect: (d: Date) =
               )}
             >
               <span>{cell.getDate()}</span>
-              {hasItems && (
-                <span
-                  className={cn(
-                    "w-1.5 h-1.5 rounded-full mt-0.5 shrink-0",
-                    isToday ? "bg-white/70" : "bg-sage-400"
-                  )}
-                />
-              )}
+              <div className="flex gap-0.5 mt-0.5 flex-wrap justify-center max-w-[28px]">
+                {dayAppts.slice(0, 3).map((a) => (
+                  <span
+                    key={a.id}
+                    className="w-1.5 h-1.5 rounded-full shrink-0"
+                    style={{ background: isToday ? "rgba(255,255,255,0.7)" : (a.color ?? DEFAULT_APPT_COLOR) }}
+                  />
+                ))}
+                {dayTaskCount > 0 && (
+                  <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", isToday ? "bg-white/50" : "bg-slate-400")} />
+                )}
+              </div>
             </button>
           );
         })}
@@ -660,6 +661,7 @@ function AppointmentRow({
     appt.showOn ?? ["day", "week", "month"]
   );
   const [editReminderMins, setEditReminderMins] = useState<number | undefined>(appt.reminderMinsBefore);
+  const [editColor, setEditColor] = useState(appt.color ?? DEFAULT_APPT_COLOR);
 
   const toggleEditShowOn = (view: "day" | "week" | "month") => {
     setEditShowOn((prev) =>
@@ -674,6 +676,7 @@ function AppointmentRow({
       allDay: editAllDay || undefined,
       startTime: editAllDay ? "" : editStartTime,
       endTime: editAllDay ? undefined : (editEndTime || undefined),
+      color: editColor,
       notes: editNotes.trim() || undefined,
       showOn: editShowOn,
       reminderMinsBefore: editAllDay ? undefined : editReminderMins,
@@ -697,6 +700,7 @@ function AppointmentRow({
     setEditNotes(appt.notes ?? "");
     setEditShowOn(appt.showOn ?? ["day", "week", "month"]);
     setEditReminderMins(appt.reminderMinsBefore);
+    setEditColor(appt.color ?? DEFAULT_APPT_COLOR);
     setShowEdit(true);
     setExpanded(false);
   };
@@ -821,6 +825,25 @@ function AppointmentRow({
             ))}
           </div>
         </div>
+        {/* Colour */}
+        <div>
+          <p className="text-xs text-slate-400 mb-1.5">Colour</p>
+          <div className="flex gap-2 flex-wrap">
+            {APPT_COLOR_OPTIONS.map((c) => (
+              <button
+                key={c.hex}
+                type="button"
+                onClick={() => setEditColor(c.hex)}
+                style={{ background: c.hex }}
+                className="w-7 h-7 rounded-full transition-all flex items-center justify-center"
+                title={c.label}
+              >
+                {editColor === c.hex && <Check size={12} className="text-white" strokeWidth={3} />}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="flex gap-2">
           <button
             onClick={handleSave}
@@ -847,10 +870,13 @@ function AppointmentRow({
     ? { appointment: "bg-blue-100 text-blue-700", activity: "bg-sage-100 text-sage-700", "time-block": "bg-violet-100 text-violet-700" }[appt.type]
     : "";
 
+  const cardColor = appt.color ?? DEFAULT_APPT_COLOR;
+  const colorOpt = APPT_COLOR_OPTIONS.find((c) => c.hex === cardColor) ?? APPT_COLOR_OPTIONS[0];
+
   return (
-    <div className="bg-cream-50 border border-slate-100 rounded-2xl px-4 py-3">
+    <div className="border rounded-2xl px-4 py-3" style={{ background: colorOpt.bg, borderColor: cardColor + "40" }}>
       <div className="flex items-center gap-3">
-        <span className="text-xs font-mono font-semibold text-sage-600 shrink-0">
+        <span className="text-xs font-mono font-semibold shrink-0" style={{ color: cardColor }}>
           {timeLabel}
         </span>
         <div className="flex-1 min-w-0">
@@ -1142,6 +1168,56 @@ function HabitRow({
 }
 
 // ---------------------------------------------------------------------------
+// Meal Plan Section
+// ---------------------------------------------------------------------------
+
+const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const MEAL_SLOTS = ["Breakfast", "Lunch", "Dinner", "Snack"];
+
+function MealPlanSection({ selectedDate }: { selectedDate: Date }) {
+  const dayName = DAY_NAMES[selectedDate.getDay()];
+  const [meals, setMeals] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("nd-meal-plan");
+      if (raw) {
+        const plan = JSON.parse(raw);
+        setMeals(plan[dayName] ?? {});
+      }
+    } catch { /* ignore */ }
+  }, [dayName]);
+
+  const hasMeals = MEAL_SLOTS.some((m) => meals[m]);
+
+  return (
+    <div className="space-y-2">
+      {hasMeals ? (
+        <div className="grid grid-cols-2 gap-2">
+          {MEAL_SLOTS.map((meal) =>
+            meals[meal] ? (
+              <div key={meal} className="bg-cream-50 border border-slate-100 rounded-xl px-3 py-2">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{meal}</p>
+                <p className="text-sm text-slate-700 font-medium mt-0.5 leading-snug">{meals[meal]}</p>
+              </div>
+            ) : null
+          )}
+        </div>
+      ) : (
+        <p className="text-sm text-slate-400 italic">No meals planned for {dayName}.</p>
+      )}
+      <Link
+        href="/meal-plan"
+        className="flex items-center gap-1.5 text-xs text-sage-600 font-medium hover:text-sage-700 transition-colors"
+      >
+        <UtensilsCrossed size={13} />
+        Open meal planner
+      </Link>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Add Schedule Item Modal
 // ---------------------------------------------------------------------------
 
@@ -1152,6 +1228,17 @@ const scheduleTypeConfig: Record<ScheduleItemType, { label: string; color: strin
   activity:    { label: "Activity",    color: "bg-sage-100 text-sage-700" },
   "time-block":{ label: "Time Block",  color: "bg-violet-100 text-violet-700" },
 };
+
+const APPT_COLOR_OPTIONS = [
+  { hex: "#5e8272", bg: "#d6e5d8", label: "Sage" },
+  { hex: "#3b82f6", bg: "#dbeafe", label: "Blue" },
+  { hex: "#7c3aed", bg: "#ede9fe", label: "Violet" },
+  { hex: "#ea580c", bg: "#ffedd5", label: "Coral" },
+  { hex: "#d97706", bg: "#fef3c7", label: "Amber" },
+  { hex: "#be185d", bg: "#fce7f3", label: "Rose" },
+  { hex: "#0f766e", bg: "#ccfbf1", label: "Teal" },
+];
+const DEFAULT_APPT_COLOR = APPT_COLOR_OPTIONS[0].hex;
 
 function AddScheduleModal({
   onClose,
@@ -1170,6 +1257,7 @@ function AddScheduleModal({
   const [showOn, setShowOn] = useState<("day" | "week" | "month")[]>(["day", "week", "month"]);
   const [reminderMins, setReminderMins] = useState<number | undefined>(undefined);
   const [notes, setNotes] = useState("");
+  const [color, setColor] = useState(DEFAULT_APPT_COLOR);
 
   const toggleShowOn = (view: "day" | "week" | "month") => {
     setShowOn((prev) =>
@@ -1186,6 +1274,7 @@ function AddScheduleModal({
       allDay: allDay || undefined,
       startTime: allDay ? "" : startTime,
       endTime: allDay ? undefined : (endTime || undefined),
+      color,
       title: title.trim(),
       notes: notes.trim() || undefined,
       showOn,
@@ -1361,6 +1450,25 @@ function AddScheduleModal({
                   {showOn.includes(v) && <Check size={8} className="text-white" strokeWidth={3} />}
                 </div>
                 {v.charAt(0).toUpperCase() + v.slice(1)} view
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Colour */}
+        <div>
+          <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">Colour</p>
+          <div className="flex gap-2 flex-wrap">
+            {APPT_COLOR_OPTIONS.map((c) => (
+              <button
+                key={c.hex}
+                type="button"
+                onClick={() => setColor(c.hex)}
+                style={{ background: c.hex }}
+                className="w-8 h-8 rounded-full transition-all flex items-center justify-center"
+                title={c.label}
+              >
+                {color === c.hex && <Check size={14} className="text-white" strokeWidth={3} />}
               </button>
             ))}
           </div>
@@ -2004,6 +2112,7 @@ export default function PlannerPage() {
                   top3: "Top 3",
                   tasks: "Tasks",
                   habits: "Habits",
+                  meal: "Meal Plan",
                 };
                 return (
                   <button
@@ -2077,6 +2186,18 @@ export default function PlannerPage() {
               onToggle={() => toggleSection("habits")}
             >
               <HabitsSection selectedDate={selectedDate} />
+            </Section>
+          )}
+
+          {/* Meal Plan */}
+          {(!mounted || sectionVisibility.meal) && (
+            <Section
+              id="meal"
+              icon={<UtensilsCrossed size={16} />}
+              title="Meal Plan"
+              onToggle={() => toggleSection("meal")}
+            >
+              <MealPlanSection selectedDate={selectedDate} />
             </Section>
           )}
         </>

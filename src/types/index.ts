@@ -76,6 +76,7 @@ export interface Appointment {
   endTime?: string;  // "HH:MM"
   allDay?: boolean;
   type?: "appointment" | "activity" | "time-block";
+  color?: string;
   title: string;
   notes?: string;
   showOn?: ("day" | "week" | "month")[];
@@ -101,6 +102,7 @@ export interface SectionVisibility {
   top3: boolean;
   tasks: boolean;
   habits: boolean;
+  meal: boolean;
 }
 
 export interface FocusSession {
