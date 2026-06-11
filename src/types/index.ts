@@ -88,7 +88,8 @@ export interface TopPriority {
   id: string;
   text: string;
   completed: boolean;
-  reward?: string;
+  rewardAmount?: number;
+  rewardType?: "xp" | "coins";
 }
 
 export interface Habit {

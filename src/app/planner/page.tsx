@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import {
   Plus, Check, Trash2, Star, Clock, ChevronDown, ChevronUp, X, Repeat,
   Eye, EyeOff, Flame, CalendarClock, Target, ListTodo, Activity, Coins,
-  ChevronLeft, ChevronRight, Calendar, CalendarDays, Pencil, UtensilsCrossed, Gift,
+  ChevronLeft, ChevronRight, Calendar, CalendarDays, Pencil, UtensilsCrossed,
 } from "lucide-react";
 
 // ---------------------------------------------------------------------------
@@ -965,18 +965,34 @@ function Top3Item({
   index: number;
   onUpdate: (updates: Partial<Omit<TopPriority, "id">>) => void;
 }) {
-  const { addXP } = useAppStore();
+  const { addXP, addCoins } = useAppStore();
   const [toast, setToast] = useState<string | null>(null);
+  const [editingReward, setEditingReward] = useState(false);
+  const [draftAmt, setDraftAmt] = useState<string>("");
   const accentColors = ["border-l-sage-500", "border-l-[#B8897A]", "border-l-rose-300"];
-  const xp = TOP3_XP[index];
+  const rewardAmt = priority.rewardAmount ?? TOP3_XP[index];
+  const rewardType = priority.rewardType ?? "xp";
 
   const handleToggle = () => {
     if (!priority.completed) {
-      addXP(xp);
-      setToast(`+${xp} XP`);
+      if (rewardType === "coins") addCoins(rewardAmt);
+      else addXP(rewardAmt);
+      setToast(`+${rewardAmt} ${rewardType === "coins" ? "Coins" : "XP"}`);
       setTimeout(() => setToast(null), 1500);
     }
     onUpdate({ completed: !priority.completed });
+  };
+
+  const openRewardEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setDraftAmt(String(rewardAmt));
+    setEditingReward(true);
+  };
+
+  const saveReward = () => {
+    const n = parseInt(draftAmt);
+    if (!isNaN(n) && n > 0) onUpdate({ rewardAmount: n });
+    setEditingReward(false);
   };
 
   return (
@@ -1018,24 +1034,44 @@ function Top3Item({
         </div>
 
         {!priority.completed && priority.text && (
-          <span className="text-[10px] text-[#B8A96A] font-semibold flex items-center gap-0.5 shrink-0">
+          <button
+            onClick={openRewardEdit}
+            className="text-[10px] text-[#B8A96A] font-semibold flex items-center gap-0.5 shrink-0 hover:opacity-70 transition-opacity"
+          >
             <Star size={9} fill="currentColor" />
-            {xp} XP
-          </span>
+            {rewardAmt} {rewardType === "coins" ? "Coins" : "XP"}
+            <Pencil size={7} className="ml-0.5 opacity-50" />
+          </button>
         )}
       </div>
 
-      {/* Custom reward */}
-      <div className="flex items-center gap-1.5 mt-2 pl-8">
-        <Gift size={11} className="text-slate-300 shrink-0" />
-        <input
-          className="flex-1 bg-transparent text-xs text-slate-400 placeholder-slate-300 focus:outline-none focus:text-slate-600"
-          placeholder="Your reward when done..."
-          value={priority.reward ?? ""}
-          onChange={(e) => onUpdate({ reward: e.target.value })}
-          onKeyDown={(e) => { if (e.key === "Enter") e.currentTarget.blur(); }}
-        />
-      </div>
+      {/* Editable reward row */}
+      {editingReward && (
+        <div className="flex items-center gap-2 mt-2 pl-8">
+          <input
+            type="number"
+            min={1}
+            className="w-16 bg-white/70 border border-slate-200 rounded-lg px-2 py-1 text-xs text-slate-700 text-center focus:outline-none focus:border-sage-400"
+            value={draftAmt}
+            onChange={(e) => setDraftAmt(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") saveReward(); if (e.key === "Escape") setEditingReward(false); }}
+            autoFocus
+          />
+          <div className="flex rounded-lg overflow-hidden border border-slate-200 text-[10px] font-semibold">
+            <button
+              className={cn("px-2 py-1 transition-colors", rewardType === "xp" ? "bg-[#B8A96A] text-white" : "bg-white/70 text-slate-500")}
+              onClick={() => onUpdate({ rewardType: "xp" })}
+            >XP</button>
+            <button
+              className={cn("px-2 py-1 transition-colors", rewardType === "coins" ? "bg-[#B8A96A] text-white" : "bg-white/70 text-slate-500")}
+              onClick={() => onUpdate({ rewardType: "coins" })}
+            >Coins</button>
+          </div>
+          <button onClick={saveReward} className="text-sage-600">
+            <Check size={14} strokeWidth={3} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
