@@ -288,7 +288,7 @@ export default function PsychoedPage() {
 
       <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100">
         <p className="text-xs text-slate-500 text-center leading-relaxed">
-          Content informed by Dr. Russell Barkley, Dr. Stephen Porges, Dr. William Dodson, and ND-affirming frameworks including Neurodivergent Insights and ADHD with Jenna Free.
+          Content informed by Dr. Russell Barkley, Dr. Stephen Porges, Dr. William Dodson, and ND-affirming frameworks including Neurodivergent Insights.
         </p>
       </div>
     </div>

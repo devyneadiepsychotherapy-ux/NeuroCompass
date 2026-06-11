@@ -192,7 +192,7 @@ function HabitCreateForm({ onDone }: { onDone: () => void }) {
           <div>
             <p className="text-sm font-bold text-slate-700 mb-1">Two versions of success</p>
             <p className="text-xs text-slate-400">
-              Both count. The good-enough version is there for hard days -using it is still a win.
+              Both count. The good-enough version is there for hard days. Using it is still a win.
             </p>
           </div>
 
@@ -219,7 +219,7 @@ function HabitCreateForm({ onDone }: { onDone: () => void }) {
                 <Star size={10} className="text-white" fill="white" strokeWidth={0} />
               </span>
               <p className="text-xs font-bold text-slate-700">Good-enough version</p>
-              <p className="text-xs text-slate-400">— for hard days</p>
+              <p className="text-xs text-slate-400">for hard days</p>
             </div>
             <input
               type="text"

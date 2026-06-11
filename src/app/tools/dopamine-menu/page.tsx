@@ -35,7 +35,7 @@ export default function DopamineMenuPage() {
 
       <div className="bg-gradient-to-br from-stone-100 to-sage-50 rounded-2xl p-4 border border-stone-200">
         <p className="text-sm text-slate-700 leading-relaxed">
-          From ADHD with Jenna Free: a menu of activities that boost dopamine, organized by how much energy they take. Build your personal list below.
+          A menu of activities that boost dopamine, organized by how much energy they take. Build your personal list below.
         </p>
         <p className="text-xs text-stone-500 mt-2 font-medium italic">
           &ldquo;Your dopamine needs are real. Meeting them is self-care, not self-indulgence.&rdquo;

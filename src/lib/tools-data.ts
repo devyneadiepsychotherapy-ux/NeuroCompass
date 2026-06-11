@@ -155,7 +155,7 @@ export const TOOLS: Tool[] = [
     icon: "Zap",
     type: "guided",
     content: {
-      intro: "From ADHD with Jenna Free: a menu of activities that boost dopamine, organized by how much energy they take.",
+      intro: "A menu of activities that boost dopamine, organized by how much energy they take.",
       variants: [
         { label: "Appetizers (low effort, 1-5 min)", description: "Doodle, stretch, listen to a song, look outside, pet an animal, make a funny face" },
         { label: "Main courses (moderate, 10-30 min)", description: "Walk, creative project, call a friend, cook something, dance, rewatch a comfort episode" },
