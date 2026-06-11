@@ -1281,48 +1281,204 @@ function HabitRow({
 // Meal Plan Section
 // ---------------------------------------------------------------------------
 
-const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const MEAL_SLOTS = ["Breakfast", "Lunch", "Dinner", "Snack"];
+const DEFAULT_MEAL_SLOTS = ["Breakfast", "Lunch", "Dinner", "Snack"];
+
+const MEAL_PRESETS: Record<string, string[]> = {
+  Breakfast: ["Oatmeal", "Toast & eggs", "Yogurt & fruit", "Cereal", "Smoothie", "Pancakes", "Avocado toast", "Granola"],
+  Lunch: ["Sandwich", "Salad", "Soup", "Leftovers", "Wrap", "Pasta", "Rice bowl", "Sushi"],
+  Dinner: ["Pasta", "Stir fry", "Chicken & veg", "Pizza", "Tacos", "Soup", "Rice & beans", "Roast veg"],
+  Snack: ["Fruit", "Crackers & cheese", "Nuts", "Yogurt", "Hummus & veg", "Granola bar", "Chocolate", "Popcorn"],
+};
+
+function getMealCategory(slot: string): string {
+  if (slot.toLowerCase().startsWith("snack")) return "Snack";
+  return slot;
+}
 
 function MealPlanSection({ selectedDate }: { selectedDate: Date }) {
-  const dayName = DAY_NAMES[selectedDate.getDay()];
-  const [meals, setMeals] = useState<Record<string, string>>({});
+  const dk = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
 
+  const [plan, setPlan] = useState<Record<string, string>>({});
+  const [extraSlots, setExtraSlots] = useState<string[]>([]);
+  const [customOptions, setCustomOptions] = useState<Record<string, string[]>>({});
+  const [editingSlot, setEditingSlot] = useState<string | null>(null);
+  const [addingOption, setAddingOption] = useState(false);
+  const [customInput, setCustomInput] = useState("");
+
+  // Load plan for this specific date
   useEffect(() => {
     try {
-      const raw = localStorage.getItem("nd-meal-plan");
-      if (raw) {
-        const plan = JSON.parse(raw);
-        setMeals(plan[dayName] ?? {});
-      }
+      const raw = localStorage.getItem("nd-meal-plan-v2");
+      setPlan(raw ? (JSON.parse(raw)[dk] ?? {}) : {});
+      const extRaw = localStorage.getItem("nd-meal-extra-slots");
+      if (extRaw) setExtraSlots(JSON.parse(extRaw));
+      const optRaw = localStorage.getItem("nd-meal-options");
+      if (optRaw) setCustomOptions(JSON.parse(optRaw));
     } catch { /* ignore */ }
-  }, [dayName]);
+  }, [dk]);
 
-  const hasMeals = MEAL_SLOTS.some((m) => meals[m]);
+  const persistPlan = (next: Record<string, string>) => {
+    setPlan(next);
+    try {
+      const raw = localStorage.getItem("nd-meal-plan-v2");
+      const all = raw ? JSON.parse(raw) : {};
+      all[dk] = next;
+      localStorage.setItem("nd-meal-plan-v2", JSON.stringify(all));
+    } catch { /* ignore */ }
+  };
+
+  const selectMeal = (slot: string, meal: string) => {
+    persistPlan({ ...plan, [slot]: meal });
+    setEditingSlot(null);
+    setAddingOption(false);
+    setCustomInput("");
+  };
+
+  const clearMeal = (slot: string) => {
+    const next = { ...plan };
+    delete next[slot];
+    persistPlan(next);
+  };
+
+  const addCustomOption = (slot: string) => {
+    if (!customInput.trim()) return;
+    const cat = getMealCategory(slot);
+    const updated = { ...customOptions, [cat]: [...(customOptions[cat] ?? []), customInput.trim()] };
+    setCustomOptions(updated);
+    localStorage.setItem("nd-meal-options", JSON.stringify(updated));
+    selectMeal(slot, customInput.trim());
+  };
+
+  const addExtraSnack = () => {
+    const next = [...extraSlots, `Snack ${extraSlots.length + 2}`];
+    setExtraSlots(next);
+    localStorage.setItem("nd-meal-extra-slots", JSON.stringify(next));
+  };
+
+  const removeExtraSlot = (slot: string) => {
+    const next = extraSlots.filter((s) => s !== slot);
+    setExtraSlots(next);
+    localStorage.setItem("nd-meal-extra-slots", JSON.stringify(next));
+    clearMeal(slot);
+  };
+
+  const allSlots = [...DEFAULT_MEAL_SLOTS, ...extraSlots];
 
   return (
     <div className="space-y-2">
-      {hasMeals ? (
-        <div className="grid grid-cols-2 gap-2">
-          {MEAL_SLOTS.map((meal) =>
-            meals[meal] ? (
-              <div key={meal} className="bg-cream-50 border border-slate-100 rounded-xl px-3 py-2">
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{meal}</p>
-                <p className="text-sm text-slate-700 font-medium mt-0.5 leading-snug">{meals[meal]}</p>
+      {allSlots.map((slot) => {
+        const cat = getMealCategory(slot);
+        const presets = MEAL_PRESETS[cat] ?? MEAL_PRESETS.Snack;
+        const custom = customOptions[cat] ?? [];
+        const allOptions = [...presets, ...custom];
+        const isEditing = editingSlot === slot;
+        const current = plan[slot];
+        const isExtra = extraSlots.includes(slot);
+
+        return (
+          <div key={slot} className="bg-cream-50 border border-slate-100 rounded-2xl overflow-hidden">
+            {/* Row */}
+            <div className="flex items-center gap-2 px-3 py-2.5">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest w-20 shrink-0">{slot}</p>
+
+              {current ? (
+                <>
+                  <button
+                    onClick={() => { setEditingSlot(isEditing ? null : slot); setAddingOption(false); setCustomInput(""); }}
+                    className="flex-1 text-left text-sm font-medium text-slate-700"
+                  >
+                    {current}
+                  </button>
+                  <button onClick={() => clearMeal(slot)} className="text-slate-300 hover:text-rose-400 transition-colors p-0.5">
+                    <X size={12} />
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => { setEditingSlot(isEditing ? null : slot); setAddingOption(false); setCustomInput(""); }}
+                  className="flex-1 text-left text-sm text-slate-300 hover:text-slate-400 transition-colors"
+                >
+                  Tap to plan...
+                </button>
+              )}
+
+              {isExtra && !current && (
+                <button onClick={() => removeExtraSlot(slot)} className="text-slate-200 hover:text-slate-400 transition-colors p-0.5">
+                  <X size={12} />
+                </button>
+              )}
+
+              <button
+                onClick={() => { setEditingSlot(isEditing ? null : slot); setAddingOption(false); setCustomInput(""); }}
+                className="text-slate-300 hover:text-slate-500 transition-colors"
+              >
+                {isEditing ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+              </button>
+            </div>
+
+            {/* Inline picker */}
+            {isEditing && (
+              <div className="border-t border-slate-100 px-3 pb-3 pt-2 space-y-2.5">
+                <div className="flex flex-wrap gap-1.5">
+                  {allOptions.map((opt) => (
+                    <button
+                      key={opt}
+                      onClick={() => selectMeal(slot, opt)}
+                      className={cn(
+                        "text-xs px-2.5 py-1 rounded-full border transition-all",
+                        current === opt
+                          ? "bg-sage-500 text-white border-sage-500"
+                          : "bg-white border-slate-200 text-slate-600 hover:border-sage-300 hover:text-sage-700"
+                      )}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+
+                {addingOption ? (
+                  <div className="flex gap-1.5">
+                    <input
+                      autoFocus
+                      className="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-700 placeholder-slate-300 focus:outline-none focus:border-sage-400"
+                      placeholder="Type a meal name..."
+                      value={customInput}
+                      onChange={(e) => setCustomInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") addCustomOption(slot);
+                        if (e.key === "Escape") { setAddingOption(false); setCustomInput(""); }
+                      }}
+                    />
+                    <button
+                      onClick={() => addCustomOption(slot)}
+                      className="bg-sage-500 text-white text-xs px-3 py-1.5 rounded-xl font-semibold shrink-0"
+                    >
+                      Add & select
+                    </button>
+                    <button onClick={() => { setAddingOption(false); setCustomInput(""); }} className="text-slate-400 hover:text-slate-600">
+                      <X size={14} />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setAddingOption(true)}
+                    className="flex items-center gap-1 text-xs text-sage-600 font-medium hover:text-sage-700 transition-colors"
+                  >
+                    <Plus size={11} /> Add custom option
+                  </button>
+                )}
               </div>
-            ) : null
-          )}
-        </div>
-      ) : (
-        <p className="text-sm text-slate-400 italic">No meals planned for {dayName}.</p>
-      )}
-      <Link
-        href="/meal-plan"
-        className="flex items-center gap-1.5 text-xs text-sage-600 font-medium hover:text-sage-700 transition-colors"
+            )}
+          </div>
+        );
+      })}
+
+      <button
+        onClick={addExtraSnack}
+        className="flex items-center gap-1.5 text-xs text-sage-600 font-medium hover:text-sage-700 transition-colors pt-0.5"
       >
-        <UtensilsCrossed size={13} />
-        Open meal planner
-      </Link>
+        <Plus size={11} /> Add another snack
+      </button>
     </div>
   );
 }
