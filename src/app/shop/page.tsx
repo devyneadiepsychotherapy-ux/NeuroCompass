@@ -406,25 +406,27 @@ export default function ShopPage() {
     : [];
 
   return (
-    <div className="px-4 pt-12 pb-24 space-y-5 min-h-screen">
+    <div className="px-4 pt-4 pb-24 space-y-5 min-h-screen">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800">Reward Shop</h1>
-          <p className="text-sm text-slate-500">Spend your coins on treats</p>
-        </div>
-        <div className="flex flex-col items-end gap-1">
-          <div className="flex items-center gap-2 bg-stone-100 border border-stone-200 rounded-2xl px-4 py-2">
-            <Coins size={18} className="text-[#B8A96A]" />
-            <span className="text-lg font-bold text-[#9e9158]">{displayCoins}</span>
-            <span className="text-xs text-[#B8A96A] font-medium">coins</span>
+      <div className="rounded-3xl bg-gradient-to-br from-white/70 to-sage-100/40 border border-white/80 shadow-sm px-5 py-5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-xs font-bold uppercase tracking-widest text-sage-600 mb-0.5">Rewards</p>
+            <h1 className="text-3xl font-extrabold text-slate-800 leading-tight">Reward Shop</h1>
+            <p className="text-sm text-slate-500 mt-1">Spend your coins on treats</p>
           </div>
-          {displayFreezes > 0 && (
-            <div className="flex items-center gap-1.5 bg-sky-50 border border-sky-200 rounded-full px-3 py-1">
-              <Snowflake size={12} className="text-sky-500" />
-              <span className="text-xs font-semibold text-sky-700">{displayFreezes} freeze{displayFreezes !== 1 ? "s" : ""}</span>
+          <div className="flex flex-col items-end gap-1.5 shrink-0">
+            <div className="flex items-center gap-2 bg-white/80 border border-gold-400/40 rounded-2xl px-3 py-2">
+              <Coins size={16} className="text-[#B8A96A]" />
+              <span className="text-base font-bold text-[#9e9158]">{displayCoins}</span>
             </div>
-          )}
+            {displayFreezes > 0 && (
+              <div className="flex items-center gap-1.5 bg-sky-50 border border-sky-200 rounded-full px-3 py-1">
+                <Snowflake size={12} className="text-sky-500" />
+                <span className="text-xs font-semibold text-sky-700">{displayFreezes} freeze{displayFreezes !== 1 ? "s" : ""}</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

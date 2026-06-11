@@ -384,10 +384,11 @@ export default function MoodPage() {
   }
 
   return (
-    <div className="px-4 pt-12 pb-8 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800">Mood Check-In</h1>
-        <p className="text-sm text-slate-500">No right or wrong answers. Just notice.</p>
+    <div className="px-4 pt-4 pb-8 space-y-6">
+      <div className="rounded-3xl bg-gradient-to-br from-white/70 to-sage-100/40 border border-white/80 shadow-sm px-5 py-5">
+        <p className="text-xs font-bold uppercase tracking-widest text-sage-600 mb-0.5">Daily</p>
+        <h1 className="text-3xl font-extrabold text-slate-800 leading-tight">Mood Check-In</h1>
+        <p className="text-sm text-slate-500 mt-1">No right or wrong answers, just notice.</p>
       </div>
 
       {/* Progress (only after flow is selected) */}

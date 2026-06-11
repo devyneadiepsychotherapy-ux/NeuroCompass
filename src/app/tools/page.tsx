@@ -266,10 +266,11 @@ export default function ToolsPage() {
   const favTools = TOOLS.filter(t => favorites.some(f => f.toolId === t.id));
 
   return (
-    <div className="px-4 pt-12 pb-8 space-y-5">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800">Tools</h1>
-        <p className="text-sm text-slate-500">ND-affirming tools for every challenge</p>
+    <div className="px-4 pt-4 pb-8 space-y-5">
+      <div className="rounded-3xl bg-gradient-to-br from-white/70 to-sage-100/40 border border-white/80 shadow-sm px-5 py-5">
+        <p className="text-xs font-bold uppercase tracking-widest text-sage-600 mb-0.5">Explore</p>
+        <h1 className="text-3xl font-extrabold text-slate-800 leading-tight">Tools</h1>
+        <p className="text-sm text-slate-500 mt-1">ND-affirming tools for every challenge</p>
       </div>
 
       {/* Recommendation widget */}

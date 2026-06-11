@@ -2100,7 +2100,7 @@ export default function PlannerPage() {
             <h1 className="text-3xl font-extrabold text-slate-800 leading-tight">
               {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric" })}
             </h1>
-            <p className="text-sm text-slate-500 mt-1">{greeting} — let&apos;s plan your day</p>
+            <p className="text-sm text-slate-500 mt-1">{greeting}, let&apos;s plan your day</p>
           </div>
           <div className="flex flex-col items-end gap-2 shrink-0">
             <button

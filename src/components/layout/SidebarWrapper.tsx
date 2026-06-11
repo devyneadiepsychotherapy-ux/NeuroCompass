@@ -26,7 +26,7 @@ export default function SidebarWrapper() {
             height={24}
             className="shrink-0"
           />
-          <span className="text-[15px] font-semibold tracking-wide text-[var(--foreground)]/80">
+          <span className="text-[16px] font-extrabold tracking-wide text-[var(--foreground)]">
             NeuroCompass
           </span>
         </div>

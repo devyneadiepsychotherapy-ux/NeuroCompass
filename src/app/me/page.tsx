@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Brain, Leaf, Zap, Shield, Sparkles, ListChecks, Plus,
-  Trash2, Check, ChevronDown, ChevronUp, X, User, ChevronRight,
+  Trash2, Check, ChevronDown, ChevronUp, X, ChevronRight,
   Heart,
   LayoutGrid, LayoutList,
 } from "lucide-react";
@@ -705,14 +705,12 @@ export default function MePage() {
   return (
     <div className="px-4 pt-4 pb-24 space-y-4">
       {/* Header */}
-      <div className="flex items-center gap-3 pb-1">
-        <div className="w-10 h-10 rounded-2xl bg-sage-100 flex items-center justify-center">
-          <User size={20} className="text-sage-700" />
-        </div>
-        <div>
-          <h1 className="text-xl font-bold text-slate-800">Me</h1>
-          <p className="text-xs text-slate-400">Your profile at a glance</p>
-        </div>
+      <div className="rounded-3xl bg-gradient-to-br from-white/70 to-sage-100/40 border border-white/80 shadow-sm px-5 py-5">
+        <p className="text-xs font-bold uppercase tracking-widest text-sage-600 mb-0.5">Profile</p>
+        <h1 className="text-3xl font-extrabold text-slate-800 leading-tight">
+          {mounted && profile.name ? profile.name : "Me"}
+        </h1>
+        <p className="text-sm text-slate-500 mt-1">Your profile at a glance</p>
       </div>
 
       {/* ND Strengths */}
