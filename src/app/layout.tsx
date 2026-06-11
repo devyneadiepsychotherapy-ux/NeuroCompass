@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     title: "NeuroCompass",
   },
   icons: {
-    apple: "/apple-touch-icon.png",
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
 };
 
@@ -40,6 +40,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" style={{ colorScheme: "light" }} className={nunito.variable}>
+      <head>
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+      </head>
       <body className="pb-20">
         <ThemeProvider>
           <TourProvider>
