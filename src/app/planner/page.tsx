@@ -1300,6 +1300,7 @@ function MealPlanSection({ selectedDate }: { selectedDate: Date }) {
   const [editingSlot, setEditingSlot] = useState<string | null>(null);
   const [addingOption, setAddingOption] = useState(false);
   const [customInput, setCustomInput] = useState("");
+  const [saveAsGoto, setSaveAsGoto] = useState(false);
 
   // Load plan for this specific date + extra snack slots
   useEffect(() => {
@@ -1338,9 +1339,9 @@ function MealPlanSection({ selectedDate }: { selectedDate: Date }) {
   const handleAddCustom = (slot: string) => {
     const trimmed = customInput.trim();
     if (!trimmed) return;
-    // Save as go-to option if not already saved
-    if (!savedNDMeals.includes(trimmed)) toggleSavedNDMeal(trimmed);
+    if (saveAsGoto && !savedNDMeals.includes(trimmed)) toggleSavedNDMeal(trimmed);
     handleSelectMeal(slot, trimmed);
+    setSaveAsGoto(false);
   };
 
   const addExtraSnack = () => {
@@ -1481,32 +1482,43 @@ function MealPlanSection({ selectedDate }: { selectedDate: Date }) {
                 </div>
 
                 {addingOption ? (
-                  <div className="flex gap-1.5">
-                    <input
-                      autoFocus
-                      className="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-700 placeholder-slate-300 focus:outline-none focus:border-sage-400"
-                      placeholder="Type a meal name..."
-                      value={customInput}
-                      onChange={(e) => setCustomInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") handleAddCustom(slot);
-                        if (e.key === "Escape") { setAddingOption(false); setCustomInput(""); }
-                      }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleAddCustom(slot)}
-                      className="bg-sage-500 text-white text-xs px-3 py-1.5 rounded-xl font-semibold shrink-0"
-                    >
-                      Add & select
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => { setAddingOption(false); setCustomInput(""); }}
-                      className="text-slate-400 hover:text-slate-600"
-                    >
-                      <X size={14} />
-                    </button>
+                  <div className="space-y-1.5">
+                    <div className="flex gap-1.5">
+                      <input
+                        autoFocus
+                        className="flex-1 bg-white border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-700 placeholder-slate-300 focus:outline-none focus:border-sage-400"
+                        placeholder="Type a meal name..."
+                        value={customInput}
+                        onChange={(e) => setCustomInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") handleAddCustom(slot);
+                          if (e.key === "Escape") { setAddingOption(false); setCustomInput(""); setSaveAsGoto(false); }
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleAddCustom(slot)}
+                        className="bg-sage-500 text-white text-xs px-3 py-1.5 rounded-xl font-semibold shrink-0"
+                      >
+                        Select
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setAddingOption(false); setCustomInput(""); setSaveAsGoto(false); }}
+                        className="text-slate-400 hover:text-slate-600"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                    <label className="flex items-center gap-1.5 cursor-pointer w-fit">
+                      <input
+                        type="checkbox"
+                        checked={saveAsGoto}
+                        onChange={(e) => setSaveAsGoto(e.target.checked)}
+                        className="w-3.5 h-3.5 accent-sage-500"
+                      />
+                      <span className="text-[10px] text-slate-400">Save as go-to option</span>
+                    </label>
                   </div>
                 ) : (
                   <button

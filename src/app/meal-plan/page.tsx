@@ -82,6 +82,14 @@ export default function MealPlanPage() {
     setInputText("");
   };
 
+  // Directly select a meal without relying on inputText state (avoids stale closure bug)
+  const selectMealDirectly = (value: string) => {
+    if (!editingCell) return;
+    setMeal(editingCell.day, editingCell.meal, value);
+    setEditingCell(null);
+    setInputText("");
+  };
+
   const addShopItem = () => {
     if (!shopInput.trim()) return;
     setShopping(prev => [...prev, shopInput.trim()]);
@@ -252,8 +260,8 @@ export default function MealPlanPage() {
                         <div key={m} className="flex items-center gap-0">
                           <button
                             type="button"
-                            onMouseDown={(e) => { e.preventDefault(); setInputText(m); commitEdit(); }}
-                            onTouchEnd={(e) => { e.preventDefault(); setInputText(m); commitEdit(); }}
+                            onMouseDown={(e) => { e.preventDefault(); selectMealDirectly(m); }}
+                            onTouchEnd={(e) => { e.preventDefault(); selectMealDirectly(m); }}
                             className="text-xs px-2.5 py-1.5 bg-sage-50 text-sage-700 rounded-l-full border border-sage-200 active:bg-sage-100"
                           >
                             {m}
