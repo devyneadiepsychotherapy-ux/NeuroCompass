@@ -586,55 +586,6 @@ export default function HomePage() {
       {/* Feeling Frozen */}
       <FeelingFrozenCard openTool={handleOpenToolById} />
 
-      {/* Feature highlights: Strengths + Learn */}
-      <div className="grid grid-cols-2 gap-3">
-        <Link
-          href="/strengths"
-          className="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl p-4 flex flex-col gap-2 hover:border-emerald-300 hover:shadow-md transition-all active:scale-[0.98]"
-        >
-          <div className="flex items-start justify-between">
-            <div className="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center">
-              <Sparkles size={17} className="text-emerald-700" />
-            </div>
-            <ChevronRight size={14} className="text-slate-300 mt-0.5" />
-          </div>
-          <div>
-            <p className="font-semibold text-slate-800 text-sm">My Strengths</p>
-            {(profile.ndIdentities.length > 0 || profile.strengths.length > 0) ? (
-              <div className="flex flex-wrap gap-1 mt-1.5">
-                {[...profile.ndIdentities, ...profile.strengths].slice(0, 3).map((s) => (
-                  <span key={s} className="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full border border-emerald-200 leading-none">
-                    {s}
-                  </span>
-                ))}
-                {([...profile.ndIdentities, ...profile.strengths].length > 3) && (
-                  <span className="text-[10px] text-slate-400">
-                    +{[...profile.ndIdentities, ...profile.strengths].length - 3} more
-                  </span>
-                )}
-              </div>
-            ) : (
-              <p className="text-xs text-emerald-600 mt-0.5 font-medium">Add your ND strengths →</p>
-            )}
-          </div>
-        </Link>
-        <Link
-          href="/psychoed"
-          className="bg-gradient-to-br from-sage-50 to-stone-50 border border-sage-200 rounded-2xl p-4 flex flex-col justify-between hover:border-sage-300 hover:shadow-md transition-all active:scale-[0.98]"
-        >
-          <div className="flex items-start justify-between">
-            <div className="w-9 h-9 rounded-xl bg-sage-100 flex items-center justify-center">
-              <Brain size={17} className="text-sage-700" />
-            </div>
-            <ChevronRight size={14} className="text-slate-300 mt-0.5" />
-          </div>
-          <div className="mt-3">
-            <p className="font-semibold text-slate-800 text-sm">Learn</p>
-            <p className="text-xs text-slate-500 mt-0.5">How your brain works</p>
-          </div>
-        </Link>
-      </div>
-
       {/* My Toolbox (favourites) */}
       <div className="bg-cream-50 rounded-2xl border border-slate-100 shadow-sm p-4">
         <div className="flex items-center justify-between mb-3">
@@ -675,6 +626,21 @@ export default function HomePage() {
           </div>
         )}
       </div>
+
+      {/* Learn */}
+      <Link
+        href="/psychoed"
+        className="bg-gradient-to-br from-sage-50 to-stone-50 border border-sage-200 rounded-2xl p-4 flex items-center gap-4 hover:border-sage-300 hover:shadow-md transition-all active:scale-[0.98]"
+      >
+        <div className="w-10 h-10 rounded-xl bg-sage-100 flex items-center justify-center shrink-0">
+          <Brain size={18} className="text-sage-700" />
+        </div>
+        <div className="flex-1">
+          <p className="font-semibold text-slate-800 text-sm">Learn</p>
+          <p className="text-xs text-slate-500 mt-0.5">How your brain works</p>
+        </div>
+        <ChevronRight size={16} className="text-slate-300 shrink-0" />
+      </Link>
 
       {/* Professional Support (compact) */}
       <div className="bg-sage-50 rounded-2xl p-4 border border-sage-200 space-y-3">

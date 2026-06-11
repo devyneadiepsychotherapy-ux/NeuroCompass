@@ -439,6 +439,7 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
   const [notes, setNotes] = useState("");
   const [showOn, setShowOn] = useState<("day" | "week" | "month")[]>(["day", "week", "month"]);
   const [reminderMins, setReminderMins] = useState<number | undefined>(undefined);
+  const [color, setColor] = useState(DEFAULT_APPT_COLOR);
 
   const selectedKey = dateKey(selectedDate);
   const dayAppointments = appointments.filter((a) => a.date === selectedKey);
@@ -460,6 +461,7 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
       notes: notes.trim() || undefined,
       showOn,
       reminderMinsBefore: allDay ? undefined : reminderMins,
+      color,
     });
     if (!allDay && reminderMins !== undefined) {
       requestNotificationPermission();
@@ -475,6 +477,7 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
     setEndTime("10:00");
     setShowOn(["day", "week", "month"]);
     setReminderMins(undefined);
+    setColor(DEFAULT_APPT_COLOR);
     setShowForm(false);
   };
 
@@ -607,6 +610,24 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
                     {showOn.includes(v) && <Check size={7} className="text-white" strokeWidth={3} />}
                   </div>
                   {v.charAt(0).toUpperCase() + v.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
+          {/* Colour */}
+          <div>
+            <p className="text-xs text-slate-400 mb-1.5">Colour</p>
+            <div className="flex gap-2 flex-wrap">
+              {APPT_COLOR_OPTIONS.map((c) => (
+                <button
+                  key={c.hex}
+                  type="button"
+                  onClick={() => setColor(c.hex)}
+                  style={{ background: c.hex }}
+                  className="w-7 h-7 rounded-full transition-all flex items-center justify-center"
+                  title={c.label}
+                >
+                  {color === c.hex && <Check size={12} className="text-white" strokeWidth={3} />}
                 </button>
               ))}
             </div>

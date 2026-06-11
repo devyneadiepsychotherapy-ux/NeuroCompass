@@ -58,7 +58,7 @@ function NDStrengthsCard({
           >
             <Brain size={16} style={{ color: "#5E7A6E" }} />
           </div>
-          <p className="text-sm font-semibold text-slate-800">ND Strengths</p>
+          <p className="text-sm font-semibold text-slate-800">My ND Strengths</p>
         </div>
         <ChevronRight size={14} className="text-slate-300 shrink-0" />
       </div>
