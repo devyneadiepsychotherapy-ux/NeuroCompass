@@ -1283,32 +1283,37 @@ function HabitRow({
 
 const DEFAULT_MEAL_SLOTS = ["Breakfast", "Lunch", "Dinner", "Snack"];
 
-// Default suggestions shown when user has no saved go-to meals yet
-const MEAL_STARTER_SUGGESTIONS = [
-  "Oatmeal", "Toast & eggs", "Yogurt & fruit", "Cereal", "Smoothie",
-  "Sandwich", "Salad", "Soup", "Leftovers", "Wrap",
-  "Pasta", "Stir fry", "Chicken & veg", "Pizza", "Tacos",
-  "Fruit", "Crackers & cheese", "Nuts", "Granola bar", "Hummus & veg",
-];
+const MEAL_PRESETS: Record<string, string[]> = {
+  Breakfast: ["Oatmeal", "Toast & eggs", "Yogurt & fruit", "Cereal", "Smoothie", "Pancakes", "Avocado toast", "Granola"],
+  Lunch: ["Sandwich", "Salad", "Soup", "Leftovers", "Wrap", "Pasta", "Rice bowl", "Sushi"],
+  Dinner: ["Pasta", "Stir fry", "Chicken & veg", "Pizza", "Tacos", "Soup", "Rice & beans", "Roast veg"],
+  Snack: ["Fruit", "Crackers & cheese", "Nuts", "Yogurt", "Hummus & veg", "Granola bar", "Chocolate", "Popcorn"],
+};
+
+function getMealCategory(slot: string) {
+  if (slot.toLowerCase().startsWith("snack")) return "Snack";
+  return slot;
+}
 
 function MealPlanSection({ selectedDate }: { selectedDate: Date }) {
-  const { savedNDMeals, toggleSavedNDMeal } = useAppStore();
   const dk = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
 
   const [plan, setPlan] = useState<Record<string, string>>({});
   const [extraSlots, setExtraSlots] = useState<string[]>([]);
+  const [customOptions, setCustomOptions] = useState<Record<string, string[]>>({});
   const [editingSlot, setEditingSlot] = useState<string | null>(null);
   const [addingOption, setAddingOption] = useState(false);
   const [customInput, setCustomInput] = useState("");
-  const [saveAsGoto, setSaveAsGoto] = useState(false);
+  const [saveForFuture, setSaveForFuture] = useState(false);
 
-  // Load plan for this specific date + extra snack slots
   useEffect(() => {
     try {
       const raw = localStorage.getItem("nd-meal-plan-v2");
       setPlan(raw ? (JSON.parse(raw)[dk] ?? {}) : {});
       const extRaw = localStorage.getItem("nd-meal-extra-slots");
       if (extRaw) setExtraSlots(JSON.parse(extRaw));
+      const optRaw = localStorage.getItem("nd-meal-options");
+      if (optRaw) setCustomOptions(JSON.parse(optRaw));
     } catch { /* ignore */ }
   }, [dk]);
 
@@ -1323,11 +1328,11 @@ function MealPlanSection({ selectedDate }: { selectedDate: Date }) {
   };
 
   const handleSelectMeal = (slot: string, meal: string) => {
-    const next = { ...plan, [slot]: meal };
-    persistPlan(next);
+    persistPlan({ ...plan, [slot]: meal });
     setEditingSlot(null);
     setAddingOption(false);
     setCustomInput("");
+    setSaveForFuture(false);
   };
 
   const handleClearMeal = (slot: string) => {
@@ -1339,9 +1344,13 @@ function MealPlanSection({ selectedDate }: { selectedDate: Date }) {
   const handleAddCustom = (slot: string) => {
     const trimmed = customInput.trim();
     if (!trimmed) return;
-    if (saveAsGoto && !savedNDMeals.includes(trimmed)) toggleSavedNDMeal(trimmed);
+    if (saveForFuture) {
+      const cat = getMealCategory(slot);
+      const updated = { ...customOptions, [cat]: [...(customOptions[cat] ?? []), trimmed] };
+      setCustomOptions(updated);
+      localStorage.setItem("nd-meal-options", JSON.stringify(updated));
+    }
     handleSelectMeal(slot, trimmed);
-    setSaveAsGoto(false);
   };
 
   const addExtraSnack = () => {
@@ -1357,13 +1366,15 @@ function MealPlanSection({ selectedDate }: { selectedDate: Date }) {
     handleClearMeal(slot);
   };
 
-  // Options = go-to saved meals, or starter suggestions if none saved yet
-  const optionPool = savedNDMeals.length > 0 ? savedNDMeals : MEAL_STARTER_SUGGESTIONS;
   const allSlots = [...DEFAULT_MEAL_SLOTS, ...extraSlots];
 
   return (
     <div className="space-y-2">
       {allSlots.map((slot) => {
+        const cat = getMealCategory(slot);
+        const presets = MEAL_PRESETS[cat] ?? MEAL_PRESETS.Snack;
+        const customs = customOptions[cat] ?? [];
+        const allOptions = [...presets, ...customs];
         const isEditing = editingSlot === slot;
         const current = plan[slot];
         const isExtra = extraSlots.includes(slot);
@@ -1373,112 +1384,47 @@ function MealPlanSection({ selectedDate }: { selectedDate: Date }) {
             {/* Slot row */}
             <div className="flex items-center gap-2 px-3 py-2.5">
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest w-20 shrink-0">{slot}</p>
-
               <span className={cn("flex-1 text-sm", current ? "font-medium text-slate-700" : "text-slate-300")}>
-                {current ?? "Tap ＋ to plan"}
+                {current ?? "Tap + to plan"}
               </span>
-
               {current && (
-                <button
-                  type="button"
-                  onClick={() => handleClearMeal(slot)}
-                  className="text-slate-300 hover:text-rose-400 transition-colors p-1"
-                >
+                <button type="button" onClick={() => handleClearMeal(slot)} className="text-slate-300 hover:text-rose-400 transition-colors p-1">
                   <X size={12} />
                 </button>
               )}
-
               {isExtra && !current && (
-                <button
-                  type="button"
-                  onClick={() => removeExtraSlot(slot)}
-                  className="text-slate-200 hover:text-slate-400 transition-colors p-1"
-                >
+                <button type="button" onClick={() => removeExtraSlot(slot)} className="text-slate-200 hover:text-slate-400 transition-colors p-1">
                   <X size={12} />
                 </button>
               )}
-
               <button
                 type="button"
-                onClick={() => {
-                  if (isEditing) {
-                    setEditingSlot(null);
-                    setAddingOption(false);
-                    setCustomInput("");
-                  } else {
-                    setEditingSlot(slot);
-                    setAddingOption(false);
-                    setCustomInput("");
-                  }
-                }}
+                onClick={() => { setEditingSlot(isEditing ? null : slot); setAddingOption(false); setCustomInput(""); setSaveForFuture(false); }}
                 className="text-slate-400 hover:text-sage-600 transition-colors p-1"
               >
                 {isEditing ? <ChevronUp size={14} /> : <Plus size={14} />}
               </button>
             </div>
 
-            {/* Picker panel — separate block, no parent button */}
+            {/* Picker */}
             {isEditing && (
               <div className="border-t border-slate-100 px-3 pb-3 pt-2 space-y-2.5">
-                {savedNDMeals.length === 0 && (
-                  <p className="text-[10px] text-slate-400">
-                    Tap ♡ to save meals as go-to options. They&apos;ll appear here every time.
-                  </p>
-                )}
                 <div className="flex flex-wrap gap-1.5">
-                  {optionPool.map((opt) => {
-                    const isSaved = savedNDMeals.includes(opt);
-                    const isSelected = current === opt;
-                    return (
-                      <div key={opt} className="flex items-center gap-0.5">
-                        <button
-                          type="button"
-                          className={cn(
-                            "text-xs px-2.5 py-1.5 rounded-l-full border transition-all",
-                            isSelected
-                              ? "bg-sage-500 text-white border-sage-500"
-                              : "bg-white border-slate-200 text-slate-600 active:bg-sage-50"
-                          )}
-                          onMouseDown={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleSelectMeal(slot, opt);
-                          }}
-                          onTouchEnd={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            handleSelectMeal(slot, opt);
-                          }}
-                        >
-                          {opt}
-                        </button>
-                        <button
-                          type="button"
-                          className={cn(
-                            "text-xs px-1.5 py-1.5 rounded-r-full border border-l-0 transition-all",
-                            isSelected
-                              ? "bg-sage-500 text-white border-sage-500"
-                              : isSaved
-                              ? "bg-rose-50 border-slate-200 text-rose-400"
-                              : "bg-white border-slate-200 text-slate-300 active:text-rose-400"
-                          )}
-                          onMouseDown={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            toggleSavedNDMeal(opt);
-                          }}
-                          onTouchEnd={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            toggleSavedNDMeal(opt);
-                          }}
-                          aria-label={isSaved ? "Remove from go-to options" : "Save as go-to option"}
-                        >
-                          ♡
-                        </button>
-                      </div>
-                    );
-                  })}
+                  {allOptions.map((opt) => (
+                    <button
+                      key={opt}
+                      type="button"
+                      onClick={() => handleSelectMeal(slot, opt)}
+                      className={cn(
+                        "text-xs px-2.5 py-1.5 rounded-full border transition-all",
+                        current === opt
+                          ? "bg-sage-500 text-white border-sage-500"
+                          : "bg-white border-slate-200 text-slate-600 hover:border-sage-300"
+                      )}
+                    >
+                      {opt}
+                    </button>
+                  ))}
                 </div>
 
                 {addingOption ? (
@@ -1492,41 +1438,24 @@ function MealPlanSection({ selectedDate }: { selectedDate: Date }) {
                         onChange={(e) => setCustomInput(e.target.value)}
                         onKeyDown={(e) => {
                           if (e.key === "Enter") handleAddCustom(slot);
-                          if (e.key === "Escape") { setAddingOption(false); setCustomInput(""); setSaveAsGoto(false); }
+                          if (e.key === "Escape") { setAddingOption(false); setCustomInput(""); setSaveForFuture(false); }
                         }}
                       />
-                      <button
-                        type="button"
-                        onClick={() => handleAddCustom(slot)}
-                        className="bg-sage-500 text-white text-xs px-3 py-1.5 rounded-xl font-semibold shrink-0"
-                      >
+                      <button type="button" onClick={() => handleAddCustom(slot)} className="bg-sage-500 text-white text-xs px-3 py-1.5 rounded-xl font-semibold shrink-0">
                         Select
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => { setAddingOption(false); setCustomInput(""); setSaveAsGoto(false); }}
-                        className="text-slate-400 hover:text-slate-600"
-                      >
+                      <button type="button" onClick={() => { setAddingOption(false); setCustomInput(""); setSaveForFuture(false); }} className="text-slate-400 hover:text-slate-600">
                         <X size={14} />
                       </button>
                     </div>
                     <label className="flex items-center gap-1.5 cursor-pointer w-fit">
-                      <input
-                        type="checkbox"
-                        checked={saveAsGoto}
-                        onChange={(e) => setSaveAsGoto(e.target.checked)}
-                        className="w-3.5 h-3.5 accent-sage-500"
-                      />
-                      <span className="text-[10px] text-slate-400">Save as go-to option</span>
+                      <input type="checkbox" checked={saveForFuture} onChange={(e) => setSaveForFuture(e.target.checked)} className="w-3.5 h-3.5 accent-sage-500" />
+                      <span className="text-[10px] text-slate-400">Save to my options for next time</span>
                     </label>
                   </div>
                 ) : (
-                  <button
-                    type="button"
-                    onClick={() => setAddingOption(true)}
-                    className="flex items-center gap-1 text-xs text-sage-600 font-medium hover:text-sage-700 transition-colors"
-                  >
-                    <Plus size={11} /> Add new option
+                  <button type="button" onClick={() => setAddingOption(true)} className="flex items-center gap-1 text-xs text-sage-600 font-medium hover:text-sage-700 transition-colors">
+                    <Plus size={11} /> Add custom meal
                   </button>
                 )}
               </div>
@@ -1535,11 +1464,7 @@ function MealPlanSection({ selectedDate }: { selectedDate: Date }) {
         );
       })}
 
-      <button
-        type="button"
-        onClick={addExtraSnack}
-        className="flex items-center gap-1.5 text-xs text-sage-600 font-medium hover:text-sage-700 transition-colors pt-0.5"
-      >
+      <button type="button" onClick={addExtraSnack} className="flex items-center gap-1.5 text-xs text-sage-600 font-medium hover:text-sage-700 transition-colors pt-0.5">
         <Plus size={11} /> Add another snack
       </button>
     </div>
