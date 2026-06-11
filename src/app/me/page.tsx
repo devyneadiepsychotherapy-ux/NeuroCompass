@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { SpecialInterest, UserList, ToolFavorite } from "@/types";
 import { TOOLS } from "@/lib/tools-data";
 import { ICON_MAP } from "@/lib/icon-map";
+import { getAvatarOption } from "@/app/onboarding/page";
 
 // ---------------------------------------------------------------------------
 // ND Strengths data
@@ -694,8 +695,9 @@ function MyListsCard() {
 // ---------------------------------------------------------------------------
 
 export default function MePage() {
-  const { profile, sensoryProfile, favorites, userName } =
+  const { profile, sensoryProfile, favorites, userName, userAvatar } =
     useAppStore();
+  const avatarInfo = getAvatarOption(userAvatar);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -707,10 +709,23 @@ export default function MePage() {
       {/* Header */}
       <div className="rounded-3xl bg-gradient-to-br from-white/70 to-sage-100/40 border border-white/80 shadow-sm px-5 py-5">
         <p className="text-xs font-bold uppercase tracking-widest text-sage-600 mb-0.5">Profile</p>
-        <h1 className="text-3xl font-extrabold text-slate-800 leading-tight">
-          {mounted && userName ? userName : "My Profile"}
-        </h1>
-        <p className="text-sm text-slate-500 mt-1">Your profile at a glance</p>
+        <div className="flex items-center gap-3 mt-1">
+          {mounted && avatarInfo ? (
+            <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center shrink-0", avatarInfo.bg)}>
+              <avatarInfo.Icon size={28} className={avatarInfo.iconColor} />
+            </div>
+          ) : (
+            <div className="w-14 h-14 rounded-2xl bg-sage-100 flex items-center justify-center shrink-0">
+              <Brain size={28} className="text-sage-600" />
+            </div>
+          )}
+          <div>
+            <h1 className="text-3xl font-extrabold text-slate-800 leading-tight">
+              {mounted && userName ? userName : "My Profile"}
+            </h1>
+            <p className="text-sm text-slate-500 mt-0.5">Level {profile.level}</p>
+          </div>
+        </div>
       </div>
 
       {/* ND Strengths */}
