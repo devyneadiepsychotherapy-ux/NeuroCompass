@@ -32,6 +32,7 @@ import {
   EmotionLogEntry,
   SensoryContingencyPlan,
   SensoryContingencyContact,
+  HabitBuilderItem,
 } from "@/types";
 import { generateId, levelFromXp, getTodayKey } from "@/lib/utils";
 import { ThemeId, THEMES } from "@/lib/themes";
@@ -222,6 +223,14 @@ interface AppState {
   addEnergyRestorer: (item: Omit<EnergyItem, "id">) => void;
   removeEnergyRestorer: (id: string) => void;
 
+  // Habit Builder
+  habitBuilderItems: HabitBuilderItem[];
+  addHabitBuilderItem: (item: Omit<HabitBuilderItem, "id" | "createdAt" | "completions" | "active">) => void;
+  updateHabitBuilderItem: (id: string, updates: Partial<Omit<HabitBuilderItem, "id" | "createdAt">>) => void;
+  deleteHabitBuilderItem: (id: string) => void;
+  logHabitBuilderCompletion: (id: string, date: string, level: "full" | "good-enough") => void;
+  clearHabitBuilderCompletion: (id: string, date: string) => void;
+
   // Okay Mode (not persisted)
   okayMode: boolean;
   setOkayMode: (val: boolean) => void;
@@ -336,6 +345,7 @@ export const useAppStore = create<AppState>()(
       xp: 0,
       energyDrains: [],
       energyRestorers: [],
+      habitBuilderItems: [],
       okayMode: false,
       hasOnboarded: false,
       userName: "",
@@ -873,6 +883,35 @@ export const useAppStore = create<AppState>()(
         set((s) => ({ energyRestorers: [...s.energyRestorers, { ...item, id: generateId() }] })),
       removeEnergyRestorer: (id) =>
         set((s) => ({ energyRestorers: s.energyRestorers.filter((e) => e.id !== id) })),
+
+      // Habit Builder actions
+      addHabitBuilderItem: (item) =>
+        set((s) => ({
+          habitBuilderItems: [
+            ...s.habitBuilderItems,
+            { ...item, id: generateId(), createdAt: new Date().toISOString(), completions: {}, active: true },
+          ],
+        })),
+      updateHabitBuilderItem: (id, updates) =>
+        set((s) => ({
+          habitBuilderItems: s.habitBuilderItems.map((h) => (h.id === id ? { ...h, ...updates } : h)),
+        })),
+      deleteHabitBuilderItem: (id) =>
+        set((s) => ({ habitBuilderItems: s.habitBuilderItems.filter((h) => h.id !== id) })),
+      logHabitBuilderCompletion: (id, date, level) =>
+        set((s) => ({
+          habitBuilderItems: s.habitBuilderItems.map((h) =>
+            h.id === id ? { ...h, completions: { ...h.completions, [date]: level } } : h
+          ),
+        })),
+      clearHabitBuilderCompletion: (id, date) =>
+        set((s) => ({
+          habitBuilderItems: s.habitBuilderItems.map((h) => {
+            if (h.id !== id) return h;
+            const { [date]: _, ...rest } = h.completions;
+            return { ...h, completions: rest };
+          }),
+        })),
 
       setOkayMode: (val) => set({ okayMode: val }),
 

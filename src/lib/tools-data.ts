@@ -623,6 +623,18 @@ export const TOOLS: Tool[] = [
     }
   },
   {
+    id: "habit-builder",
+    title: "Habit Builder",
+    description: "Start new habits or return to old ones — with a good-enough version for hard days",
+    category: "selfcare",
+    icon: "Sprout",
+    type: "interactive",
+    linkTo: "/habits",
+    content: {
+      intro: "Build habits in a way that actually works for your brain.",
+    }
+  },
+  {
     id: "habit-stack",
     title: "Habit Stacking",
     description: "Attach new habits to things you already do reliably",

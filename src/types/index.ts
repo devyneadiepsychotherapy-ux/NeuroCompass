@@ -99,6 +99,19 @@ export interface Habit {
   createdAt: string;
 }
 
+export interface HabitBuilderItem {
+  id: string;
+  name: string;
+  type: "new" | "returning";
+  fullVersion: string;       // the full/ideal version of the habit
+  goodEnoughVersion: string; // the minimum viable version for hard days
+  anchor: string;            // e.g. "After morning coffee"
+  frequency: "daily" | "weekdays" | "weekends" | "3x" | "2x";
+  completions: Record<string, "full" | "good-enough">; // YYYY-MM-DD → level
+  createdAt: string;
+  active: boolean;
+}
+
 export interface SectionVisibility {
   schedule: boolean;
   top3: boolean;
