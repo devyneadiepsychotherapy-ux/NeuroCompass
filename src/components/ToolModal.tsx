@@ -841,7 +841,7 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
           </div>
         </div>
 
-        <div className="px-6 py-5 space-y-5 pb-10">
+        <div className="px-6 py-5 space-y-5 pb-24">
 
           {/* Intro */}
           {tool.content.intro && !isBrainDump && (
