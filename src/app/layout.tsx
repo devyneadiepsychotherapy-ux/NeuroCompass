@@ -4,6 +4,7 @@ import BottomNav from "@/components/layout/BottomNav";
 import { TourProvider } from "@/components/layout/TourProvider";
 import ThemeProvider from "@/components/layout/ThemeProvider";
 import SidebarWrapper from "@/components/layout/SidebarWrapper";
+import StartPageGuard from "@/components/layout/StartPageGuard";
 
 export const metadata: Metadata = {
   title: "NeuroCompass",
@@ -35,6 +36,7 @@ export default function RootLayout({
       <body className="pb-20">
         <ThemeProvider>
           <TourProvider>
+            <StartPageGuard />
             <SidebarWrapper />
             <main
               className="max-w-lg mx-auto pt-14"
