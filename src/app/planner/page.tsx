@@ -1305,12 +1305,13 @@ const scheduleTypeConfig: Record<ScheduleItemType, { label: string; color: strin
 
 const APPT_COLOR_OPTIONS = [
   { hex: "#5e8272", bg: "#d6e5d8", label: "Sage" },
-  { hex: "#3b82f6", bg: "#dbeafe", label: "Blue" },
-  { hex: "#7c3aed", bg: "#ede9fe", label: "Violet" },
-  { hex: "#ea580c", bg: "#ffedd5", label: "Coral" },
-  { hex: "#d97706", bg: "#fef3c7", label: "Amber" },
-  { hex: "#be185d", bg: "#fce7f3", label: "Rose" },
-  { hex: "#0f766e", bg: "#ccfbf1", label: "Teal" },
+  { hex: "#4d7a80", bg: "#cde4e6", label: "Teal" },
+  { hex: "#7a8fb8", bg: "#dce3f5", label: "Slate Blue" },
+  { hex: "#9B8EC4", bg: "#e8e4f5", label: "Lavender" },
+  { hex: "#C4929A", bg: "#f5e4e6", label: "Dusty Rose" },
+  { hex: "#B8897A", bg: "#f0ddd8", label: "Terracotta" },
+  { hex: "#B8A96A", bg: "#f0ead4", label: "Gold" },
+  { hex: "#8a9e7a", bg: "#dce8d4", label: "Moss" },
 ];
 const DEFAULT_APPT_COLOR = APPT_COLOR_OPTIONS[0].hex;
 
