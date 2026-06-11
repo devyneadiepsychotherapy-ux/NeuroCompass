@@ -2061,7 +2061,7 @@ function TasksSection({
 // ---------------------------------------------------------------------------
 
 export default function PlannerPage() {
-  const { sectionVisibility, toggleSection } = useAppStore();
+  const { sectionVisibility, toggleSection, streak } = useAppStore();
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -2081,17 +2081,42 @@ export default function PlannerPage() {
     setActiveView("day");
   };
 
+  const greeting = (() => {
+    const h = new Date().getHours();
+    if (h < 12) return "Good morning";
+    if (h < 17) return "Good afternoon";
+    return "Good evening";
+  })();
+
   return (
     <div className="px-4 pt-4 pb-10 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-slate-800">Planner</h1>
-        <button
-          onClick={() => setShowScheduleModal(true)}
-          className="w-11 h-11 rounded-2xl bg-sage-600 flex items-center justify-center shadow-md hover:bg-sage-700 transition-all active:scale-95"
-        >
-          <Plus size={22} className="text-white" />
-        </button>
+      <div className="rounded-3xl bg-gradient-to-br from-white/70 to-sage-100/40 border border-white/80 shadow-sm px-5 py-5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-xs font-bold uppercase tracking-widest text-sage-600 mb-0.5">
+              {new Date().toLocaleDateString("en-US", { weekday: "long" })}
+            </p>
+            <h1 className="text-3xl font-extrabold text-slate-800 leading-tight">
+              {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric" })}
+            </h1>
+            <p className="text-sm text-slate-500 mt-1">{greeting} — let&apos;s plan your day</p>
+          </div>
+          <div className="flex flex-col items-end gap-2 shrink-0">
+            <button
+              onClick={() => setShowScheduleModal(true)}
+              className="w-11 h-11 rounded-2xl bg-sage-600 flex items-center justify-center shadow-md hover:bg-sage-700 transition-all active:scale-95"
+            >
+              <Plus size={22} className="text-white" />
+            </button>
+            {mounted && streak > 0 && (
+              <div className="flex items-center gap-1 bg-terracotta-100 text-terracotta-600 px-2.5 py-1 rounded-full">
+                <Flame size={12} />
+                <span className="text-xs font-bold">{streak} day{streak !== 1 ? "s" : ""}</span>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* View toggle + date navigation */}
