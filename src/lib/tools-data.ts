@@ -625,7 +625,7 @@ export const TOOLS: Tool[] = [
   {
     id: "habit-builder",
     title: "Habit Builder",
-    description: "Start new habits or return to old ones — with a good-enough version for hard days",
+    description: "Start new habits or return to old ones -with a good-enough version for hard days",
     category: "selfcare",
     icon: "Sprout",
     type: "interactive",
@@ -1072,7 +1072,7 @@ export const TOOLS: Tool[] = [
         "Is there a secondary emotion underneath?",
       ],
       tips: [
-        "ND brains often experience alexithymia (difficulty identifying emotions) — this is very common",
+        "ND brains often experience alexithymia (difficulty identifying emotions) -this is very common",
         "Starting with body sensations (tight chest, heavy arms) can help when words don't come",
         "There is no wrong emotion. Naming it is the first step to working with it.",
       ],
@@ -1087,7 +1087,7 @@ export const TOOLS: Tool[] = [
     icon: "LayoutGrid",
     type: "info",
     content: {
-      intro: "From Russ Harris's ACT work: emotions can be mapped on two axes — energy (high/low) and valence (pleasant/unpleasant). This helps you respond to emotions instead of reacting.",
+      intro: "From Russ Harris's ACT work: emotions can be mapped on two axes -energy (high/low) and valence (pleasant/unpleasant). This helps you respond to emotions instead of reacting.",
       variants: [
         { label: "High energy + unpleasant", description: "Anxious, angry, panicked, overwhelmed → needs grounding and nervous system down-regulation" },
         { label: "Low energy + unpleasant", description: "Sad, numb, shut down, hopeless → needs gentle activation, warmth, and compassion" },
@@ -1096,7 +1096,7 @@ export const TOOLS: Tool[] = [
       ],
       tips: [
         "Different quadrants need different tools: activation for low-energy states, regulation for high-energy ones",
-        "Notice which quadrant you spend the most time in — it's useful data about your nervous system",
+        "Notice which quadrant you spend the most time in -it's useful data about your nervous system",
         "The goal isn't to feel pleasant all the time, it's to have flexibility across the matrix",
       ],
       prompts: [
@@ -1116,16 +1116,16 @@ export const TOOLS: Tool[] = [
     content: {
       intro: "Not all emotions need the same response. A '3' frustration needs a different tool than an '8' panic. The feelings thermometer helps you calibrate your response to the actual intensity.",
       steps: [
-        "Notice the emotion — what are you feeling right now?",
+        "Notice the emotion -what are you feeling right now?",
         "Rate the intensity from 1 to 10 (1 = barely noticeable, 10 = overwhelming)",
-        "1–3: Mild — gentle awareness, continue with what you're doing",
-        "4–6: Moderate — pause, take 3 breaths, use a grounding tool",
-        "7–8: High — step away if possible, regulate before responding",
-        "9–10: Crisis level — do NOT make decisions, focus only on safety and nervous system regulation",
+        "1–3: Mild -gentle awareness, continue with what you're doing",
+        "4–6: Moderate -pause, take 3 breaths, use a grounding tool",
+        "7–8: High -step away if possible, regulate before responding",
+        "9–10: Crisis level -do NOT make decisions, focus only on safety and nervous system regulation",
       ],
       tips: [
         "Regular check-ins throughout the day build interoceptive awareness over time",
-        "For ND brains: emotions can escalate very fast — early detection (catching a 4 before it becomes an 8) is the skill",
+        "For ND brains: emotions can escalate very fast -early detection (catching a 4 before it becomes an 8) is the skill",
         "Intensity doesn't tell you the emotion is wrong. It tells you how much support you need.",
       ],
       prompts: [

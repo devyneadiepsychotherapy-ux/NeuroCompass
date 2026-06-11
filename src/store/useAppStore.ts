@@ -33,6 +33,7 @@ import {
   SensoryContingencyPlan,
   SensoryContingencyContact,
   HabitBuilderItem,
+  CheckInReminders,
 } from "@/types";
 import { generateId, levelFromXp, getTodayKey } from "@/lib/utils";
 import { ThemeId, THEMES } from "@/lib/themes";
@@ -223,6 +224,12 @@ interface AppState {
   addEnergyRestorer: (item: Omit<EnergyItem, "id">) => void;
   removeEnergyRestorer: (id: string) => void;
 
+  // Check-in reminders
+  checkInReminders: CheckInReminders;
+  updateCheckInReminder: (type: keyof Omit<CheckInReminders, "permissionState">, updates: Partial<import("@/types").CheckInReminderEntry>) => void;
+  setReminderPermissionState: (state: CheckInReminders["permissionState"]) => void;
+  markReminderNotified: (type: keyof Omit<CheckInReminders, "permissionState">, date: string) => void;
+
   // Habit Builder
   habitBuilderItems: HabitBuilderItem[];
   addHabitBuilderItem: (item: Omit<HabitBuilderItem, "id" | "createdAt" | "completions" | "active">) => void;
@@ -346,6 +353,12 @@ export const useAppStore = create<AppState>()(
       energyDrains: [],
       energyRestorers: [],
       habitBuilderItems: [],
+      checkInReminders: {
+        mood: { enabled: false, time: "09:00", lastNotifiedDate: "" },
+        body: { enabled: false, time: "12:00", lastNotifiedDate: "" },
+        full: { enabled: false, time: "20:00", lastNotifiedDate: "" },
+        permissionState: "default",
+      },
       okayMode: false,
       hasOnboarded: false,
       userName: "",
@@ -883,6 +896,24 @@ export const useAppStore = create<AppState>()(
         set((s) => ({ energyRestorers: [...s.energyRestorers, { ...item, id: generateId() }] })),
       removeEnergyRestorer: (id) =>
         set((s) => ({ energyRestorers: s.energyRestorers.filter((e) => e.id !== id) })),
+
+      // Check-in reminder actions
+      updateCheckInReminder: (type, updates) =>
+        set((s) => ({
+          checkInReminders: {
+            ...s.checkInReminders,
+            [type]: { ...s.checkInReminders[type], ...updates },
+          },
+        })),
+      setReminderPermissionState: (state) =>
+        set((s) => ({ checkInReminders: { ...s.checkInReminders, permissionState: state } })),
+      markReminderNotified: (type, date) =>
+        set((s) => ({
+          checkInReminders: {
+            ...s.checkInReminders,
+            [type]: { ...s.checkInReminders[type], lastNotifiedDate: date },
+          },
+        })),
 
       // Habit Builder actions
       addHabitBuilderItem: (item) =>

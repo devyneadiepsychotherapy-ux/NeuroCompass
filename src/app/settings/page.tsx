@@ -66,6 +66,7 @@ export default function SettingsPage() {
     activeTheme,
     notificationStyle, setNotificationStyle,
     updateProfile,
+    checkInReminders, updateCheckInReminder, setReminderPermissionState,
   } = useAppStore();
 
   const [editingProfile, setEditingProfile] = useState(false);
@@ -210,6 +211,8 @@ export default function SettingsPage() {
         {/* ── Notifications ── */}
         <section>
           <SectionHeading label="Notifications" />
+
+          {/* Notification style */}
           <div className="space-y-2">
             {notifOptions.map(({ id, label, desc, Icon }) => {
               const active = notificationStyle === id;
@@ -243,8 +246,85 @@ export default function SettingsPage() {
               );
             })}
           </div>
+
+          {/* Check-in reminders */}
+          <div className="mt-4 space-y-1">
+            <p className="text-xs font-bold text-slate-600 px-1 mb-2">Check-in reminders</p>
+
+            {/* Permission request */}
+            {checkInReminders.permissionState !== "granted" && (
+              <div className="bg-sage-50 border border-sage-100 rounded-2xl px-4 py-3 mb-3">
+                <p className="text-xs text-slate-600 mb-2">
+                  {checkInReminders.permissionState === "denied"
+                    ? "Notifications are blocked. Enable them in your browser/device settings."
+                    : "Allow notifications so reminders can appear even when you're not in the app."}
+                </p>
+                {checkInReminders.permissionState !== "denied" && (
+                  <button
+                    onClick={async () => {
+                      if (typeof Notification === "undefined") return;
+                      const result = await Notification.requestPermission();
+                      setReminderPermissionState(result as "granted" | "denied" | "default");
+                    }}
+                    className="flex items-center gap-1.5 bg-sage-600 text-white text-xs font-semibold rounded-xl px-3 py-2"
+                  >
+                    <Bell size={12} />
+                    Enable notifications
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Mood reminder */}
+            {(["mood", "body", "full"] as const).map((type) => {
+              const r = checkInReminders[type];
+              const labels = {
+                mood: { title: "Mood check-in", desc: "How are you feeling?" },
+                body: { title: "Body check-in", desc: "Quick body scan" },
+                full: { title: "Full check-in", desc: "Daily full check-in" },
+              };
+              const cfg = labels[type];
+              return (
+                <div
+                  key={type}
+                  className={cn(
+                    "flex items-center gap-3 rounded-2xl border px-4 py-3 transition-all",
+                    r.enabled ? "bg-sage-50 border-sage-200" : "bg-white border-slate-100"
+                  )}
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-slate-700">{cfg.title}</p>
+                    <p className="text-xs text-slate-400">{cfg.desc}</p>
+                  </div>
+                  {r.enabled && (
+                    <input
+                      type="time"
+                      value={r.time}
+                      onChange={(e) => updateCheckInReminder(type, { time: e.target.value })}
+                      className="text-xs font-semibold text-sage-700 bg-white border border-sage-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-sage-400"
+                    />
+                  )}
+                  {/* Toggle */}
+                  <button
+                    onClick={() => updateCheckInReminder(type, { enabled: !r.enabled })}
+                    className={cn(
+                      "w-10 h-6 rounded-full transition-all relative shrink-0",
+                      r.enabled ? "bg-sage-500" : "bg-slate-200"
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all",
+                        r.enabled ? "left-[18px]" : "left-0.5"
+                      )}
+                    />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
           <p className="text-xs text-slate-400 mt-2 px-1">
-            Notification delivery coming soon
+            Reminders appear as banners when you open the app, or as notifications if enabled above.
           </p>
         </section>
 

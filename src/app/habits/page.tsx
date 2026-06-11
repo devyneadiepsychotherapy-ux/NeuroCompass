@@ -5,7 +5,7 @@ import { useAppStore } from "@/store/useAppStore";
 import { HabitBuilderItem } from "@/types";
 import {
   ArrowLeft, Plus, Sprout, RefreshCw, Check, Star,
-  Trash2, ChevronDown, ChevronUp, Flame,
+  Trash2, ChevronDown, ChevronUp, Flame, Heart,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -93,12 +93,12 @@ function HabitCreateForm({ onDone }: { onDone: () => void }) {
         ))}
       </div>
 
-      {/* Step 1 — New or returning */}
+      {/* Step 1 -New or returning */}
       {step === 1 && (
         <div className="space-y-4">
           <div>
             <p className="text-sm font-bold text-slate-700 mb-1">What kind of habit is this?</p>
-            <p className="text-xs text-slate-400">No judgment either way — returning to something counts too.</p>
+            <p className="text-xs text-slate-400">No judgment either way -returning to something counts too.</p>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <button
@@ -140,12 +140,12 @@ function HabitCreateForm({ onDone }: { onDone: () => void }) {
         </div>
       )}
 
-      {/* Step 2 — Name & frequency */}
+      {/* Step 2 -Name & frequency */}
       {step === 2 && (
         <div className="space-y-4">
           <div>
             <p className="text-sm font-bold text-slate-700 mb-1">Name your habit</p>
-            <p className="text-xs text-slate-400">Keep it simple — you know what it means.</p>
+            <p className="text-xs text-slate-400">Keep it simple -you know what it means.</p>
           </div>
           <input
             type="text"
@@ -186,13 +186,13 @@ function HabitCreateForm({ onDone }: { onDone: () => void }) {
         </div>
       )}
 
-      {/* Step 3 — Full & good-enough versions */}
+      {/* Step 3 -Full & good-enough versions */}
       {step === 3 && (
         <div className="space-y-4">
           <div>
             <p className="text-sm font-bold text-slate-700 mb-1">Two versions of success</p>
             <p className="text-xs text-slate-400">
-              Both count. The good-enough version is there for hard days — using it is still a win.
+              Both count. The good-enough version is there for hard days -using it is still a win.
             </p>
           </div>
 
@@ -202,7 +202,7 @@ function HabitCreateForm({ onDone }: { onDone: () => void }) {
                 <Check size={11} className="text-white" strokeWidth={3} />
               </span>
               <p className="text-xs font-bold text-slate-700">Full version</p>
-              <p className="text-xs text-slate-400">— your ideal</p>
+              <p className="text-xs text-slate-400">your ideal</p>
             </div>
             <input
               type="text"
@@ -243,7 +243,7 @@ function HabitCreateForm({ onDone }: { onDone: () => void }) {
         </div>
       )}
 
-      {/* Step 4 — Anchor */}
+      {/* Step 4 -Anchor */}
       {step === 4 && (
         <div className="space-y-4">
           <div>
@@ -447,8 +447,10 @@ function HabitCard({ habit }: { habit: HabitBuilderItem }) {
 export default function HabitsPage() {
   const router = useRouter();
   const habitBuilderItems = useAppStore((s) => s.habitBuilderItems);
+  const { toggleFavorite, isFavorite } = useAppStore();
   const activeHabits = habitBuilderItems.filter((h) => h.active);
   const [showForm, setShowForm] = useState(false);
+  const fav = isFavorite("habit-builder");
 
   return (
     <div className="min-h-screen pb-24" style={{ background: "var(--background)" }}>
@@ -466,6 +468,12 @@ export default function HabitsPage() {
         <div className="flex-1">
           <h1 className="text-lg font-bold text-slate-800">Habit Builder</h1>
         </div>
+        <button
+          onClick={() => toggleFavorite("habit-builder")}
+          className="w-9 h-9 rounded-xl bg-black/5 flex items-center justify-center"
+        >
+          <Heart size={17} className={fav ? "text-rose-400 fill-rose-400" : "text-slate-400"} />
+        </button>
         <button
           onClick={() => setShowForm(true)}
           className="w-9 h-9 rounded-xl bg-sage-600 flex items-center justify-center shadow-sm"

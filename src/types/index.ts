@@ -99,6 +99,19 @@ export interface Habit {
   createdAt: string;
 }
 
+export interface CheckInReminderEntry {
+  enabled: boolean;
+  time: string; // "HH:MM" 24-hour
+  lastNotifiedDate: string; // "YYYY-MM-DD" — prevents repeat notifications same day
+}
+
+export interface CheckInReminders {
+  mood: CheckInReminderEntry;
+  body: CheckInReminderEntry;
+  full: CheckInReminderEntry;
+  permissionState: "default" | "granted" | "denied";
+}
+
 export interface HabitBuilderItem {
   id: string;
   name: string;

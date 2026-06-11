@@ -284,16 +284,6 @@ export default function ToolsPage() {
         onChange={(e) => setSearch(e.target.value)}
       />
 
-      {/* Favorites */}
-      {mounted && favTools.length > 0 && !search && !activeCategory && (
-        <div>
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Your Favourites</p>
-          <div className="space-y-2">
-            {favTools.map(t => <ToolCard key={t.id} tool={t} onOpen={() => openTool(t)} />)}
-          </div>
-        </div>
-      )}
-
       {/* Category pills */}
       {!search && (
         <div>
@@ -320,6 +310,16 @@ export default function ToolsPage() {
                 </button>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* Favorites */}
+      {mounted && favTools.length > 0 && !search && !activeCategory && (
+        <div>
+          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Your Favourites</p>
+          <div className="space-y-2">
+            {favTools.map(t => <ToolCard key={t.id} tool={t} onOpen={() => openTool(t)} />)}
           </div>
         </div>
       )}

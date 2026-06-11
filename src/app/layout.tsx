@@ -12,6 +12,7 @@ import { TourProvider } from "@/components/layout/TourProvider";
 import ThemeProvider from "@/components/layout/ThemeProvider";
 import SidebarWrapper from "@/components/layout/SidebarWrapper";
 import StartPageGuard from "@/components/layout/StartPageGuard";
+import ReminderManager from "@/components/layout/ReminderManager";
 
 export const metadata: Metadata = {
   title: "NeuroCompass",
@@ -47,6 +48,7 @@ export default function RootLayout({
         <ThemeProvider>
           <TourProvider>
             <StartPageGuard />
+            <ReminderManager />
             <SidebarWrapper />
             <main
               className="max-w-lg mx-auto pt-14"
