@@ -76,7 +76,7 @@ export default function ThemesPage() {
 
       <div className="px-4 pt-5 space-y-3">
         <p className="text-xs text-slate-400 px-1">
-          Unlock new themes by levelling up. Each card shows exactly what that theme looks like.
+          Unlock new themes by levelling up — at levels 2, 3, 5, 10, then every 5 after that. Each card shows exactly what that theme looks like.
         </p>
 
         {THEMES.map((theme) => {

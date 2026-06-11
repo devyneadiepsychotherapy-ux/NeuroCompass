@@ -38,7 +38,7 @@ export const THEMES: Theme[] = [
   {
     id: 'monochrome',
     name: 'Monochrome',
-    unlockLevel: 3,
+    unlockLevel: 2,
     background: '#F5F5F5',
     card: '#FFFFFF',
     primary: '#333333',
@@ -50,7 +50,7 @@ export const THEMES: Theme[] = [
   {
     id: 'pastel-dream',
     name: 'Pastel Dream',
-    unlockLevel: 5,
+    unlockLevel: 3,
     background: '#FDF0F8',
     card: '#FFF5FB',
     primary: '#C17BAC',
@@ -62,7 +62,7 @@ export const THEMES: Theme[] = [
   {
     id: 'midnight-ocean',
     name: 'Midnight Ocean',
-    unlockLevel: 10,
+    unlockLevel: 5,
     background: '#0D1B2A',
     card: '#1B2D3E',
     primary: '#4A9EBF',
@@ -74,7 +74,7 @@ export const THEMES: Theme[] = [
   {
     id: 'autumn-leaves',
     name: 'Autumn Leaves',
-    unlockLevel: 15,
+    unlockLevel: 10,
     background: '#FBF1E9',
     card: '#FDF6EF',
     primary: '#C4622D',
@@ -86,7 +86,7 @@ export const THEMES: Theme[] = [
   {
     id: 'earthy-green',
     name: 'Earthy Green',
-    unlockLevel: 20,
+    unlockLevel: 15,
     background: '#EAF0E6',
     card: '#F0F5EC',
     primary: '#4A7C59',
@@ -98,7 +98,7 @@ export const THEMES: Theme[] = [
   {
     id: 'botanical',
     name: 'Botanical Garden',
-    unlockLevel: 25,
+    unlockLevel: 20,
     background: '#EEF4EC',
     card: '#F5F9F4',
     primary: '#3D6B47',
@@ -110,7 +110,7 @@ export const THEMES: Theme[] = [
   {
     id: 'holographic',
     name: 'Holographic',
-    unlockLevel: 30,
+    unlockLevel: 25,
     background: '#F0EEF8',
     card: '#F8F7FC',
     primary: '#8B6FBF',
@@ -122,7 +122,7 @@ export const THEMES: Theme[] = [
   {
     id: 'rainbow',
     name: 'Rainbow',
-    unlockLevel: 35,
+    unlockLevel: 30,
     background: '#FFF8F0',
     card: '#FFFCF8',
     primary: '#E06B6B',

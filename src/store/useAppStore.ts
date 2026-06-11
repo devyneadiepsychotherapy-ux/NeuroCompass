@@ -808,8 +808,8 @@ export const useAppStore = create<AppState>()(
         }
       },
 
-      addXP: (amount) =>
-        set((s) => ({ xp: s.xp + amount })),
+      // Alias for addXp — routes through the real level-up logic
+      addXP: (amount) => get().addXp(amount),
 
       userLists: [],
 

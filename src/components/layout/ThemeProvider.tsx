@@ -97,7 +97,7 @@ function LevelUpToast({
               </span>
             </p>
             <Link
-              href="/settings"
+              href="/themes"
               className="text-xs font-semibold underline underline-offset-2 shrink-0"
               style={{ color: unlockedTheme.primary }}
               onClick={onDismiss}
