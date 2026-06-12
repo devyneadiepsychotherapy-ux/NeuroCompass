@@ -2356,7 +2356,7 @@ export default function PlannerPage() {
   return (
     <div className="px-4 pt-0 pb-10 space-y-6">
       {/* Header */}
-      <div className="pt-6 pb-2">
+      <div className="pt-3 pb-2">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="text-xs text-slate-400 font-medium tracking-wide uppercase">

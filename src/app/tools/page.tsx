@@ -5,7 +5,7 @@ import { TOOL_CATEGORIES, TOOLS, Tool } from "@/lib/tools-data";
 import { ICON_MAP } from "@/lib/icon-map";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/store/useAppStore";
-import { Heart, ChevronRight, MessageCircle, Search, HeartHandshake, ExternalLink } from "lucide-react";
+import { Heart, ChevronRight, MessageCircle, Search, HeartHandshake, ExternalLink, Wrench } from "lucide-react";
 import { ToolModal } from "@/components/ToolModal";
 
 // Map category id to a soft background color for the icon container
@@ -267,12 +267,14 @@ export default function ToolsPage() {
 
   return (
     <div className="px-4 pt-0 pb-8 space-y-5">
-      <div className="pt-6 pb-2 flex items-start justify-between gap-3">
+      <div className="pt-3 pb-2 flex items-start justify-between gap-3">
         <div>
           <h1 className="text-3xl font-extrabold text-slate-800 leading-tight">Tools</h1>
           <p className="text-sm text-slate-500 mt-1.5">ND-affirming tools for every challenge</p>
         </div>
-        <div className="text-4xl select-none mt-1" aria-hidden>🧰</div>
+        <div className="w-11 h-11 rounded-2xl bg-sage-100 flex items-center justify-center shrink-0 mt-1">
+          <Wrench size={20} className="text-sage-600" />
+        </div>
       </div>
 
       {/* Recommendation widget */}
