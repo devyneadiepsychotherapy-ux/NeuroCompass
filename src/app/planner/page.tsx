@@ -261,51 +261,60 @@ function WeekView({ date }: { date: Date }) {
   const todayKey = getTodayKey();
   const weekDays = getWeekDays(date);
 
+  const hasAnythingThisWeek = weekDays.some((day) => {
+    const key = dateKey(day);
+    return (
+      appointments.some((a) => a.date === key && (!a.showOn || a.showOn.includes("week"))) ||
+      tasks.some((t) => taskMatchesView(t, "week") && t.dueDate === key)
+    );
+  });
+
   return (
     <div>
-      {weekDays.map((day, i) => {
-        const key = dateKey(day);
-        const pendingTasks = tasks.filter(
-          (t) => taskMatchesView(t, "week") && !isTaskDone(t) && t.dueDate === key
-        );
-        const doneTasks = tasks.filter(
-          (t) => taskMatchesView(t, "week") && isTaskDone(t) && t.dueDate === key
-        );
-        const dayAppts = appointments.filter(
-          (a) => a.date === key && (!a.showOn || a.showOn.includes("week"))
-        );
-        const taskCount = pendingTasks.length + doneTasks.length;
-        const isToday = key === todayKey;
-        const isExpanded = expandedDay === key;
-        const hasAnything = dayAppts.length > 0 || taskCount > 0;
+      {!hasAnythingThisWeek && (
+        <p className="text-sm text-slate-400 italic mb-4">Nothing scheduled this week.</p>
+      )}
+      <div className="space-y-1">
+        {weekDays.map((day, i) => {
+          const key = dateKey(day);
+          const pendingTasks = tasks.filter(
+            (t) => taskMatchesView(t, "week") && !isTaskDone(t) && t.dueDate === key
+          );
+          const doneTasks = tasks.filter(
+            (t) => taskMatchesView(t, "week") && isTaskDone(t) && t.dueDate === key
+          );
+          const dayAppts = appointments.filter(
+            (a) => a.date === key && (!a.showOn || a.showOn.includes("week"))
+          );
+          const taskCount = pendingTasks.length + doneTasks.length;
+          const isToday = key === todayKey;
+          const isExpanded = expandedDay === key;
+          const hasAnything = dayAppts.length > 0 || taskCount > 0;
 
-        return (
-          <div key={key} className="border-b border-slate-100 last:border-0 py-3">
-            <div className="flex items-start gap-4">
+          return (
+            <div key={key} className={cn("flex items-start gap-3 py-1.5 px-2 rounded-xl transition-colors", isToday && "bg-sage-50/60")}>
               {/* Day label */}
-              <div className="flex flex-col items-center w-8 shrink-0 pt-0.5">
-                <span className={cn("text-[9px] font-bold uppercase leading-none", isToday ? "text-sage-600" : "text-slate-400")}>
+              <div className="w-9 shrink-0 pt-0.5">
+                <span className={cn("text-[9px] font-bold uppercase block leading-none", isToday ? "text-sage-600" : "text-slate-400")}>
                   {WEEK_DAY_LABELS[i]}
                 </span>
-                <span className={cn("text-lg font-bold leading-tight", isToday ? "text-sage-700" : "text-slate-700")}>
+                <span className={cn("text-sm font-bold leading-snug", isToday ? "text-sage-700" : "text-slate-600")}>
                   {day.getDate()}
                 </span>
-                {isToday && <span className="w-1 h-1 rounded-full bg-sage-500 mt-0.5" />}
               </div>
 
               {/* Content */}
-              <div className="flex-1 min-w-0 pt-1">
+              <div className="flex-1 min-w-0 pt-0.5">
                 {!hasAnything && (
-                  <span className="text-xs text-slate-300 italic">Nothing scheduled</span>
+                  <span className="text-xs text-slate-300">—</span>
                 )}
 
-                {/* Appointments */}
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                   {dayAppts.map((appt) => {
                     const c = appt.color ?? DEFAULT_APPT_COLOR;
                     return (
                       <div key={appt.id} className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full shrink-0 mt-0.5" style={{ background: c }} />
+                        <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: c }} />
                         <span className="text-sm text-slate-700 truncate">{appt.title}</span>
                         {appt.startTime && !appt.allDay && (
                           <span className="text-xs text-slate-400 shrink-0">{appt.startTime}</span>
@@ -315,33 +324,31 @@ function WeekView({ date }: { date: Date }) {
                   })}
                 </div>
 
-                {/* Task count / expand */}
                 {taskCount > 0 && (
                   <button
                     onClick={() => setExpandedDay(isExpanded ? null : key)}
-                    className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 transition-colors mt-1"
+                    className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 transition-colors mt-0.5"
                   >
                     {taskCount} task{taskCount !== 1 ? "s" : ""}
                     {isExpanded ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
                   </button>
                 )}
 
-                {/* Expanded tasks */}
                 {isExpanded && taskCount > 0 && (
-                  <div className="mt-2 space-y-1.5 pl-1">
+                  <div className="mt-1 space-y-0.5">
                     {[...pendingTasks, ...doneTasks].map((task) => (
                       <div key={task.id} className={cn("flex items-center gap-2", isTaskDone(task) && "opacity-50")}>
                         <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", isTaskDone(task) ? "bg-sage-400" : "bg-slate-300")} />
-                        <span className={cn("text-sm text-slate-700", isTaskDone(task) && "line-through text-slate-400")}>{task.title}</span>
+                        <span className={cn("text-xs text-slate-700", isTaskDone(task) && "line-through text-slate-400")}>{task.title}</span>
                       </div>
                     ))}
                   </div>
                 )}
               </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -359,19 +366,19 @@ function MonthView({ date, onDaySelect }: { date: Date; onDaySelect: (d: Date) =
 
   return (
     <div className="py-1">
-      <div className="grid grid-cols-7 mb-3">
+      <div className="grid grid-cols-7 mb-1">
         {MONTH_DAY_HEADERS.map((d) => (
           <div
             key={d}
-            className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider py-1"
+            className="text-center text-[9px] font-bold text-slate-400 uppercase tracking-wider pb-1"
           >
             {d}
           </div>
         ))}
       </div>
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7 gap-0.5">
         {cells.map((cell, i) => {
-          if (!cell) return <div key={`empty-${i}`} className="aspect-square" />;
+          if (!cell) return <div key={`empty-${i}`} className="h-9" />;
           const key = dateKey(cell);
           const dayTaskCount = tasks.filter(
             (t) => taskMatchesView(t, "month") && t.dueDate === key && !isTaskDone(t)
@@ -379,31 +386,34 @@ function MonthView({ date, onDaySelect }: { date: Date; onDaySelect: (d: Date) =
           const dayAppts = appointments.filter(
             (a) => a.date === key && (!a.showOn || a.showOn.includes("month"))
           );
+          const hasContent = dayAppts.length > 0 || dayTaskCount > 0;
           const isToday = key === todayKey;
           return (
             <button
               key={key}
               onClick={() => onDaySelect(cell)}
               className={cn(
-                "aspect-square flex flex-col items-center justify-center rounded-xl text-sm font-semibold transition-all",
+                "h-9 flex flex-col items-center justify-center rounded-lg text-sm font-medium transition-all",
                 isToday
-                  ? "bg-sage-600 text-white hover:bg-sage-700"
-                  : "text-slate-700 hover:bg-slate-100"
+                  ? "bg-sage-600 text-white"
+                  : "text-slate-700 hover:bg-white/50"
               )}
             >
               <span>{cell.getDate()}</span>
-              <div className="flex gap-0.5 mt-0.5 flex-wrap justify-center max-w-[28px]">
-                {dayAppts.slice(0, 3).map((a) => (
-                  <span
-                    key={a.id}
-                    className="w-1.5 h-1.5 rounded-full shrink-0"
-                    style={{ background: isToday ? "rgba(255,255,255,0.7)" : (a.color ?? DEFAULT_APPT_COLOR) }}
-                  />
-                ))}
-                {dayTaskCount > 0 && (
-                  <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", isToday ? "bg-white/50" : "bg-slate-400")} />
-                )}
-              </div>
+              {hasContent && (
+                <div className="flex gap-0.5 mt-0.5">
+                  {dayAppts.slice(0, 2).map((a) => (
+                    <span
+                      key={a.id}
+                      className="w-1 h-1 rounded-full shrink-0"
+                      style={{ background: isToday ? "rgba(255,255,255,0.7)" : (a.color ?? DEFAULT_APPT_COLOR) }}
+                    />
+                  ))}
+                  {dayTaskCount > 0 && (
+                    <span className={cn("w-1 h-1 rounded-full shrink-0", isToday ? "bg-white/50" : "bg-slate-400")} />
+                  )}
+                </div>
+              )}
             </button>
           );
         })}
