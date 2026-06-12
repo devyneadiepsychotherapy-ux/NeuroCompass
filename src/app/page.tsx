@@ -127,10 +127,10 @@ function FreezeSavedBanner({ onDismiss }: { onDismiss: () => void }) {
   }, [onDismiss]);
 
   return (
-    <div className="fixed top-4 left-4 right-4 z-50 flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-2xl px-4 py-3 shadow-lg">
+    <div className="fixed top-4 left-4 right-4 z-50 flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 shadow-lg">
       <Snowflake size={18} className="text-slate-400 shrink-0" />
       <p className="text-sm font-semibold text-slate-700 flex-1">Streak saved by a freeze!</p>
-      <button onClick={onDismiss} className="text-blue-400 hover:text-blue-600 transition-colors">
+      <button onClick={onDismiss} className="text-slate-400 hover:text-slate-600 transition-colors">
         <X size={16} />
       </button>
     </div>
@@ -513,7 +513,7 @@ export default function HomePage() {
       <div className="-mx-4 px-4 pt-3 pb-5 relative overflow-hidden" style={{ background: "linear-gradient(to bottom, var(--background) 0%, transparent 100%)" }}>
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <p className="text-xs text-slate-400 font-medium tracking-wide uppercase">
+            <p className="text-xs text-slate-500 font-semibold tracking-wide uppercase">
               {new Date().toLocaleDateString("en-CA", { weekday: "long", month: "long", day: "numeric" })}
             </p>
             <h1 className="text-3xl font-bold text-slate-800 mt-1 leading-tight" style={{ fontFamily: "var(--font-fraunces)" }}>

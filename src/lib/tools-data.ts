@@ -24,15 +24,15 @@ export const TOOL_CATEGORIES = [
   { id: "motivation", label: "Motivation & Activation", icon: "Zap", color: "bg-stone-100 text-stone-700" },
   { id: "attention", label: "Attention & Focus", icon: "Brain", color: "bg-sage-100 text-sage-700" },
   { id: "planning", label: "Planning & Organization", icon: "ClipboardList", color: "bg-sage-100 text-sage-700" },
-  { id: "impulsivity", label: "Impulsivity", icon: "Wind", color: "bg-teal-100 text-teal-700" },
+  { id: "impulsivity", label: "Impulsivity", icon: "Wind", color: "bg-stone-100 text-stone-600" },
   { id: "sensory", label: "Sensory", icon: "Leaf", color: "bg-sage-100 text-sage-700" },
-  { id: "selfcare", label: "Self-Care & Chores", icon: "Heart", color: "bg-rose-100 text-rose-700" },
+  { id: "selfcare", label: "Self-Care & Chores", icon: "Heart", color: "bg-stone-100 text-stone-600" },
   { id: "eating", label: "Eating Challenges", icon: "Utensils", color: "bg-stone-100 text-stone-700" },
-  { id: "perfectionism", label: "Perfectionism", icon: "CheckCircle", color: "bg-pink-100 text-pink-700" },
+  { id: "perfectionism", label: "Perfectionism", icon: "CheckCircle", color: "bg-stone-100 text-stone-600" },
   { id: "people", label: "People Pleasing", icon: "Users", color: "bg-stone-100 text-stone-700" },
   { id: "burnout", label: "Burnout Prevention", icon: "Battery", color: "bg-sage-100 text-sage-700" },
   { id: "interoception", label: "Interoception", icon: "Activity", color: "bg-sage-100 text-sage-700" },
-  { id: "emotion", label: "Emotion Regulation", icon: "Heart", color: "bg-rose-100 text-rose-700" },
+  { id: "emotion", label: "Emotion Regulation", icon: "Heart", color: "bg-stone-100 text-stone-600" },
 ];
 
 export const TOOLS: Tool[] = [
