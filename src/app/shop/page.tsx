@@ -408,7 +408,7 @@ export default function ShopPage() {
   return (
     <div className="px-4 pt-4 pb-24 space-y-5 min-h-screen">
       {/* Header */}
-      <div className="pt-2 pb-1">
+      <div className="-mx-4 px-4 pt-5 pb-4 bg-gradient-to-b from-stone-100 to-transparent">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <h1 className="text-3xl font-extrabold text-slate-800 leading-tight">Reward Shop</h1>

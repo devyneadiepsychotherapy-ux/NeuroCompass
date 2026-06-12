@@ -267,9 +267,9 @@ export default function ToolsPage() {
 
   return (
     <div className="px-4 pt-4 pb-8 space-y-5">
-      <div className="pt-2 pb-1">
+      <div className="-mx-4 px-4 pt-5 pb-4 bg-gradient-to-b from-sage-50 to-transparent">
         <h1 className="text-3xl font-extrabold text-slate-800 leading-tight">Tools</h1>
-        <p className="text-sm text-slate-500 mt-1">ND-affirming tools for every challenge</p>
+        <p className="text-sm text-slate-500 mt-1.5">ND-affirming tools for every challenge</p>
       </div>
 
       {/* Recommendation widget */}

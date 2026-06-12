@@ -555,9 +555,9 @@ export default function MoodPage() {
 
   return (
     <div className="px-4 pt-4 pb-8 space-y-6">
-      <div className="pt-2 pb-1">
+      <div className="-mx-4 px-4 pt-5 pb-4 bg-gradient-to-b from-rose-50 to-transparent">
         <h1 className="text-3xl font-extrabold text-slate-800 leading-tight">Check-In</h1>
-        <p className="text-sm text-slate-500 mt-1">No right or wrong answers, just notice.</p>
+        <p className="text-sm text-slate-500 mt-1.5">No right or wrong answers, just notice.</p>
       </div>
 
       {/* Progress (only after flow is selected) */}

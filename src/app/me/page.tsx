@@ -707,7 +707,7 @@ export default function MePage() {
   return (
     <div className="px-4 pt-4 pb-24 space-y-4">
       {/* Header */}
-      <div className="pt-2 pb-1">
+      <div className="-mx-4 px-4 pt-5 pb-4 bg-gradient-to-b from-sage-50 to-transparent">
         <div className="flex items-center gap-3">
           {mounted && avatarInfo ? (
             <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center shrink-0", avatarInfo.bg)}>
