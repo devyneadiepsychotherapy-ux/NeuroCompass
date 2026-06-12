@@ -492,7 +492,7 @@ function MyListsCard() {
             className="w-8 h-8 rounded-xl flex items-center justify-center"
             style={{ background: "#E2E8F0" }}
           >
-            <ListChecks size={16} className="text-violet-600" />
+            <ListChecks size={16} className="text-sage-600" />
           </div>
           <p className="text-sm font-semibold text-slate-800">My Lists</p>
         </div>
@@ -508,9 +508,9 @@ function MyListsCard() {
       </div>
 
       {showNewForm && (
-        <div className="bg-violet-50 border border-violet-200 rounded-xl p-3 space-y-2">
+        <div className="bg-sage-50 border border-sage-200 rounded-xl p-3 space-y-2">
           <input
-            className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-400 bg-white"
+            className="w-full border border-stone-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-400 bg-white"
             placeholder="List name"
             value={newListName}
             onChange={(e) => setNewListName(e.target.value)}
@@ -523,8 +523,8 @@ function MyListsCard() {
               className={cn(
                 "flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-xl text-xs font-semibold border transition-all",
                 newListType === "checklist"
-                  ? "bg-violet-600 text-white border-violet-600"
-                  : "bg-white text-slate-500 border-stone-200 hover:border-violet-300"
+                  ? "bg-sage-600 text-white border-sage-600"
+                  : "bg-white text-slate-500 border-stone-200 hover:border-sage-300"
               )}
             >
               <Check size={12} />
@@ -535,8 +535,8 @@ function MyListsCard() {
               className={cn(
                 "flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-xl text-xs font-semibold border transition-all",
                 newListType === "bullet"
-                  ? "bg-violet-600 text-white border-violet-600"
-                  : "bg-white text-slate-500 border-stone-200 hover:border-violet-300"
+                  ? "bg-sage-600 text-white border-sage-600"
+                  : "bg-white text-slate-500 border-stone-200 hover:border-sage-300"
               )}
             >
               <span className="text-sm leading-none">•</span>
@@ -548,7 +548,7 @@ function MyListsCard() {
               <button
                 key={s}
                 onClick={() => setNewListName(s)}
-                className="text-xs bg-white border border-violet-200 text-violet-700 px-2.5 py-1 rounded-full hover:bg-violet-100 transition-colors"
+                className="text-xs bg-white border border-sage-200 text-sage-700 px-2.5 py-1 rounded-full hover:bg-sage-100 transition-colors"
               >
                 {s}
               </button>
@@ -558,7 +558,7 @@ function MyListsCard() {
             <button
               onClick={handleCreateList}
               disabled={!newListName.trim()}
-              className="flex-1 bg-violet-600 hover:bg-violet-700 disabled:bg-stone-100 disabled:text-stone-400 text-white text-sm font-semibold rounded-xl py-2 transition-all"
+              className="flex-1 bg-sage-600 hover:bg-sage-700 disabled:bg-stone-100 disabled:text-stone-400 text-white text-sm font-semibold rounded-xl py-2 transition-all"
             >
               Create
             </button>
@@ -789,7 +789,7 @@ export default function MePage() {
           >
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "#E2E8F0" }}>
-                <ListChecks size={16} className="text-violet-600" />
+                <ListChecks size={16} className="text-sage-600" />
               </div>
               <p className="text-sm font-semibold text-slate-800">My Lists</p>
             </div>
