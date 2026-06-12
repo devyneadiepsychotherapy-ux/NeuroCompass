@@ -252,9 +252,7 @@ function CheckInReminderSettings() {
         onClick={() => setOpen((v) => !v)}
         className="w-full flex items-center gap-3 px-4 py-3.5 text-left"
       >
-        <div className="w-8 h-8 rounded-xl bg-sage-100 flex items-center justify-center shrink-0">
-          <Bell size={15} className={anyEnabled ? "text-sage-600" : "text-slate-400"} />
-        </div>
+        <Bell size={16} className={`shrink-0 ${anyEnabled ? "text-sage-600" : "text-slate-400"}`} />
         <div className="flex-1">
           <p className="text-sm font-semibold text-slate-700">Reminders</p>
           <p className="text-xs text-slate-400">
@@ -560,9 +558,7 @@ export default function MoodPage() {
           <h1 className="text-3xl font-bold text-slate-800 leading-tight" style={{ fontFamily: "var(--font-fraunces)" }}>Check-In</h1>
           <p className="text-sm text-slate-500 mt-1.5">No right or wrong answers, just notice.</p>
         </div>
-        <div className="w-11 h-11 rounded-2xl bg-sage-100 flex items-center justify-center shrink-0 mt-1">
-          <Heart size={20} className="text-sage-600" />
-        </div>
+        <Heart size={22} className="text-sage-500 shrink-0 mt-2" />
       </div>
 
       {/* Progress (only after flow is selected) */}

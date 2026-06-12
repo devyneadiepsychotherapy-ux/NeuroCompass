@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Nunito, Fraunces } from "next/font/google";
+import { Nunito, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import BottomNav from "@/components/layout/BottomNav";
 
@@ -9,11 +9,10 @@ const nunito = Nunito({
   display: "swap",
 });
 
-const fraunces = Fraunces({
+const playfair = Playfair_Display({
   subsets: ["latin"],
   variable: "--font-fraunces",
   display: "swap",
-  axes: ["opsz", "SOFT"],
 });
 import { TourProvider } from "@/components/layout/TourProvider";
 import ThemeProvider from "@/components/layout/ThemeProvider";
@@ -48,7 +47,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" style={{ colorScheme: "light" }} className={`${nunito.variable} ${fraunces.variable}`}>
+    <html lang="en" style={{ colorScheme: "light" }} className={`${nunito.variable} ${playfair.variable}`}>
       <head>
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         {/* Register service worker as early as possible — before React hydration */}

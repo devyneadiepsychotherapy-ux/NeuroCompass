@@ -272,9 +272,7 @@ export default function ToolsPage() {
           <h1 className="text-3xl font-bold text-slate-800 leading-tight" style={{ fontFamily: "var(--font-fraunces)" }}>Tools</h1>
           <p className="text-sm text-slate-500 mt-1.5">ND-affirming tools for every challenge</p>
         </div>
-        <div className="w-11 h-11 rounded-2xl bg-sage-100 flex items-center justify-center shrink-0 mt-1">
-          <Wrench size={20} className="text-sage-600" />
-        </div>
+        <Wrench size={22} className="text-sage-500 shrink-0 mt-2" />
       </div>
 
       {/* Recommendation widget */}

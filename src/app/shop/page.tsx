@@ -41,9 +41,9 @@ const ICON_OPTIONS = [
   "Heart", "Star", "Music", "Bike", "Bath", "Gift",
 ];
 
-function RewardIcon({ name, size = 22 }: { name: string; size?: number }) {
+function RewardIcon({ name, size = 22, className }: { name: string; size?: number; className?: string }) {
   const IC = REWARD_ICONS[name] ?? Gift;
-  return <IC size={size} />;
+  return <IC size={size} className={className} />;
 }
 
 // ---------------------------------------------------------------------------
@@ -223,9 +223,7 @@ function RewardCard({
       </div>
 
       <div className="flex items-start gap-3 pr-16">
-        <div className="w-11 h-11 rounded-xl bg-sage-100 flex items-center justify-center text-sage-600 shrink-0">
-          <RewardIcon name={reward.icon} size={20} />
-        </div>
+        <RewardIcon name={reward.icon} size={22} className="text-sage-500 shrink-0" />
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-slate-800 text-sm leading-snug">{reward.name}</p>
           <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{reward.description}</p>
