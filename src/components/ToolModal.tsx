@@ -886,7 +886,7 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
   const suppressDefaultSteps = ["fawn-response", "rsd-perfectionism", "masking-costs", "weekly-review", "body-scan", "burnout-signs", "focus-ritual", "easy-food", "eating-routine", "emotion-wheel", "emotion-matrix", "feelings-thermometer"].includes(tool.id);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-end justify-center">
+    <div className="fixed inset-0 z-[60] bg-black/50 flex items-end justify-center">
       <div className="bg-cream-50 rounded-t-3xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
 
         {/* Header */}

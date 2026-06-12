@@ -1546,7 +1546,7 @@ function AddScheduleModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 flex items-end justify-center p-0">
+    <div className="fixed inset-0 z-[60] bg-black/40 flex items-end justify-center p-0">
       <div className="bg-cream-50 rounded-t-3xl w-full max-w-lg p-6 pb-10 space-y-4 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-bold text-slate-800">Add to Schedule</h2>
@@ -1814,7 +1814,7 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 flex items-end justify-center p-0">
+    <div className="fixed inset-0 z-[60] bg-black/40 flex items-end justify-center p-0">
       <div className="bg-cream-50 rounded-t-3xl w-full max-w-lg p-6 pb-10 space-y-4 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-bold text-slate-800">{isEditing ? "Edit Task" : "New Task"}</h2>
