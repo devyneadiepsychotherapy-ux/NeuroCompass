@@ -460,6 +460,7 @@ function Section({
   children,
   action,
   tint,
+  headerTint,
 }: {
   id: string;
   icon: React.ReactNode;
@@ -469,18 +470,22 @@ function Section({
   children: React.ReactNode;
   action?: React.ReactNode;
   tint?: string;
+  headerTint?: string;
 }) {
   return (
-    <div className="space-y-3 py-4">
-      <div className="flex items-center justify-between">
+    <div className="space-y-3 py-3">
+      <div
+        className="-mx-4 px-4 py-2.5 flex items-center justify-between"
+        style={{ background: headerTint ?? "#eceae5" }}
+      >
         <div className="flex items-center gap-2">
-          <h2 className="text-sm font-semibold text-slate-600">{title}</h2>
+          <h2 className="text-sm font-semibold text-slate-600" style={{ fontFamily: "var(--font-fraunces)" }}>{title}</h2>
         </div>
         <div className="flex items-center gap-2">
           {action}
           <button
             onClick={onToggle}
-            className="p-1.5 rounded-lg text-slate-300 hover:text-slate-500 hover:bg-white/40 transition-all"
+            className="p-1.5 rounded-lg text-slate-300 hover:text-slate-500 transition-all"
             aria-label={`Hide ${title}`}
           >
             <EyeOff size={15} />
@@ -2510,6 +2515,7 @@ export default function PlannerPage() {
               icon={<CalendarClock size={16} />}
               title="Schedule"
               onToggle={() => toggleSection("schedule")}
+              headerTint="#e4ebe2"
             >
               <ScheduleSection selectedDate={selectedDate} />
             </Section>
@@ -2522,6 +2528,7 @@ export default function PlannerPage() {
               icon={<Target size={16} />}
               title="Top 3 Priorities"
               onToggle={() => toggleSection("top3")}
+              headerTint="#ede8e0"
             >
               <Top3Section date={dateKey(selectedDate)} />
             </Section>
@@ -2534,6 +2541,7 @@ export default function PlannerPage() {
               icon={<ListTodo size={16} />}
               title="Tasks"
               onToggle={() => toggleSection("tasks")}
+              headerTint="#eceae5"
               action={
                 <button
                   onClick={() => setShowTaskModal(true)}
@@ -2559,6 +2567,7 @@ export default function PlannerPage() {
               icon={<Activity size={16} />}
               title="Habits"
               onToggle={() => toggleSection("habits")}
+              headerTint="#e4ebe2"
             >
               <HabitsSection selectedDate={selectedDate} />
             </Section>
@@ -2571,6 +2580,7 @@ export default function PlannerPage() {
               icon={<UtensilsCrossed size={16} />}
               title="Meal Plan"
               onToggle={() => toggleSection("meal")}
+              headerTint="#ede8e0"
             >
               <MealPlanSection selectedDate={selectedDate} />
             </Section>
