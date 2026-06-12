@@ -26,7 +26,7 @@ export default function SidebarWrapper() {
             height={24}
             className="shrink-0"
           />
-          <span className="text-[16px] font-extrabold tracking-wide text-[var(--foreground)]">
+          <span className="text-[17px] font-bold text-[var(--foreground)]" style={{ fontFamily: "var(--font-fraunces)" }}>
             NeuroCompass
           </span>
         </div>
