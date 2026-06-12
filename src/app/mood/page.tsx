@@ -555,11 +555,9 @@ export default function MoodPage() {
 
   return (
     <div className="px-4 pt-0 pb-8 space-y-6">
-      <div className="-mx-4 px-4 pt-8 pb-5 relative overflow-hidden" style={{ background: "linear-gradient(to bottom, #e8efe8 0%, transparent 100%)" }}>
-        <div className="relative">
-          <h1 className="text-3xl font-extrabold text-slate-800 leading-tight">Check-In</h1>
-          <p className="text-sm text-slate-500 mt-1.5">No right or wrong answers, just notice.</p>
-        </div>
+      <div className="pt-6 pb-2">
+        <h1 className="text-3xl font-extrabold text-slate-800 leading-tight">Check-In</h1>
+        <p className="text-sm text-slate-500 mt-1.5">No right or wrong answers, just notice.</p>
       </div>
 
       {/* Progress (only after flow is selected) */}
