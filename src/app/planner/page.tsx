@@ -240,14 +240,9 @@ function WeekView({ date }: { date: Date }) {
           <div key={key} className="bg-cream-50 border border-slate-100 rounded-2xl overflow-hidden">
             {/* Day header row */}
             <div className="flex items-center gap-3 px-4 pt-3 pb-2">
-              <div
-                className={cn(
-                  "w-9 h-9 rounded-xl flex flex-col items-center justify-center shrink-0",
-                  isToday ? "bg-sage-600 text-white" : "bg-slate-100 text-slate-600"
-                )}
-              >
-                <span className="text-[9px] font-bold uppercase leading-none">{WEEK_DAY_LABELS[i]}</span>
-                <span className="text-sm font-bold leading-tight">{day.getDate()}</span>
+              <div className="flex flex-col items-center justify-center shrink-0 w-9">
+                <span className={cn("text-[9px] font-bold uppercase leading-none", isToday ? "text-sage-600" : "text-slate-400")}>{WEEK_DAY_LABELS[i]}</span>
+                <span className={cn("text-base font-bold leading-tight", isToday ? "text-sage-700" : "text-slate-600")}>{day.getDate()}</span>
               </div>
               {!hasAnything && (
                 <span className="text-sm text-slate-400 italic">Nothing scheduled</span>
@@ -391,8 +386,7 @@ function Section({
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-slate-400">{icon}</span>
-          <h2 className="text-base font-bold text-slate-800">{title}</h2>
+          <h2 className="text-lg font-bold text-slate-800" style={{ fontFamily: "var(--font-fraunces)" }}>{title}</h2>
         </div>
         <div className="flex items-center gap-2">
           {action}
@@ -1008,10 +1002,11 @@ function Top3Item({
   return (
     <div
       className={cn(
-        "bg-cream-50 border border-slate-100 border-l-4 rounded-2xl px-4 py-3 transition-all relative",
+        "border border-slate-100 border-l-4 rounded-2xl px-4 py-3.5 transition-all relative",
         accentColors[index],
-        priority.completed && "opacity-60"
+        priority.completed ? "opacity-50" : ""
       )}
+      style={{ background: index === 0 ? "linear-gradient(135deg, #f5f0ec 0%, #ede5e0 100%)" : index === 1 ? "linear-gradient(135deg, #f0f4ef 0%, #e6ede5 100%)" : "#fafafa" }}
     >
       {toast && (
         <div className="absolute -top-7 left-10 bg-emerald-600 text-white text-xs font-bold px-2.5 py-1 rounded-full z-10 animate-fade-in-up whitespace-nowrap">
@@ -2496,12 +2491,7 @@ export default function PlannerPage() {
       {/* Week view */}
       {activeView === "week" && (
         <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <span className="text-slate-400">
-              <CalendarDays size={16} />
-            </span>
-            <h2 className="text-base font-bold text-slate-800">This Week</h2>
-          </div>
+          <h2 className="text-lg font-bold text-slate-800" style={{ fontFamily: "var(--font-fraunces)" }}>This Week</h2>
           <WeekView date={selectedDate} />
         </div>
       )}
@@ -2509,12 +2499,7 @@ export default function PlannerPage() {
       {/* Month view */}
       {activeView === "month" && (
         <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <span className="text-slate-400">
-              <Calendar size={16} />
-            </span>
-            <h2 className="text-base font-bold text-slate-800">Monthly View</h2>
-          </div>
+          <h2 className="text-lg font-bold text-slate-800" style={{ fontFamily: "var(--font-fraunces)" }}>Monthly View</h2>
           <MonthView date={selectedDate} onDaySelect={handleDaySelect} />
         </div>
       )}
