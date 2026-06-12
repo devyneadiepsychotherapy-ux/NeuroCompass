@@ -2362,7 +2362,7 @@ export default function PlannerPage() {
             <p className="text-xs text-slate-400 font-medium tracking-wide uppercase">
               {new Date().toLocaleDateString("en-US", { weekday: "long" })}
             </p>
-            <h1 className="text-3xl font-extrabold text-slate-800 leading-tight">
+            <h1 className="text-3xl font-bold text-slate-800 leading-tight" style={{ fontFamily: "var(--font-fraunces)" }}>
               {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric" })}
             </h1>
             <p className="text-sm text-slate-500 mt-1">{greeting}, let&apos;s plan your day</p>

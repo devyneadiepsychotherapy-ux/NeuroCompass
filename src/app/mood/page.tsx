@@ -557,7 +557,7 @@ export default function MoodPage() {
     <div className="px-4 pt-0 pb-8 space-y-6">
       <div className="pt-3 pb-2 flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-800 leading-tight">Check-In</h1>
+          <h1 className="text-3xl font-bold text-slate-800 leading-tight" style={{ fontFamily: "var(--font-fraunces)" }}>Check-In</h1>
           <p className="text-sm text-slate-500 mt-1.5">No right or wrong answers, just notice.</p>
         </div>
         <div className="w-11 h-11 rounded-2xl bg-sage-100 flex items-center justify-center shrink-0 mt-1">
@@ -586,29 +586,33 @@ export default function MoodPage() {
 
       {/* Flow selector */}
       {step === "flow" && (
-        <div className="space-y-4">
-          <p className="text-sm font-semibold text-slate-700">What would you like to check in with today?</p>
-          <div className="space-y-3">
-            <button
-              onClick={() => startFlow("both")}
-              className="w-full text-left bg-cream-50 border border-sage-200 hover:border-sage-400 rounded-2xl p-4 transition-all active:scale-[0.98]"
-            >
-              <p className="font-semibold text-slate-800">Full check-in</p>
-              <p className="text-sm text-slate-500 mt-0.5">Emotions, body scan, and notes</p>
-            </button>
+        <div className="space-y-3">
+          {/* Full check-in — featured/primary */}
+          <button
+            onClick={() => startFlow("both")}
+            className="w-full text-left rounded-2xl p-5 transition-all active:scale-[0.98]"
+            style={{ background: "linear-gradient(135deg, #f0f4ef 0%, #e4ece3 100%)" }}
+          >
+            <p className="text-base font-bold text-slate-800">Full check-in</p>
+            <p className="text-sm text-slate-500 mt-0.5">Emotions, body scan, and notes</p>
+          </button>
+          {/* Quick options — smaller, side by side */}
+          <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => startFlow("mood")}
-              className="w-full text-left bg-cream-50 border border-rose-200 hover:border-rose-400 rounded-2xl p-4 transition-all active:scale-[0.98]"
+              className="text-left bg-white border border-slate-100 rounded-2xl p-4 transition-all active:scale-[0.97] hover:border-sage-200"
             >
-              <p className="font-semibold text-slate-800">Mood check-in only</p>
-              <p className="text-sm text-slate-500 mt-0.5">How you're feeling emotionally</p>
+              <Heart size={16} className="text-sage-500 mb-2" />
+              <p className="text-sm font-semibold text-slate-800">Mood only</p>
+              <p className="text-xs text-slate-400 mt-0.5 leading-snug">How you&apos;re feeling</p>
             </button>
             <button
               onClick={() => startFlow("body")}
-              className="w-full text-left bg-cream-50 border border-emerald-200 hover:border-emerald-400 rounded-2xl p-4 transition-all active:scale-[0.98]"
+              className="text-left bg-white border border-slate-100 rounded-2xl p-4 transition-all active:scale-[0.97] hover:border-sage-200"
             >
-              <p className="font-semibold text-slate-800">Body check-in only</p>
-              <p className="text-sm text-slate-500 mt-0.5">Physical sensations and interoception</p>
+              <Zap size={16} className="text-sage-500 mb-2" />
+              <p className="text-sm font-semibold text-slate-800">Body only</p>
+              <p className="text-xs text-slate-400 mt-0.5 leading-snug">Physical sensations</p>
             </button>
           </div>
         </div>

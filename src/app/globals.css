@@ -11,6 +11,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-nunito);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-fraunces);
 
   /* Override white to warm off-white so all bg-white cards feel cozy */
   --color-white: #F7F5F2;

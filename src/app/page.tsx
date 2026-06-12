@@ -521,7 +521,7 @@ export default function HomePage() {
             <p className="text-xs text-slate-400 font-medium tracking-wide uppercase">
               {new Date().toLocaleDateString("en-CA", { weekday: "long", month: "long", day: "numeric" })}
             </p>
-            <h1 className="text-3xl font-extrabold text-slate-800 mt-1 leading-tight">
+            <h1 className="text-3xl font-bold text-slate-800 mt-1 leading-tight" style={{ fontFamily: "var(--font-fraunces)" }}>
               {mounted && userName ? `Hey, ${userName}` : "Hey there"}
             </h1>
             <p className="text-sm text-slate-500 mt-1 leading-relaxed">{greeting}</p>

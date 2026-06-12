@@ -411,7 +411,7 @@ export default function ShopPage() {
       <div className="pt-3 pb-2">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="text-3xl font-extrabold text-slate-800 leading-tight">Reward Shop</h1>
+            <h1 className="text-3xl font-bold text-slate-800 leading-tight" style={{ fontFamily: "var(--font-fraunces)" }}>Reward Shop</h1>
             <p className="text-sm text-slate-500 mt-1">Spend your coins on treats</p>
           </div>
           <div className="flex flex-col items-end gap-1.5 shrink-0">

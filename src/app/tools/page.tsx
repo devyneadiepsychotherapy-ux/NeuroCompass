@@ -269,7 +269,7 @@ export default function ToolsPage() {
     <div className="px-4 pt-0 pb-8 space-y-5">
       <div className="pt-3 pb-2 flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-800 leading-tight">Tools</h1>
+          <h1 className="text-3xl font-bold text-slate-800 leading-tight" style={{ fontFamily: "var(--font-fraunces)" }}>Tools</h1>
           <p className="text-sm text-slate-500 mt-1.5">ND-affirming tools for every challenge</p>
         </div>
         <div className="w-11 h-11 rounded-2xl bg-sage-100 flex items-center justify-center shrink-0 mt-1">

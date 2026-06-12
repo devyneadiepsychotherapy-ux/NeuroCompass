@@ -51,15 +51,7 @@ function NDStrengthsCard({
       style={{ borderColor: "#D0DCCB" }}
     >
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div
-            className="w-8 h-8 rounded-xl flex items-center justify-center"
-            style={{ background: "#D8E4D6" }}
-          >
-            <Brain size={16} style={{ color: "#5E7A6E" }} />
-          </div>
-          <p className="text-sm font-semibold text-slate-800">My ND Strengths</p>
-        </div>
+        <p className="text-sm font-bold text-slate-700">My ND Strengths</p>
         <ChevronRight size={14} className="text-slate-300 shrink-0" />
       </div>
 
@@ -103,19 +95,10 @@ function MyToolboxCard({ favorites }: { favorites: ToolFavorite[] }) {
 
   return (
     <div
-      className="bg-cream-50 rounded-2xl border shadow-sm p-4 space-y-3"
-      style={{ borderColor: "#DDD9F0" }}
+      className="bg-cream-50 rounded-2xl border border-slate-100 shadow-sm p-4 space-y-3"
     >
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div
-            className="w-8 h-8 rounded-xl flex items-center justify-center"
-            style={{ background: "#EDD5C8" }}
-          >
-            <Heart size={16} style={{ color: "#A0523A" }} />
-          </div>
-          <p className="text-sm font-semibold text-slate-800">My Toolbox</p>
-        </div>
+        <p className="text-sm font-bold text-slate-700">My Toolbox</p>
         <div className="flex items-center gap-2">
           {favTools.length > 0 && (
             <div className="flex items-center gap-1 border border-slate-200 rounded-lg p-0.5">
@@ -710,16 +693,16 @@ export default function MePage() {
       <div className="pt-3 pb-2">
         <div className="flex items-center gap-3">
           {mounted && avatarInfo ? (
-            <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center shrink-0", avatarInfo.bg)}>
-              <avatarInfo.Icon size={28} className={avatarInfo.iconColor} />
+            <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center shrink-0", avatarInfo.bg)}>
+              <avatarInfo.Icon size={22} className={avatarInfo.iconColor} />
             </div>
           ) : (
-            <div className="w-14 h-14 rounded-2xl bg-sage-100 flex items-center justify-center shrink-0">
-              <Brain size={28} className="text-sage-600" />
+            <div className="w-11 h-11 rounded-xl bg-sage-100 flex items-center justify-center shrink-0">
+              <Brain size={22} className="text-sage-600" />
             </div>
           )}
           <div>
-            <h1 className="text-3xl font-extrabold text-slate-800 leading-tight">
+            <h1 className="text-3xl font-bold text-slate-800 leading-tight" style={{ fontFamily: "var(--font-fraunces)" }}>
               {mounted && userName ? userName : "My Profile"}
             </h1>
             <p className="text-sm text-slate-500 mt-0.5">Level {profile.level}</p>
