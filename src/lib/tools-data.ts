@@ -20,19 +20,19 @@ export interface ToolContent {
 }
 
 export const TOOL_CATEGORIES = [
-  { id: "time", label: "Time Management", icon: "Clock", color: "bg-stone-100 text-stone-700" },
-  { id: "motivation", label: "Motivation & Activation", icon: "Zap", color: "bg-amber-50 text-amber-700" },
-  { id: "attention", label: "Attention & Focus", icon: "Brain", color: "bg-sky-50 text-sky-700" },
-  { id: "planning", label: "Planning & Organization", icon: "ClipboardList", color: "bg-indigo-50 text-indigo-600" },
-  { id: "impulsivity", label: "Impulsivity", icon: "Wind", color: "bg-cyan-50 text-cyan-700" },
-  { id: "sensory", label: "Sensory", icon: "Leaf", color: "bg-emerald-50 text-emerald-700" },
-  { id: "selfcare", label: "Self-Care & Chores", icon: "Heart", color: "bg-rose-50 text-rose-600" },
-  { id: "eating", label: "Eating Challenges", icon: "Utensils", color: "bg-orange-50 text-orange-600" },
-  { id: "perfectionism", label: "Perfectionism", icon: "CheckCircle", color: "bg-purple-50 text-purple-600" },
-  { id: "people", label: "People Pleasing", icon: "Users", color: "bg-yellow-50 text-yellow-700" },
-  { id: "burnout", label: "Burnout Prevention", icon: "Battery", color: "bg-teal-50 text-teal-700" },
-  { id: "interoception", label: "Interoception", icon: "Activity", color: "bg-violet-50 text-violet-600" },
-  { id: "emotion", label: "Emotion Regulation", icon: "Heart", color: "bg-pink-50 text-pink-600" },
+  { id: "time", label: "Time Management", icon: "Clock", color: "bg-[#ede8e0] text-[#6b5f50]" },
+  { id: "motivation", label: "Motivation & Activation", icon: "Zap", color: "bg-[#f0e8d0] text-[#7a6030]" },
+  { id: "attention", label: "Attention & Focus", icon: "Brain", color: "bg-[#dde4ec] text-[#4a607a]" },
+  { id: "planning", label: "Planning & Organization", icon: "ClipboardList", color: "bg-[#e4e8d8] text-[#4a6040]" },
+  { id: "impulsivity", label: "Impulsivity", icon: "Wind", color: "bg-[#dce8e4] text-[#3a6860]" },
+  { id: "sensory", label: "Sensory", icon: "Leaf", color: "bg-[#e8ede6] text-[#4a7050]" },
+  { id: "selfcare", label: "Self-Care & Chores", icon: "Heart", color: "bg-[#f0e0e4] text-[#8a5060]" },
+  { id: "eating", label: "Eating Challenges", icon: "Utensils", color: "bg-[#f0e4d8] text-[#7a5440]" },
+  { id: "perfectionism", label: "Perfectionism", icon: "CheckCircle", color: "bg-[#ece0ec] text-[#7a5080]" },
+  { id: "people", label: "People Pleasing", icon: "Users", color: "bg-[#f0eadc] text-[#786040]" },
+  { id: "burnout", label: "Burnout Prevention", icon: "Battery", color: "bg-[#f0ddd8] text-[#9a5040]" },
+  { id: "interoception", label: "Interoception", icon: "Activity", color: "bg-[#e4e0ec] text-[#5a5088]" },
+  { id: "emotion", label: "Emotion Regulation", icon: "Heart", color: "bg-[#f0e4e0] text-[#8a5850]" },
 ];
 
 export const TOOLS: Tool[] = [
