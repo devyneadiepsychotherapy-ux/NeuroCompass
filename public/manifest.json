@@ -1,15 +1,68 @@
 {
+  "id": "/",
   "name": "NeuroCompass",
   "short_name": "NeuroCompass",
-  "description": "A neurodivergent-affirming companion app",
+  "description": "A neurodivergent-affirming companion app for ADHD and autism — tools, check-ins, habit building, and psychoeducation for everyday life.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
   "orientation": "portrait",
-  "background_color": "#B8D0AE",
+  "background_color": "#F5F0EA",
   "theme_color": "#6B8F71",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["health", "productivity", "lifestyle"],
+  "prefer_related_applications": false,
   "icons": [
-    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
     { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Check In",
+      "short_name": "Check In",
+      "description": "Log your mood and body check-in",
+      "url": "/mood",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Tools",
+      "short_name": "Tools",
+      "description": "Browse ND-affirming tools",
+      "url": "/tools",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Habit Builder",
+      "short_name": "Habits",
+      "description": "Track and build habits",
+      "url": "/habits",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/home.png",
+      "sizes": "1080x2340",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Home screen showing streak, toolbox, and daily reminder"
+    },
+    {
+      "src": "/screenshots/tools.png",
+      "sizes": "1080x2340",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Tools page with ND-affirming tools by category"
+    },
+    {
+      "src": "/screenshots/checkin.png",
+      "sizes": "1080x2340",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Mood and body check-in flow"
+    }
   ]
 }

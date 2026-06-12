@@ -143,19 +143,23 @@ function FreezeSavedBanner({ onDismiss }: { onDismiss: () => void }) {
 
 function StreakCard({ streak, longestStreak, streakFreezes }: { streak: number; longestStreak: number; streakFreezes: number }) {
   return (
-    <div className="rounded-2xl border border-stone-200 shadow-sm p-5" style={{ background: "linear-gradient(135deg, #f5efec 0%, #e8d8d2 100%)" }}>
-      <div className="flex items-center gap-4">
-        <div className="w-16 h-16 rounded-2xl bg-stone-100 flex items-center justify-center shrink-0 shadow-inner">
-          <Flame size={34} className="text-[#B8897A] fill-[#d4b8b0]" />
-        </div>
+    <div className="rounded-3xl p-5 overflow-hidden relative" style={{ background: "linear-gradient(135deg, #f0ebe8 0%, #e2d0c8 100%)" }}>
+      {/* Background flame decoration */}
+      <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-10">
+        <Flame size={80} className="text-[#B8897A] fill-[#B8897A]" />
+      </div>
+      <div className="flex items-center gap-4 relative">
         <div className="flex-1 min-w-0">
-          <p className="text-3xl font-black text-[#8f6559] leading-none">{streak}</p>
-          <p className="text-base font-bold text-slate-700 mt-0.5">Day Streak!</p>
-          <p className="text-xs text-slate-400 mt-1">Best: {longestStreak} days</p>
+          <div className="flex items-baseline gap-2">
+            <p className="text-5xl font-black text-[#7a4f40] leading-none">{streak}</p>
+            <Flame size={22} className="text-[#B8897A] fill-[#d4b8b0] mb-1" />
+          </div>
+          <p className="text-sm font-bold text-[#7a4f40] mt-0.5 opacity-80">day streak</p>
+          <p className="text-xs text-[#9b7060] mt-1">Best: {longestStreak} days</p>
         </div>
-        <div className="flex items-center gap-1.5 bg-blue-50 border border-blue-100 rounded-full px-3 py-1.5 shrink-0">
+        <div className="flex items-center gap-1.5 bg-white/60 rounded-xl px-3 py-2 shrink-0">
           <Snowflake size={13} className="text-blue-400" />
-          <span className="text-xs font-semibold text-blue-600">
+          <span className="text-xs font-bold text-blue-600">
             {streakFreezes} freeze{streakFreezes !== 1 ? "s" : ""}
           </span>
         </div>
@@ -510,46 +514,45 @@ export default function HomePage() {
         <StreakCelebrationModal streak={streak} onDismiss={() => setShowStreakCelebration(false)} />
       )}
 
-      {/* Greeting + XP (full width) */}
-      <div className="bg-cream-50 rounded-2xl p-4 border border-sage-100 shadow-sm space-y-3">
-        <div className="flex items-start justify-between gap-3">
+      {/* Greeting header — no card, full bleed */}
+      <div className="pt-2 pb-1">
+        <div className="flex items-center justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <p className="text-xs text-slate-400 font-medium">
+            <p className="text-xs text-slate-400 font-medium tracking-wide uppercase">
               {new Date().toLocaleDateString("en-CA", { weekday: "long", month: "long", day: "numeric" })}
             </p>
-            <h1 className="text-xl font-bold text-slate-800 mt-0.5">
-              Hi {mounted && userName ? userName : "there"}
+            <h1 className="text-3xl font-extrabold text-slate-800 mt-1 leading-tight">
+              {mounted && userName ? `Hey, ${userName}` : "Hey there"}
             </h1>
-            <p className="text-sm text-slate-500 mt-0.5">{greeting}</p>
+            <p className="text-sm text-slate-500 mt-1 leading-relaxed">{greeting}</p>
           </div>
           {mounted && userAvatar && (() => {
             const av = getAvatarOption(userAvatar);
             if (!av) return null;
             const { Icon, bg, iconColor } = av;
             return (
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${bg}`}>
-                <Icon size={20} className={iconColor} />
+              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${bg}`}>
+                <Icon size={24} className={iconColor} />
               </div>
             );
           })()}
         </div>
-        <div>
-          <div className="flex items-center justify-between mb-1.5">
+        {/* XP bar — slim, unboxed */}
+        <div className="mt-3">
+          <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-1.5">
-              <div className="w-6 h-6 rounded-full bg-sage-600 flex items-center justify-center">
-                <Star size={11} className="text-white fill-white" />
-              </div>
-              <span className="text-xs font-semibold text-slate-700">Level {displayLevel}</span>
+              <Star size={11} className="text-sage-500 fill-sage-500" />
+              <span className="text-xs font-semibold text-slate-500">Level {displayLevel}</span>
             </div>
             <span className="text-xs font-bold text-sage-600">{displayXp} XP</span>
           </div>
-          <div className="w-full bg-sage-100 rounded-full h-1.5">
+          <div className="w-full bg-sage-100 rounded-full h-1">
             <div
-              className="bg-sage-500 h-1.5 rounded-full transition-all duration-700"
+              className="bg-sage-500 h-1 rounded-full transition-all duration-700"
               style={{ width: `${Math.min(xpProgress, 100)}%` }}
             />
           </div>
-          <p className="text-xs text-slate-400 mt-1">{xpToNext} XP to Level {displayLevel + 1}</p>
+          <p className="text-[10px] text-slate-400 mt-0.5">{xpToNext} XP to Level {displayLevel + 1}</p>
         </div>
       </div>
 
@@ -587,10 +590,10 @@ export default function HomePage() {
       <FeelingFrozenCard openTool={handleOpenToolById} />
 
       {/* My Toolbox (favourites) */}
-      <div className="bg-cream-50 rounded-2xl border border-slate-100 shadow-sm p-4">
+      <div className="p-4 rounded-3xl" style={{ background: "linear-gradient(135deg, #f0f4ef 0%, #e8efe8 100%)" }}>
         <div className="flex items-center justify-between mb-3">
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">My Toolbox</p>
-          <Link href="/tools" className="text-xs text-sage-600 font-medium">Browse all</Link>
+          <p className="text-sm font-bold text-slate-700">My Toolbox</p>
+          <Link href="/tools" className="text-xs text-sage-600 font-semibold">Browse all</Link>
         </div>
         {favTools.length === 0 ? (
           <div className="flex flex-col items-center gap-2 py-3 text-center">

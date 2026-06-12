@@ -13,6 +13,7 @@ import ThemeProvider from "@/components/layout/ThemeProvider";
 import SidebarWrapper from "@/components/layout/SidebarWrapper";
 import StartPageGuard from "@/components/layout/StartPageGuard";
 import ReminderManager from "@/components/layout/ReminderManager";
+import ServiceWorkerRegistration from "@/components/layout/ServiceWorkerRegistration";
 
 export const metadata: Metadata = {
   title: "NeuroCompass",
@@ -44,9 +45,10 @@ export default function RootLayout({
       <head>
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
       </head>
-      <body className="pb-20">
+      <body className="pb-24">
         <ThemeProvider>
           <TourProvider>
+            <ServiceWorkerRegistration />
             <StartPageGuard />
             <ReminderManager />
             <SidebarWrapper />
