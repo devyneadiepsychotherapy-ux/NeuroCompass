@@ -211,6 +211,11 @@ function SensoryProfileSummaryCard({
   const allTriggers = Object.values(triggers).flat();
   const allSoothers = Object.values(soothers).flat();
   const hasAny = allTriggers.length > 0 || allSoothers.length > 0;
+  const PREVIEW = 4;
+  const shownTriggers = allTriggers.slice(0, PREVIEW);
+  const moreTriggers = allTriggers.length - PREVIEW;
+  const shownSoothers = allSoothers.slice(0, PREVIEW);
+  const moreSoothers = allSoothers.length - PREVIEW;
 
   return (
     <div
@@ -253,7 +258,7 @@ function SensoryProfileSummaryCard({
               <p className="text-xs text-slate-400">None added</p>
             ) : (
               <p className="text-xs leading-relaxed" style={{ color: "#C4897A" }}>
-                {allTriggers.join(" · ")}
+                {shownTriggers.join(" · ")}{moreTriggers > 0 && <span className="opacity-50"> · +{moreTriggers} more</span>}
               </p>
             )}
           </div>
@@ -267,7 +272,7 @@ function SensoryProfileSummaryCard({
               <p className="text-xs text-slate-400">None added</p>
             ) : (
               <p className="text-xs leading-relaxed" style={{ color: "#7FA882" }}>
-                {allSoothers.join(" · ")}
+                {shownSoothers.join(" · ")}{moreSoothers > 0 && <span className="opacity-50"> · +{moreSoothers} more</span>}
               </p>
             )}
           </div>
