@@ -514,9 +514,9 @@ export default function HomePage() {
         <StreakCelebrationModal streak={streak} onDismiss={() => setShowStreakCelebration(false)} />
       )}
 
-      {/* Greeting header — no card, full bleed */}
-      <div className="pt-2 pb-1">
-        <div className="flex items-center justify-between gap-3">
+      {/* Greeting header — full bleed wash */}
+      <div className="-mx-4 px-4 pt-5 pb-5 bg-gradient-to-b from-sage-50 to-transparent">
+        <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             <p className="text-xs text-slate-400 font-medium tracking-wide uppercase">
               {new Date().toLocaleDateString("en-CA", { weekday: "long", month: "long", day: "numeric" })}
@@ -531,28 +531,27 @@ export default function HomePage() {
             if (!av) return null;
             const { Icon, bg, iconColor } = av;
             return (
-              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${bg}`}>
-                <Icon size={24} className={iconColor} />
+              <div className={`w-13 h-13 rounded-2xl flex items-center justify-center shrink-0 ${bg}`}>
+                <Icon size={26} className={iconColor} />
               </div>
             );
           })()}
         </div>
-        {/* XP bar — slim, unboxed */}
-        <div className="mt-3">
-          <div className="flex items-center justify-between mb-1">
+        {/* XP bar */}
+        <div className="mt-4">
+          <div className="flex items-center justify-between mb-1.5">
             <div className="flex items-center gap-1.5">
               <Star size={11} className="text-sage-500 fill-sage-500" />
               <span className="text-xs font-semibold text-slate-500">Level {displayLevel}</span>
             </div>
-            <span className="text-xs font-bold text-sage-600">{displayXp} XP</span>
+            <span className="text-xs font-bold text-sage-600">{displayXp} XP · {xpToNext} to next</span>
           </div>
-          <div className="w-full bg-sage-100 rounded-full h-1">
+          <div className="w-full bg-sage-200/60 rounded-full h-1.5">
             <div
-              className="bg-sage-500 h-1 rounded-full transition-all duration-700"
+              className="bg-sage-500 h-1.5 rounded-full transition-all duration-700"
               style={{ width: `${Math.min(xpProgress, 100)}%` }}
             />
           </div>
-          <p className="text-[10px] text-slate-400 mt-0.5">{xpToNext} XP to Level {displayLevel + 1}</p>
         </div>
       </div>
 
