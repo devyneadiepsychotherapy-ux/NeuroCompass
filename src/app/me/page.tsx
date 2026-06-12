@@ -693,13 +693,9 @@ export default function MePage() {
       <div className="pt-3 pb-2">
         <div className="flex items-center gap-3">
           {mounted && avatarInfo ? (
-            <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center shrink-0", avatarInfo.bg)}>
-              <avatarInfo.Icon size={22} className={avatarInfo.iconColor} />
-            </div>
+            <avatarInfo.Icon size={30} className={avatarInfo.iconColor} />
           ) : (
-            <div className="w-11 h-11 rounded-xl bg-sage-100 flex items-center justify-center shrink-0">
-              <Brain size={22} className="text-sage-600" />
-            </div>
+            <Brain size={30} className="text-sage-600" />
           )}
           <div>
             <h1 className="text-3xl font-bold text-slate-800 leading-tight" style={{ fontFamily: "var(--font-fraunces)" }}>

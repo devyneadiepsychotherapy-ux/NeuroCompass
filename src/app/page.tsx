@@ -157,12 +157,9 @@ function StreakCard({ streak, longestStreak, streakFreezes }: { streak: number; 
           <p className="text-sm font-bold text-[#7a4f40] mt-0.5 opacity-80">day streak</p>
           <p className="text-xs text-[#9b7060] mt-1">Best: {longestStreak} days</p>
         </div>
-        <div className="flex items-center gap-1.5 bg-white/60 rounded-xl px-3 py-2 shrink-0">
-          <Snowflake size={13} className="text-blue-400" />
-          <span className="text-xs font-bold text-blue-600">
-            {streakFreezes} freeze{streakFreezes !== 1 ? "s" : ""}
-          </span>
-        </div>
+        <span className="text-xs font-semibold text-blue-500/80 shrink-0">
+          {streakFreezes} freeze{streakFreezes !== 1 ? "s" : ""}
+        </span>
       </div>
     </div>
   );
@@ -528,11 +525,7 @@ export default function HomePage() {
             const av = getAvatarOption(userAvatar);
             if (!av) return null;
             const { Icon, bg, iconColor } = av;
-            return (
-              <div className={`w-13 h-13 rounded-2xl flex items-center justify-center shrink-0 ${bg}`}>
-                <Icon size={26} className={iconColor} />
-              </div>
-            );
+            return <Icon size={32} className={iconColor} />;
           })()}
         </div>
         {/* XP bar */}
