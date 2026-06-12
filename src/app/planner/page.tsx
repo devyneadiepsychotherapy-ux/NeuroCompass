@@ -148,6 +148,13 @@ function addOneHour(time: string): string {
   return `${String(newH).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 
+function calcDurationMins(startTime: string, endTime: string): number {
+  if (!startTime || !endTime) return 0;
+  const [sh, sm] = startTime.split(":").map(Number);
+  const [eh, em] = endTime.split(":").map(Number);
+  return (eh * 60 + em) - (sh * 60 + sm);
+}
+
 function calcDuration(startTime: string, endTime: string): string {
   if (!startTime || !endTime) return "";
   const [sh, sm] = startTime.split(":").map(Number);
@@ -197,6 +204,9 @@ function DateNavigation({
   view: PlannerView;
   onNavigate: (d: Date) => void;
 }) {
+  const todayKey = getTodayKey();
+  const isToday = dateKey(date) === todayKey;
+
   return (
     <div className="flex items-center justify-between gap-2">
       <button
@@ -206,12 +216,28 @@ function DateNavigation({
       >
         <ChevronLeft size={16} />
       </button>
+
       {view !== "day" && (
         <span className="text-sm font-semibold text-slate-700 text-center flex-1">
           {formatDateLabel(date, view)}
         </span>
       )}
-      {view === "day" && <span className="flex-1" />}
+
+      {view === "day" && (
+        <div className="flex-1 flex justify-center">
+          {isToday ? (
+            <span className="text-xs font-semibold text-slate-400 tracking-wide">today</span>
+          ) : (
+            <button
+              onClick={() => onNavigate(new Date())}
+              className="text-xs font-semibold text-sage-600 hover:text-sage-700 transition-colors px-3 py-1 rounded-lg hover:bg-sage-50"
+            >
+              ↩ Back to today
+            </button>
+          )}
+        </div>
+      )}
+
       <button
         onClick={() => onNavigate(navigateDate(date, view, 1))}
         className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
@@ -585,13 +611,39 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
     setShowForm(false);
   };
 
+  // Split into all-day and timed, sort timed by start time
+  const allDayAppts = dayAppointments.filter((a) => a.allDay || !a.startTime);
+  const timedAppts = dayAppointments
+    .filter((a) => !a.allDay && a.startTime)
+    .sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+  const PX_PER_MIN = 80 / 60; // 80px per hour
+  const MIN_BLOCK = 48;
+
+  const blockHeight = (appt: Appointment) => {
+    if (!appt.endTime) return MIN_BLOCK;
+    const mins = calcDurationMins(appt.startTime, appt.endTime);
+    return Math.max(MIN_BLOCK, Math.round(mins * PX_PER_MIN));
+  };
+
+  const gapPx = (prev: Appointment, next: Appointment) => {
+    if (!prev.endTime || !next.startTime) return 8;
+    const gap = calcDurationMins(prev.endTime, next.startTime);
+    if (gap <= 0) return 4;
+    if (gap <= 15) return 10;
+    if (gap <= 30) return 18;
+    if (gap <= 60) return 28;
+    return 40;
+  };
+
   return (
     <div className="space-y-2">
       {dayAppointments.length === 0 && !showForm && (
         <p className="text-sm text-slate-400 italic">No appointments yet for today.</p>
       )}
 
-      {dayAppointments.map((appt) => (
+      {/* All-day events */}
+      {allDayAppts.map((appt) => (
         <AppointmentRow
           key={appt.id}
           appt={appt}
@@ -599,6 +651,20 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
           onUpdate={(updates) => updateAppointment(appt.id, updates)}
         />
       ))}
+
+      {/* Proportional time blocks */}
+      <div>
+        {timedAppts.map((appt, i) => (
+          <div key={appt.id} style={{ marginTop: i === 0 ? 0 : gapPx(timedAppts[i - 1], appt) }}>
+            <AppointmentRow
+              appt={appt}
+              onDelete={() => deleteAppointment(appt.id)}
+              onUpdate={(updates) => updateAppointment(appt.id, updates)}
+              blockHeight={blockHeight(appt)}
+            />
+          </div>
+        ))}
+      </div>
 
       {showForm ? (
         <div className="bg-cream-50 border border-slate-200 rounded-2xl p-4 space-y-3">
@@ -770,10 +836,12 @@ function AppointmentRow({
   appt,
   onDelete,
   onUpdate,
+  blockHeight,
 }: {
   appt: Appointment;
   onDelete: () => void;
   onUpdate: (updates: Partial<Omit<Appointment, "id" | "createdAt">>) => void;
+  blockHeight?: number;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
@@ -988,47 +1056,43 @@ function AppointmentRow({
     );
   }
 
-  const typeBadge = appt.type
-    ? { appointment: "Appointment", activity: "Activity", "time-block": "Time Block" }[appt.type]
-    : null;
-  const typeBadgeColor = appt.type
-    ? { appointment: "bg-blue-100 text-blue-700", activity: "bg-sage-100 text-sage-700", "time-block": "bg-violet-100 text-violet-700" }[appt.type]
-    : "";
-
   const cardColor = appt.color ?? DEFAULT_APPT_COLOR;
   const colorOpt = APPT_COLOR_OPTIONS.find((c) => c.hex === cardColor) ?? APPT_COLOR_OPTIONS[0];
+  const minH = blockHeight ?? 52;
 
   return (
-    <div className="border rounded-2xl px-4 py-3" style={{ background: colorOpt.bg, borderColor: cardColor + "40" }}>
-      <div className="flex items-center gap-3">
-        <span className="text-xs font-mono font-semibold shrink-0" style={{ color: cardColor }}>
-          {timeLabel}
-        </span>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-slate-800">{appt.title}</p>
-          {typeBadge && (
-            <span className={cn("text-[10px] px-1.5 py-0.5 rounded-full font-semibold", typeBadgeColor)}>
-              {typeBadge}
-            </span>
-          )}
-        </div>
-        <div className="flex items-center gap-1">
-          {appt.notes && (
-            <button onClick={() => setExpanded(!expanded)} className="p-1 text-slate-300 hover:text-slate-500">
-              {expanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+    <div
+      className="rounded-xl overflow-hidden flex items-stretch"
+      style={{ minHeight: minH, background: colorOpt.bg }}
+    >
+      {/* Left accent bar */}
+      <div className="w-1 shrink-0" style={{ background: cardColor }} />
+
+      {/* Content */}
+      <div className="flex-1 px-3 py-2.5 flex flex-col justify-center">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-slate-800 leading-snug">{appt.title}</p>
+            <p className="text-xs mt-0.5 font-medium" style={{ color: cardColor }}>{timeLabel}</p>
+            {appt.notes && expanded && (
+              <p className="mt-1 text-xs text-slate-500 leading-relaxed">{appt.notes}</p>
+            )}
+          </div>
+          <div className="flex items-center gap-0.5 shrink-0 pt-0.5">
+            {appt.notes && (
+              <button onClick={() => setExpanded(!expanded)} className="p-1 text-slate-300 hover:text-slate-500">
+                {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+              </button>
+            )}
+            <button onClick={openEdit} className="p-1 text-slate-300 hover:text-sage-500 transition-colors">
+              <Pencil size={13} />
             </button>
-          )}
-          <button onClick={openEdit} className="p-1 text-slate-300 hover:text-sage-500 transition-colors" aria-label="Edit appointment">
-            <Pencil size={15} />
-          </button>
-          <button onClick={onDelete} className="p-1 text-slate-300 hover:text-red-400 transition-colors">
-            <Trash2 size={15} />
-          </button>
+            <button onClick={onDelete} className="p-1 text-slate-300 hover:text-red-400 transition-colors">
+              <Trash2 size={13} />
+            </button>
+          </div>
         </div>
       </div>
-      {expanded && appt.notes && (
-        <p className="mt-1.5 text-xs text-slate-500 leading-relaxed">{appt.notes}</p>
-      )}
     </div>
   );
 }
@@ -1315,58 +1379,87 @@ function HabitRow({
     return count;
   })();
 
+  // Last 7 days for the dot tracker
+  const last7 = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(today);
+    d.setDate(d.getDate() - (6 - i));
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  });
+
   return (
-    <div className={cn("py-3 flex items-center gap-3 transition-all relative", doneToday && "opacity-80")}>
+    <div className={cn("py-2.5 relative", doneToday && "opacity-80")}>
       {xpToast && (
         <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-emerald-600 text-white text-xs font-bold px-3 py-1.5 rounded-full z-10 animate-fade-in-up whitespace-nowrap">
           +5 XP
         </div>
       )}
-      <button
-        onClick={handleToggle}
-        className={cn(
-          "w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
-          doneToday ? "bg-emerald-500 border-emerald-500" : "border-slate-300 hover:border-emerald-400"
+
+      <div className="flex items-center gap-3">
+        <button
+          onClick={handleToggle}
+          className={cn(
+            "w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
+            doneToday ? "bg-emerald-500 border-emerald-500" : "border-slate-300 hover:border-emerald-400"
+          )}
+        >
+          {doneToday && <Check size={12} className="text-white" strokeWidth={3} />}
+        </button>
+
+        {editing ? (
+          <input
+            ref={inputRef}
+            className="flex-1 bg-white border border-sage-300 rounded-lg px-2 py-1 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-sage-400"
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            onBlur={saveEdit}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") saveEdit();
+              if (e.key === "Escape") setEditing(false);
+            }}
+          />
+        ) : (
+          <p className={cn("flex-1 text-sm font-medium text-slate-800", doneToday && "line-through text-slate-400")}>
+            {habit.name}
+          </p>
         )}
-      >
-        {doneToday && <Check size={12} className="text-white" strokeWidth={3} />}
-      </button>
 
-      {editing ? (
-        <input
-          ref={inputRef}
-          className="flex-1 bg-white border border-sage-300 rounded-lg px-2 py-1 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-sage-400"
-          value={editName}
-          onChange={(e) => setEditName(e.target.value)}
-          onBlur={saveEdit}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") saveEdit();
-            if (e.key === "Escape") setEditing(false);
-          }}
-        />
-      ) : (
-        <p className={cn("flex-1 text-sm font-medium text-slate-800", doneToday && "line-through text-slate-400")}>
-          {habit.name}
-        </p>
-      )}
+        {!editing && streak > 0 && (
+          <span className="flex items-center gap-1 text-xs font-bold text-[#B8897A]">
+            <Flame size={12} fill="currentColor" />
+            {streak}
+          </span>
+        )}
 
-      {!editing && streak > 0 && (
-        <span className="flex items-center gap-1 text-xs font-semibold text-[#B8897A]">
-          <Flame size={12} fill="currentColor" />
-          {streak}
-        </span>
-      )}
+        {!editing && (
+          <button onClick={startEdit} className="p-1 text-slate-300 hover:text-sage-500 transition-colors">
+            <Pencil size={13} />
+          </button>
+        )}
 
+        {!editing && (
+          <button onClick={onDelete} className="p-1 text-slate-300 hover:text-red-400 transition-colors">
+            <Trash2 size={14} />
+          </button>
+        )}
+      </div>
+
+      {/* 7-day dot tracker */}
       {!editing && (
-        <button onClick={startEdit} className="p-1 text-slate-300 hover:text-sage-500 transition-colors">
-          <Pencil size={13} />
-        </button>
-      )}
-
-      {!editing && (
-        <button onClick={onDelete} className="p-1 text-slate-300 hover:text-red-400 transition-colors">
-          <Trash2 size={14} />
-        </button>
+        <div className="flex gap-1 mt-2 ml-9">
+          {last7.map((dayKey, i) => {
+            const done = habit.completedDates.includes(dayKey);
+            const isToday = dayKey === today;
+            return (
+              <div
+                key={i}
+                className={cn(
+                  "w-5 h-2 rounded-full transition-all",
+                  done ? "bg-emerald-400" : isToday ? "bg-slate-200 ring-1 ring-emerald-300" : "bg-slate-200"
+                )}
+              />
+            );
+          })}
+        </div>
       )}
     </div>
   );

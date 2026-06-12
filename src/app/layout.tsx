@@ -71,7 +71,8 @@ if ('serviceWorker' in navigator) {
             <ReminderManager />
             <SidebarWrapper />
             <main
-              className="max-w-lg mx-auto pb-28"
+              className="max-w-lg mx-auto"
+              style={{ paddingBottom: "calc(7rem + env(safe-area-inset-bottom))" }}
             >
               {children}
             </main>
