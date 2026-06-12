@@ -6,7 +6,7 @@ import { useAppStore } from "@/store/useAppStore";
 import { getTheme } from "@/lib/themes";
 import { getAvatarOption } from "@/app/onboarding/page";
 import {
-  ArrowLeft, Check, Bell, BellOff, BellRing, User,
+  ArrowLeft, Check, Bell, BellOff, BellRing, User, Flame,
   Cat, Star, Moon, Leaf, Zap, Sparkles, Mountain, Flower2, Compass, BookOpen,
   Music, Gamepad2, Heart, Telescope, Feather, Waves, ChevronRight,
 } from "lucide-react";
@@ -52,6 +52,53 @@ function SectionHeading({ label }: { label: string }) {
     <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 mt-1">
       {label}
     </p>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Streak morning reminder setting
+// ---------------------------------------------------------------------------
+
+function StreakReminderSetting() {
+  const { streakReminder, updateStreakReminder } = useAppStore();
+
+  return (
+    <div className="mt-4 rounded-2xl border border-slate-100 bg-white p-4 space-y-3">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-terracotta-100 flex items-center justify-center shrink-0">
+            <Flame size={15} className="text-terracotta-600" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-slate-700">Morning streak reminder</p>
+            <p className="text-xs text-slate-400 mt-0.5">Reminds you to keep your streak going</p>
+          </div>
+        </div>
+        <button
+          onClick={() => updateStreakReminder({ enabled: !streakReminder.enabled })}
+          className={cn(
+            "w-11 h-6 rounded-full transition-all shrink-0 relative",
+            streakReminder.enabled ? "bg-sage-500" : "bg-slate-200"
+          )}
+        >
+          <span className={cn(
+            "absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all",
+            streakReminder.enabled ? "left-5" : "left-0.5"
+          )} />
+        </button>
+      </div>
+      {streakReminder.enabled && (
+        <div className="flex items-center gap-3 pt-1 border-t border-slate-100">
+          <p className="text-xs text-slate-500 flex-1">Reminder time</p>
+          <input
+            type="time"
+            value={streakReminder.time}
+            onChange={(e) => updateStreakReminder({ time: e.target.value })}
+            className="text-sm font-semibold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-sage-400"
+          />
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -249,6 +296,9 @@ export default function SettingsPage() {
           <p className="text-xs text-slate-400 mt-2 px-1">
             Set check-in reminder times on the <Link href="/mood" className="underline text-sage-600">Check-In page</Link>.
           </p>
+
+          {/* Streak morning reminder */}
+          <StreakReminderSetting />
         </section>
 
         {/* ── Themes ── */}

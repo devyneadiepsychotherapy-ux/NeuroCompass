@@ -563,8 +563,8 @@ export default function HomePage() {
       />
 
       {/* Quote */}
-      <div className="rounded-2xl px-4 py-3.5 border-l-4 border-rose-200" style={{ background: "linear-gradient(135deg, #fdf6f3 0%, #f0ebe7 100%)" }}>
-        <p className="text-xs font-semibold text-rose-400 mb-1">Today's thought</p>
+      <div className="rounded-2xl px-4 py-3.5 border-l-4 border-sage-300" style={{ background: "linear-gradient(135deg, #f0f4ef 0%, #e8efe8 100%)" }}>
+        <p className="text-xs font-semibold text-sage-600 mb-1">Today's thought</p>
         <p className="text-sm text-slate-600 italic leading-relaxed">&ldquo;{todayQuote}&rdquo;</p>
       </div>
 

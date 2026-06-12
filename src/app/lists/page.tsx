@@ -231,10 +231,10 @@ export default function ListsPage() {
                 onClick={() => { setOpenListId(list.id); setNewItemText(""); }}
                 className="w-full flex items-center gap-3 bg-white rounded-2xl border border-slate-100 shadow-sm p-4 text-left hover:border-sage-200 active:scale-[0.98] transition-all"
               >
-                <div className="w-9 h-9 rounded-xl bg-violet-50 flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-sage-100 flex items-center justify-center shrink-0">
                   {isBullet
-                    ? <List size={16} className="text-violet-500" />
-                    : <ListChecks size={16} className="text-violet-500" />
+                    ? <List size={16} className="text-sage-600" />
+                    : <ListChecks size={16} className="text-sage-600" />
                   }
                 </div>
                 <div className="flex-1 min-w-0">

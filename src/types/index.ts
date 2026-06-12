@@ -112,6 +112,12 @@ export interface CheckInReminders {
   permissionState: "default" | "granted" | "denied";
 }
 
+export interface StreakReminderConfig {
+  enabled: boolean;
+  time: string; // "HH:MM" 24-hour, e.g. "09:00"
+  lastNotifiedDate: string; // "YYYY-MM-DD" — one per day
+}
+
 export interface HabitBuilderItem {
   id: string;
   name: string;

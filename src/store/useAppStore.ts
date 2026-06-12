@@ -224,6 +224,11 @@ interface AppState {
   addEnergyRestorer: (item: Omit<EnergyItem, "id">) => void;
   removeEnergyRestorer: (id: string) => void;
 
+  // Streak morning reminder
+  streakReminder: import("@/types").StreakReminderConfig;
+  updateStreakReminder: (updates: Partial<import("@/types").StreakReminderConfig>) => void;
+  markStreakReminderNotified: (date: string) => void;
+
   // Check-in reminders
   checkInReminders: CheckInReminders;
   updateCheckInReminder: (type: keyof Omit<CheckInReminders, "permissionState">, updates: Partial<import("@/types").CheckInReminderEntry>) => void;
@@ -355,6 +360,7 @@ export const useAppStore = create<AppState>()(
       energyDrains: [],
       energyRestorers: [],
       habitBuilderItems: [],
+      streakReminder: { enabled: false, time: "09:00", lastNotifiedDate: "" },
       checkInReminders: {
         mood: { enabled: false, times: ["09:00"], lastNotifiedDates: {} },
         body: { enabled: false, times: ["12:00"], lastNotifiedDates: {} },
@@ -943,6 +949,12 @@ export const useAppStore = create<AppState>()(
             },
           },
         })),
+
+      // Streak reminder actions
+      updateStreakReminder: (updates) =>
+        set((s) => ({ streakReminder: { ...s.streakReminder, ...updates } })),
+      markStreakReminderNotified: (date) =>
+        set((s) => ({ streakReminder: { ...s.streakReminder, lastNotifiedDate: date } })),
 
       // Habit Builder actions
       addHabitBuilderItem: (item) =>

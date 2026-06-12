@@ -555,9 +555,12 @@ export default function MoodPage() {
 
   return (
     <div className="px-4 pt-0 pb-8 space-y-6">
-      <div className="pt-6 pb-2">
-        <h1 className="text-3xl font-extrabold text-slate-800 leading-tight">Check-In</h1>
-        <p className="text-sm text-slate-500 mt-1.5">No right or wrong answers, just notice.</p>
+      <div className="pt-6 pb-2 flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-3xl font-extrabold text-slate-800 leading-tight">Check-In</h1>
+          <p className="text-sm text-slate-500 mt-1.5">No right or wrong answers, just notice.</p>
+        </div>
+        <div className="text-4xl select-none mt-1" aria-hidden>🌿</div>
       </div>
 
       {/* Progress (only after flow is selected) */}
