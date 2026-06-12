@@ -64,14 +64,14 @@ if ('serviceWorker' in navigator) {
           }}
         />
       </head>
-      <body className="pb-24">
+      <body>
         <ThemeProvider>
           <TourProvider>
 <StartPageGuard />
             <ReminderManager />
             <SidebarWrapper />
             <main
-              className="max-w-lg mx-auto"
+              className="max-w-lg mx-auto pb-28"
             >
               {children}
             </main>

@@ -15,7 +15,7 @@ const nav = [
 export default function BottomNav() {
   const path = usePathname();
   return (
-    <div className="fixed bottom-4 left-0 right-0 z-50 flex justify-center px-4">
+    <div className="fixed bottom-4 left-0 right-0 z-50 flex justify-center px-4" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
       <nav className="w-full max-w-lg bg-white/95 backdrop-blur-md rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-black/5 px-2">
         <div className="flex justify-around items-center h-[60px]">
           {nav.map(({ href, icon: Icon, label }) => {
