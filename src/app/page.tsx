@@ -515,7 +515,7 @@ export default function HomePage() {
       )}
 
       {/* Greeting header — flush with nav, breathing room inside */}
-      <div className="-mx-4 px-4 pt-8 pb-5 relative overflow-hidden" style={{ background: "linear-gradient(to bottom, #e8efe8 0%, transparent 100%)" }}>
+      <div className="-mx-4 px-4 pt-8 pb-5 relative overflow-hidden" style={{ background: "linear-gradient(to bottom, var(--background) 0%, transparent 100%)" }}>
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             <p className="text-xs text-slate-400 font-medium tracking-wide uppercase">
