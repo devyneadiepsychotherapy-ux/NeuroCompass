@@ -192,9 +192,12 @@ function DateNavigation({
       >
         <ChevronLeft size={16} />
       </button>
-      <span className="text-sm font-semibold text-slate-700 text-center flex-1">
-        {formatDateLabel(date, view)}
-      </span>
+      {view !== "day" && (
+        <span className="text-sm font-semibold text-slate-700 text-center flex-1">
+          {formatDateLabel(date, view)}
+        </span>
+      )}
+      {view === "day" && <span className="flex-1" />}
       <button
         onClick={() => onNavigate(navigateDate(date, view, 1))}
         className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
@@ -2385,7 +2388,9 @@ export default function PlannerPage() {
       {/* View toggle + date navigation */}
       <div className="space-y-2 pb-2">
         <ViewToggle active={activeView} onChange={setActiveView} />
-        <DateNavigation date={selectedDate} view={activeView} onNavigate={setSelectedDate} />
+        {activeView !== "day" && (
+          <DateNavigation date={selectedDate} view={activeView} onNavigate={setSelectedDate} />
+        )}
       </div>
 
       {/* Day view */}
