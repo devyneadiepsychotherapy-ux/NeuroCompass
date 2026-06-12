@@ -418,7 +418,7 @@ export default function ShopPage() {
               <span className="text-base font-bold text-[#9e9158]">{displayCoins}</span>
             </div>
             {displayFreezes > 0 && (
-              <span className="text-xs font-semibold text-sky-500/80">{displayFreezes} freeze{displayFreezes !== 1 ? "s" : ""}</span>
+              <span className="text-xs font-semibold text-slate-400">{displayFreezes} freeze{displayFreezes !== 1 ? "s" : ""}</span>
             )}
           </div>
         </div>

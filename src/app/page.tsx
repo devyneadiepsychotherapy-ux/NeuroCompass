@@ -128,8 +128,8 @@ function FreezeSavedBanner({ onDismiss }: { onDismiss: () => void }) {
 
   return (
     <div className="fixed top-4 left-4 right-4 z-50 flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-2xl px-4 py-3 shadow-lg">
-      <Snowflake size={18} className="text-blue-400 shrink-0" />
-      <p className="text-sm font-semibold text-blue-700 flex-1">Streak saved by a freeze!</p>
+      <Snowflake size={18} className="text-slate-400 shrink-0" />
+      <p className="text-sm font-semibold text-slate-700 flex-1">Streak saved by a freeze!</p>
       <button onClick={onDismiss} className="text-blue-400 hover:text-blue-600 transition-colors">
         <X size={16} />
       </button>
@@ -157,7 +157,7 @@ function StreakCard({ streak, longestStreak, streakFreezes }: { streak: number; 
           <p className="text-sm font-bold text-[#7a4f40] mt-0.5 opacity-80">day streak</p>
           <p className="text-xs text-[#9b7060] mt-1">Best: {longestStreak} days</p>
         </div>
-        <span className="text-xs font-semibold text-blue-500/80 shrink-0">
+        <span className="text-xs font-semibold text-slate-400 shrink-0">
           {streakFreezes} freeze{streakFreezes !== 1 ? "s" : ""}
         </span>
       </div>
