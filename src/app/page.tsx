@@ -566,9 +566,9 @@ export default function HomePage() {
       />
 
       {/* Quote */}
-      <div className="relative px-1 py-2">
-        <span className="absolute -top-1 -left-0 text-6xl leading-none text-rose-200 font-serif select-none">&ldquo;</span>
-        <p className="text-base text-slate-700 italic leading-relaxed pl-7 pr-2 font-medium">{todayQuote}</p>
+      <div className="relative rounded-2xl overflow-hidden px-4 py-4" style={{ background: "linear-gradient(135deg, #fdf6f3 0%, #f0ebe7 100%)" }}>
+        <span className="absolute -top-3 left-2 text-8xl leading-none text-rose-200/50 font-serif select-none pointer-events-none">&ldquo;</span>
+        <p className="relative text-sm text-slate-700 italic leading-relaxed font-medium pt-3">{todayQuote}</p>
       </div>
 
       {/* Feeling Frozen */}

@@ -707,7 +707,7 @@ export default function MePage() {
   return (
     <div className="px-4 pt-4 pb-24 space-y-4">
       {/* Header */}
-      <div className="-mx-4 px-4 pt-5 pb-4 relative overflow-hidden" style={{ background: "linear-gradient(to bottom, #ede8f5 0%, transparent 100%)" }}>
+      <div className="-mx-4 px-4 pt-5 pb-4 relative overflow-hidden" style={{ background: "linear-gradient(to bottom, #e8efe8 0%, transparent 100%)" }}>
         <div className="absolute right-3 top-1/2 -translate-y-1/2 opacity-[0.08] pointer-events-none">
           <Brain size={96} className="text-slate-900" />
         </div>
