@@ -5,7 +5,7 @@ import { TOOL_CATEGORIES, TOOLS, Tool } from "@/lib/tools-data";
 import { ICON_MAP } from "@/lib/icon-map";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/store/useAppStore";
-import { Heart, ChevronRight, MessageCircle, Search, HeartHandshake, ExternalLink, Wrench } from "lucide-react";
+import { Heart, ChevronRight, MessageCircle, Search, HeartHandshake, ExternalLink } from "lucide-react";
 import { ToolModal } from "@/components/ToolModal";
 
 // Map category id to a soft background color for the icon container
