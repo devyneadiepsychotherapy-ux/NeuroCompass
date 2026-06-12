@@ -11,35 +11,35 @@ import { ToolModal } from "@/components/ToolModal";
 // Map category id to a soft background color for the icon container
 const CATEGORY_ICON_BG: Record<string, string> = {
   time:          "bg-stone-100",
-  motivation:    "bg-stone-100",
+  motivation:    "bg-amber-50",
   attention:     "bg-sage-100",
   planning:      "bg-sage-100",
-  impulsivity:   "bg-stone-100",
+  impulsivity:   "bg-sky-50",
   sensory:       "bg-sage-100",
-  selfcare:      "bg-stone-100",
+  selfcare:      "bg-rose-50",
   eating:        "bg-stone-100",
-  perfectionism: "bg-stone-100",
-  people:        "bg-stone-100",
+  perfectionism: "bg-purple-50",
+  people:        "bg-amber-50",
   burnout:       "bg-sage-100",
   interoception: "bg-sage-100",
-  emotion:       "bg-stone-100",
+  emotion:       "bg-rose-50",
 };
 
 // Left-border accent color per category
 const CATEGORY_BORDER_ACCENT: Record<string, string> = {
   time:          "border-l-stone-300",
-  motivation:    "border-l-stone-300",
+  motivation:    "border-l-amber-200",
   attention:     "border-l-sage-300",
   planning:      "border-l-sage-300",
-  impulsivity:   "border-l-stone-400",
+  impulsivity:   "border-l-sky-200",
   sensory:       "border-l-sage-300",
-  selfcare:      "border-l-stone-300",
+  selfcare:      "border-l-rose-200",
   eating:        "border-l-stone-300",
-  perfectionism: "border-l-stone-300",
-  people:        "border-l-stone-300",
+  perfectionism: "border-l-purple-200",
+  people:        "border-l-amber-200",
   burnout:       "border-l-sage-300",
   interoception: "border-l-sage-300",
-  emotion:       "border-l-stone-300",
+  emotion:       "border-l-rose-200",
 };
 
 // --------------- Recommendation logic ---------------
