@@ -507,15 +507,15 @@ export default function HomePage() {
   if (!hasOnboarded) return null;
 
   return (
-    <div className="px-4 pt-4 pb-10 space-y-3">
+    <div className="px-4 pt-0 pb-10 space-y-3">
       {/* Overlays */}
       {mounted && showFreezeSaved && <FreezeSavedBanner onDismiss={() => setShowFreezeSaved(false)} />}
       {mounted && showStreakCelebration && (
         <StreakCelebrationModal streak={streak} onDismiss={() => setShowStreakCelebration(false)} />
       )}
 
-      {/* Greeting header — full bleed wash */}
-      <div className="-mx-4 px-4 pt-5 pb-5 relative overflow-hidden" style={{ background: "linear-gradient(to bottom, #e8efe8 0%, transparent 100%)" }}>
+      {/* Greeting header — flush with nav, no gap */}
+      <div className="-mx-4 px-4 pt-4 pb-5 relative overflow-hidden" style={{ background: "linear-gradient(to bottom, #e8efe8 0%, transparent 100%)" }}>
         <div className="absolute right-3 bottom-0 opacity-[0.07] pointer-events-none">
           <Sparkles size={100} className="text-sage-900" />
         </div>
@@ -566,9 +566,8 @@ export default function HomePage() {
       />
 
       {/* Quote */}
-      <div className="relative rounded-2xl overflow-hidden px-4 py-4" style={{ background: "linear-gradient(135deg, #fdf6f3 0%, #f0ebe7 100%)" }}>
-        <span className="absolute -top-3 left-2 text-8xl leading-none text-rose-200/50 font-serif select-none pointer-events-none">&ldquo;</span>
-        <p className="relative text-sm text-slate-700 italic leading-relaxed font-medium pt-3">{todayQuote}</p>
+      <div className="rounded-2xl px-4 py-3.5" style={{ background: "linear-gradient(135deg, #fdf6f3 0%, #f0ebe7 100%)" }}>
+        <p className="text-sm text-slate-600 italic leading-relaxed">{todayQuote}</p>
       </div>
 
       {/* Feeling Frozen */}
