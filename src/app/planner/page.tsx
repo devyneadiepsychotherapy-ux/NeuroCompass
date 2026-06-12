@@ -1093,20 +1093,14 @@ function Top3Item({
   };
 
   return (
-    <div
-      className={cn(
-        "border border-slate-100 border-l-4 rounded-2xl px-4 py-3.5 transition-all relative",
-        accentColors[index],
-        priority.completed ? "opacity-50" : ""
-      )}
-      style={{ background: index === 0 ? "linear-gradient(135deg, #f5f0ec 0%, #ede5e0 100%)" : index === 1 ? "linear-gradient(135deg, #f0f4ef 0%, #e6ede5 100%)" : "#fafafa" }}
-    >
+    <div className={cn("py-3 border-b border-slate-100 relative last:border-0", priority.completed && "opacity-50")}>
       {toast && (
         <div className="absolute -top-7 left-10 bg-emerald-600 text-white text-xs font-bold px-2.5 py-1 rounded-full z-10 animate-fade-in-up whitespace-nowrap">
           {toast}
         </div>
       )}
       <div className="flex items-center gap-3">
+        <div className={cn("w-1 h-8 rounded-full shrink-0", accentColors[index].replace("border-l-", "bg-"))} />
         <button
           onClick={handleToggle}
           className={cn(
@@ -1192,7 +1186,7 @@ function HabitsSection({ selectedDate }: { selectedDate: Date }) {
   };
 
   return (
-    <div className="space-y-2">
+    <div>
       {habits.length === 0 && !showInput && (
         <p className="text-sm text-slate-400 italic">Add habits to track each day.</p>
       )}
@@ -1314,12 +1308,7 @@ function HabitRow({
   })();
 
   return (
-    <div
-      className={cn(
-        "bg-cream-50 border border-slate-100 rounded-2xl px-4 py-3 flex items-center gap-3 transition-all relative",
-        doneToday && "bg-emerald-50 border-emerald-100"
-      )}
-    >
+    <div className={cn("py-3 border-b border-slate-100 flex items-center gap-3 transition-all relative last:border-0", doneToday && "opacity-80")}>
       {xpToast && (
         <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-emerald-600 text-white text-xs font-bold px-3 py-1.5 rounded-full z-10 animate-fade-in-up whitespace-nowrap">
           +5 XP
@@ -2186,18 +2175,13 @@ function TaskCard({ task }: { task: Task }) {
   };
 
   return (
-    <div
-      className={cn(
-        "bg-cream-50 rounded-2xl border transition-all shadow-sm relative",
-        isDone ? "border-slate-100 opacity-60" : "border-slate-100 hover:border-sage-200"
-      )}
-    >
+    <div className={cn("py-3 border-b border-slate-100 relative last:border-0", isDone && "opacity-60")}>
       {toast && (
         <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-xs font-bold px-3 py-1.5 rounded-full z-10 animate-fade-in-up whitespace-nowrap">
           {toast}
         </div>
       )}
-      <div className="p-4">
+      <div>
         <div className="flex items-start gap-3">
           <button
             onClick={handleComplete}
@@ -2317,6 +2301,8 @@ function TaskCard({ task }: { task: Task }) {
   );
 }
 
+
+
 // ---------------------------------------------------------------------------
 // Tasks section
 // ---------------------------------------------------------------------------
@@ -2400,7 +2386,7 @@ function TasksSection({
         </div>
       )}
 
-      <div className="space-y-3">
+      <div>
         {filtered.map((task) => (
           <TaskCard key={task.id} task={task} />
         ))}
