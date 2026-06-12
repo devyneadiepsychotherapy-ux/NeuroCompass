@@ -236,12 +236,7 @@ function SensoryProfileSummaryCard({
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div
-            className="w-8 h-8 rounded-xl flex items-center justify-center"
-            style={{ background: "#DDE4DC" }}
-          >
-            <Leaf size={16} className="text-green-700" />
-          </div>
+          <Leaf size={16} className="text-sage-600" />
           <p className="text-sm font-semibold text-slate-800">Sensory Profile</p>
         </div>
         <Link
@@ -752,9 +747,7 @@ export default function MePage() {
             style={{ borderColor: "#D8D0CA" }}
           >
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "#E8E0D8" }}>
-                <Sparkles size={16} style={{ color: "#9B6B60" }} />
-              </div>
+              <Sparkles size={16} className="text-stone-400" />
               <p className="text-sm font-semibold text-slate-800">Special Interests</p>
             </div>
             <ChevronRight size={14} className="text-slate-300 shrink-0" />
@@ -767,9 +760,7 @@ export default function MePage() {
             style={{ borderColor: "#C8D4E0" }}
           >
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "#E2E8F0" }}>
-                <ListChecks size={16} className="text-sage-600" />
-              </div>
+              <ListChecks size={16} className="text-sage-500" />
               <p className="text-sm font-semibold text-slate-800">My Lists</p>
             </div>
             <ChevronRight size={14} className="text-slate-300 shrink-0" />

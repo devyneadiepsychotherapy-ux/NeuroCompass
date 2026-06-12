@@ -418,10 +418,7 @@ export default function ShopPage() {
               <span className="text-base font-bold text-[#9e9158]">{displayCoins}</span>
             </div>
             {displayFreezes > 0 && (
-              <div className="flex items-center gap-1.5 bg-sky-50 border border-sky-200 rounded-full px-3 py-1">
-                <Snowflake size={12} className="text-sky-500" />
-                <span className="text-xs font-semibold text-sky-700">{displayFreezes} freeze{displayFreezes !== 1 ? "s" : ""}</span>
-              </div>
+              <span className="text-xs font-semibold text-sky-500/80">{displayFreezes} freeze{displayFreezes !== 1 ? "s" : ""}</span>
             )}
           </div>
         </div>
