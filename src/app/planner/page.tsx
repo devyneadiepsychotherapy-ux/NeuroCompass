@@ -389,10 +389,10 @@ function Section({
   tint?: string;
 }) {
   return (
-    <div className="space-y-3 py-4 border-b border-slate-100">
+    <div className="space-y-3 py-4 border-b border-[#d8e4d6]">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wider">{title}</h2>
+          <h2 className="text-sm font-semibold text-slate-600">{title}</h2>
         </div>
         <div className="flex items-center gap-2">
           {action}

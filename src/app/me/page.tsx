@@ -8,7 +8,7 @@ import {
   LayoutGrid, LayoutList,
 } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
-import { cn } from "@/lib/utils";
+import { cn, xpForLevel } from "@/lib/utils";
 import { SpecialInterest, UserList, ToolFavorite } from "@/types";
 import { TOOLS } from "@/lib/tools-data";
 import { ICON_MAP } from "@/lib/icon-map";
@@ -60,23 +60,9 @@ function NDStrengthsCard({
           Tap to explore your strengths
         </p>
       ) : (
-        <div className="-mx-4 overflow-x-auto scrollbar-hide">
-          <div className="flex gap-2 px-4">
-            {allStrengths.map((s, i) => (
-              <span
-                key={i}
-                className="shrink-0 text-xs border px-3 py-1.5 rounded-xl font-medium"
-                style={{
-                  background: "#F0F4EE",
-                  color: "#5E7A6E",
-                  borderColor: "#D0DCCB",
-                }}
-              >
-                {s}
-              </span>
-            ))}
-          </div>
-        </div>
+        <p className="text-sm leading-relaxed" style={{ color: "#5E7A6E" }}>
+          {allStrengths.join(" · ")}
+        </p>
       )}
     </Link>
   );
@@ -266,22 +252,9 @@ function SensoryProfileSummaryCard({
             {allTriggers.length === 0 ? (
               <p className="text-xs text-slate-400">None added</p>
             ) : (
-              <div className="flex flex-wrap gap-1">
-                {allTriggers.slice(0, 4).map((t, i) => (
-                  <span
-                    key={i}
-                    className="text-xs px-2 py-0.5 rounded-full border"
-                    style={{ background: "#F5EAE7", color: "#C4897A", borderColor: "#E8C9C1" }}
-                  >
-                    {t}
-                  </span>
-                ))}
-                {allTriggers.length > 4 && (
-                  <span className="text-xs text-slate-400">
-                    +{allTriggers.length - 4} more
-                  </span>
-                )}
-              </div>
+              <p className="text-xs leading-relaxed" style={{ color: "#C4897A" }}>
+                {allTriggers.join(" · ")}
+              </p>
             )}
           </div>
 
@@ -293,22 +266,9 @@ function SensoryProfileSummaryCard({
             {allSoothers.length === 0 ? (
               <p className="text-xs text-slate-400">None added</p>
             ) : (
-              <div className="flex flex-wrap gap-1">
-                {allSoothers.slice(0, 4).map((s, i) => (
-                  <span
-                    key={i}
-                    className="text-xs px-2 py-0.5 rounded-full border"
-                    style={{ background: "#EBF2EB", color: "#7FA882", borderColor: "#C8DEC9" }}
-                  >
-                    {s}
-                  </span>
-                ))}
-                {allSoothers.length > 4 && (
-                  <span className="text-xs text-slate-400">
-                    +{allSoothers.length - 4} more
-                  </span>
-                )}
-              </div>
+              <p className="text-xs leading-relaxed" style={{ color: "#7FA882" }}>
+                {allSoothers.join(" · ")}
+              </p>
             )}
           </div>
         </div>
@@ -683,18 +643,32 @@ export default function MePage() {
     <div className="px-4 pt-0 pb-24 space-y-4">
       {/* Header */}
       <div className="pt-3 pb-2">
-        <div className="flex items-center gap-3">
-          {mounted && avatarInfo ? (
-            <avatarInfo.Icon size={30} className={avatarInfo.iconColor} />
-          ) : (
-            <Brain size={30} className="text-sage-600" />
-          )}
-          <div>
-            <h1 className="text-3xl font-bold text-slate-800 leading-tight" style={{ fontFamily: "var(--font-fraunces)" }}>
-              {mounted && userName ? userName : "My Profile"}
-            </h1>
-            <p className="text-sm text-slate-500 mt-0.5">Level {profile.level}</p>
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3">
+            {mounted && avatarInfo ? (
+              <avatarInfo.Icon size={30} className={avatarInfo.iconColor} />
+            ) : (
+              <Brain size={30} className="text-sage-600" />
+            )}
+            <div>
+              <h1 className="text-3xl font-bold text-slate-800 leading-tight" style={{ fontFamily: "var(--font-fraunces)" }}>
+                {mounted && userName ? userName : "My Profile"}
+              </h1>
+              <p className="text-sm text-slate-500 mt-0.5">Level {profile.level}</p>
+            </div>
           </div>
+          {mounted && (
+            <div className="flex flex-col items-end gap-1 shrink-0 pt-1">
+              <span className="text-xs font-semibold text-slate-500">{profile.totalXp} XP</span>
+              <div className="w-20 h-1.5 rounded-full bg-slate-200 overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-sage-500 transition-all"
+                  style={{ width: `${((profile.totalXp % xpForLevel(profile.level)) / xpForLevel(profile.level)) * 100}%` }}
+                />
+              </div>
+              <span className="text-[10px] text-slate-400">to level {profile.level + 1}</span>
+            </div>
+          )}
         </div>
       </div>
 
