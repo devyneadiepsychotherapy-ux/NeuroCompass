@@ -2576,11 +2576,11 @@ export default function PlannerPage() {
       {activeView === "week" && (
         <div className="space-y-6">
           <div className="space-y-3">
-            <h2 className="text-sm font-semibold text-slate-600">This Week</h2>
+            <h2 className="text-sm font-semibold text-slate-600" style={{ fontFamily: "var(--font-fraunces)" }}>This Week</h2>
             <WeekView date={selectedDate} />
           </div>
           <div className="space-y-3 border-t border-[#d8e4d6] pt-5">
-            <h2 className="text-sm font-semibold text-slate-600">This Week&apos;s Focus</h2>
+            <h2 className="text-sm font-semibold text-slate-600" style={{ fontFamily: "var(--font-fraunces)" }}>This Week&apos;s Focus</h2>
             <FocusList weekKey={getWeekKey(selectedDate)} />
           </div>
         </div>
