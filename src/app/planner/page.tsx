@@ -2590,11 +2590,11 @@ export default function PlannerPage() {
       {activeView === "month" && (
         <div className="space-y-6">
           <div className="space-y-3">
-            <h2 className="text-sm font-semibold text-slate-600">Monthly View</h2>
+            <h2 className="text-sm font-semibold text-slate-600" style={{ fontFamily: "var(--font-fraunces)" }}>Monthly View</h2>
             <MonthView date={selectedDate} onDaySelect={handleDaySelect} />
           </div>
           <div className="space-y-3 border-t border-[#d8e4d6] pt-5">
-            <h2 className="text-sm font-semibold text-slate-600">Monthly Intentions</h2>
+            <h2 className="text-sm font-semibold text-slate-600" style={{ fontFamily: "var(--font-fraunces)" }}>Monthly Intentions</h2>
             <FocusList monthKey={getMonthKey(selectedDate)} />
           </div>
         </div>
