@@ -514,11 +514,8 @@ export default function HomePage() {
         <StreakCelebrationModal streak={streak} onDismiss={() => setShowStreakCelebration(false)} />
       )}
 
-      {/* Greeting header — flush with nav, no gap */}
-      <div className="-mx-4 px-4 pt-4 pb-5 relative overflow-hidden" style={{ background: "linear-gradient(to bottom, #e8efe8 0%, transparent 100%)" }}>
-        <div className="absolute right-3 bottom-0 opacity-[0.07] pointer-events-none">
-          <Sparkles size={100} className="text-sage-900" />
-        </div>
+      {/* Greeting header — flush with nav, breathing room inside */}
+      <div className="-mx-4 px-4 pt-8 pb-5 relative overflow-hidden" style={{ background: "linear-gradient(to bottom, #e8efe8 0%, transparent 100%)" }}>
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             <p className="text-xs text-slate-400 font-medium tracking-wide uppercase">
@@ -566,8 +563,9 @@ export default function HomePage() {
       />
 
       {/* Quote */}
-      <div className="rounded-2xl px-4 py-3.5" style={{ background: "linear-gradient(135deg, #fdf6f3 0%, #f0ebe7 100%)" }}>
-        <p className="text-sm text-slate-600 italic leading-relaxed">{todayQuote}</p>
+      <div className="rounded-2xl px-4 py-3.5 border-l-4 border-rose-200" style={{ background: "linear-gradient(135deg, #fdf6f3 0%, #f0ebe7 100%)" }}>
+        <p className="text-xs font-semibold text-rose-400 mb-1">Today's thought</p>
+        <p className="text-sm text-slate-600 italic leading-relaxed">&ldquo;{todayQuote}&rdquo;</p>
       </div>
 
       {/* Feeling Frozen */}
