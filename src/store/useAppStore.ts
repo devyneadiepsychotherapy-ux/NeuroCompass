@@ -259,6 +259,16 @@ interface AppState {
   _hasHydrated: boolean;
   setHasHydrated: (v: boolean) => void;
 
+  // Weekly & monthly focus items
+  weeklyFocus: Record<string, { id: string; text: string; done: boolean }[]>; // keyed by "YYYY-Www"
+  monthlyGoals: Record<string, { id: string; text: string; done: boolean }[]>; // keyed by "YYYY-MM"
+  addWeeklyFocusItem: (weekKey: string, text: string) => void;
+  toggleWeeklyFocusItem: (weekKey: string, id: string) => void;
+  deleteWeeklyFocusItem: (weekKey: string, id: string) => void;
+  addMonthlyGoalItem: (monthKey: string, text: string) => void;
+  toggleMonthlyGoalItem: (monthKey: string, id: string) => void;
+  deleteMonthlyGoalItem: (monthKey: string, id: string) => void;
+
   // Toolbox view mode
   toolboxViewMode: 'grid' | 'list';
   setToolboxViewMode: (mode: 'grid' | 'list') => void;
@@ -997,6 +1007,46 @@ export const useAppStore = create<AppState>()(
 
       completeOnboarding: (name, avatar) =>
         set({ hasOnboarded: true, userName: name, userAvatar: avatar }),
+
+      weeklyFocus: {},
+      addWeeklyFocusItem: (weekKey, text) => set((s) => ({
+        weeklyFocus: {
+          ...s.weeklyFocus,
+          [weekKey]: [...(s.weeklyFocus[weekKey] ?? []), { id: Date.now().toString(), text, done: false }],
+        },
+      })),
+      toggleWeeklyFocusItem: (weekKey, id) => set((s) => ({
+        weeklyFocus: {
+          ...s.weeklyFocus,
+          [weekKey]: (s.weeklyFocus[weekKey] ?? []).map((i) => i.id === id ? { ...i, done: !i.done } : i),
+        },
+      })),
+      deleteWeeklyFocusItem: (weekKey, id) => set((s) => ({
+        weeklyFocus: {
+          ...s.weeklyFocus,
+          [weekKey]: (s.weeklyFocus[weekKey] ?? []).filter((i) => i.id !== id),
+        },
+      })),
+
+      monthlyGoals: {},
+      addMonthlyGoalItem: (monthKey, text) => set((s) => ({
+        monthlyGoals: {
+          ...s.monthlyGoals,
+          [monthKey]: [...(s.monthlyGoals[monthKey] ?? []), { id: Date.now().toString(), text, done: false }],
+        },
+      })),
+      toggleMonthlyGoalItem: (monthKey, id) => set((s) => ({
+        monthlyGoals: {
+          ...s.monthlyGoals,
+          [monthKey]: (s.monthlyGoals[monthKey] ?? []).map((i) => i.id === id ? { ...i, done: !i.done } : i),
+        },
+      })),
+      deleteMonthlyGoalItem: (monthKey, id) => set((s) => ({
+        monthlyGoals: {
+          ...s.monthlyGoals,
+          [monthKey]: (s.monthlyGoals[monthKey] ?? []).filter((i) => i.id !== id),
+        },
+      })),
 
       toolboxViewMode: 'list',
       setToolboxViewMode: (mode) => set({ toolboxViewMode: mode }),

@@ -84,6 +84,20 @@ function getMonthGrid(date: Date): (Date | null)[] {
   return cells;
 }
 
+function getWeekKey(date: Date): string {
+  const d = new Date(date);
+  const day = d.getDay() || 7;
+  d.setDate(d.getDate() + 4 - day);
+  const year = d.getFullYear();
+  const jan1 = new Date(year, 0, 1);
+  const week = Math.ceil((((d.getTime() - jan1.getTime()) / 86400000) + jan1.getDay() + 1) / 7);
+  return `${year}-W${String(week).padStart(2, "0")}`;
+}
+
+function getMonthKey(date: Date): string {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+
 function formatDateLabel(date: Date, view: PlannerView): string {
   if (view === "day") {
     return date.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
@@ -367,6 +381,74 @@ function MonthView({ date, onDaySelect }: { date: Date; onDaySelect: (d: Date) =
 }
 
 // ---------------------------------------------------------------------------
+// Weekly / Monthly focus list
+// ---------------------------------------------------------------------------
+
+function FocusList({
+  weekKey,
+  monthKey,
+}: { weekKey?: string; monthKey?: string }) {
+  const {
+    weeklyFocus, addWeeklyFocusItem, toggleWeeklyFocusItem, deleteWeeklyFocusItem,
+    monthlyGoals, addMonthlyGoalItem, toggleMonthlyGoalItem, deleteMonthlyGoalItem,
+  } = useAppStore();
+  const [input, setInput] = useState("");
+
+  const key = weekKey ?? monthKey ?? "";
+  const isWeekly = !!weekKey;
+  const items = isWeekly ? (weeklyFocus[key] ?? []) : (monthlyGoals[key] ?? []);
+  const addItem = isWeekly ? addWeeklyFocusItem : addMonthlyGoalItem;
+  const toggleItem = isWeekly ? toggleWeeklyFocusItem : toggleMonthlyGoalItem;
+  const deleteItem = isWeekly ? deleteWeeklyFocusItem : deleteMonthlyGoalItem;
+
+  const handleAdd = () => {
+    const t = input.trim();
+    if (!t) return;
+    addItem(key, t);
+    setInput("");
+  };
+
+  return (
+    <div className="space-y-2">
+      {items.length === 0 && (
+        <p className="text-sm text-slate-400 italic">Nothing added yet.</p>
+      )}
+      {items.map((item) => (
+        <div key={item.id} className="flex items-center gap-3 group">
+          <button
+            onClick={() => toggleItem(key, item.id)}
+            className={cn(
+              "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
+              item.done ? "bg-sage-500 border-sage-500" : "border-slate-300 hover:border-sage-400"
+            )}
+          >
+            {item.done && <Check size={10} className="text-white" />}
+          </button>
+          <span className={cn("text-sm flex-1", item.done ? "line-through text-slate-400" : "text-slate-700")}>
+            {item.text}
+          </span>
+          <button onClick={() => deleteItem(key, item.id)} className="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-400 transition-all">
+            <Trash2 size={13} />
+          </button>
+        </div>
+      ))}
+      <div className="flex items-center gap-2 pt-1">
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+          placeholder={isWeekly ? "Add a weekly focus..." : "Add a monthly goal..."}
+          className="flex-1 text-sm bg-transparent border-b border-slate-200 pb-1 outline-none placeholder:text-slate-300 text-slate-700 focus:border-sage-400 transition-colors"
+        />
+        <button onClick={handleAdd} className="text-slate-300 hover:text-sage-500 transition-colors">
+          <Plus size={16} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Section wrapper with hide/show
 // ---------------------------------------------------------------------------
 
@@ -389,7 +471,7 @@ function Section({
   tint?: string;
 }) {
   return (
-    <div className="space-y-3 py-4 border-b border-[#d8e4d6]">
+    <div className="space-y-3 py-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <h2 className="text-sm font-semibold text-slate-600">{title}</h2>
@@ -2498,17 +2580,29 @@ export default function PlannerPage() {
 
       {/* Week view */}
       {activeView === "week" && (
-        <div className="space-y-3">
-          <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wider">This Week</h2>
-          <WeekView date={selectedDate} />
+        <div className="space-y-6">
+          <div className="space-y-3">
+            <h2 className="text-sm font-semibold text-slate-600">This Week</h2>
+            <WeekView date={selectedDate} />
+          </div>
+          <div className="space-y-3 border-t border-[#d8e4d6] pt-5">
+            <h2 className="text-sm font-semibold text-slate-600">This Week&apos;s Focus</h2>
+            <FocusList weekKey={getWeekKey(selectedDate)} />
+          </div>
         </div>
       )}
 
       {/* Month view */}
       {activeView === "month" && (
-        <div className="space-y-3">
-          <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wider">Monthly View</h2>
-          <MonthView date={selectedDate} onDaySelect={handleDaySelect} />
+        <div className="space-y-6">
+          <div className="space-y-3">
+            <h2 className="text-sm font-semibold text-slate-600">Monthly View</h2>
+            <MonthView date={selectedDate} onDaySelect={handleDaySelect} />
+          </div>
+          <div className="space-y-3 border-t border-[#d8e4d6] pt-5">
+            <h2 className="text-sm font-semibold text-slate-600">Monthly Intentions</h2>
+            <FocusList monthKey={getMonthKey(selectedDate)} />
+          </div>
         </div>
       )}
 
