@@ -386,7 +386,7 @@ function Section({
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h2 className="text-xs font-bold text-slate-500 uppercase tracking-widest">{title}</h2>
+          <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wider">{title}</h2>
         </div>
         <div className="flex items-center gap-2">
           {action}
@@ -2491,7 +2491,7 @@ export default function PlannerPage() {
       {/* Week view */}
       {activeView === "week" && (
         <div className="space-y-3">
-          <h2 className="text-xs font-bold text-slate-500 uppercase tracking-widest">This Week</h2>
+          <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wider">This Week</h2>
           <WeekView date={selectedDate} />
         </div>
       )}
@@ -2499,7 +2499,7 @@ export default function PlannerPage() {
       {/* Month view */}
       {activeView === "month" && (
         <div className="space-y-3">
-          <h2 className="text-xs font-bold text-slate-500 uppercase tracking-widest">Monthly View</h2>
+          <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wider">Monthly View</h2>
           <MonthView date={selectedDate} onDaySelect={handleDaySelect} />
         </div>
       )}
