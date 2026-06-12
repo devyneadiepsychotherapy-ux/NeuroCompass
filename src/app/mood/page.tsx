@@ -126,7 +126,7 @@ function PastCheckIns({ entries }: { entries: MoodEntry[] }) {
   return (
     <div className="space-y-3 pt-2">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Past check-ins</p>
+        <p className="text-sm font-bold text-slate-700">Past check-ins</p>
         <span className="text-xs text-slate-400">{entries.length} total</span>
       </div>
 
@@ -527,7 +527,7 @@ export default function MoodPage() {
           )}
         </div>
         <div className="w-full space-y-2">
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Recent entries</p>
+          <p className="text-sm font-bold text-slate-700">Recent entries</p>
           {recentEntries.map((entry) => (
             <div key={entry.id} className="bg-cream-50 rounded-xl p-3 border border-slate-100 flex items-center gap-3">
               <div className={cn("w-3 h-3 rounded-full shrink-0", entry.pleasantness >= 4 ? "bg-emerald-400" : entry.pleasantness >= 3 ? "bg-stone-400" : "bg-rose-400")} />
@@ -555,9 +555,8 @@ export default function MoodPage() {
 
   return (
     <div className="px-4 pt-4 pb-8 space-y-6">
-      <div className="rounded-3xl bg-gradient-to-br from-white/70 to-sage-100/40 border border-white/80 shadow-sm px-5 py-5">
-        <p className="text-xs font-bold uppercase tracking-widest text-sage-600 mb-0.5">Daily</p>
-        <h1 className="text-3xl font-extrabold text-slate-800 leading-tight">Mood Check-In</h1>
+      <div className="pt-2 pb-1">
+        <h1 className="text-3xl font-extrabold text-slate-800 leading-tight">Check-In</h1>
         <p className="text-sm text-slate-500 mt-1">No right or wrong answers, just notice.</p>
       </div>
 

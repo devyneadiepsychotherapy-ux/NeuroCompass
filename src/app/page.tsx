@@ -254,7 +254,7 @@ function FeelingFrozenCard({ openTool }: { openTool: (id: string) => void }) {
             Paralysis is real and it's not your fault. Your brain is overwhelmed. Let's take one tiny step.
           </p>
           <div className="space-y-2">
-            <p className="text-xs font-semibold text-stone-500 uppercase tracking-wider">What feels easiest right now?</p>
+            <p className="text-sm font-bold text-slate-700">What feels easiest right now?</p>
             {[
               { icon: Wind, label: "Wake your body up", action: () => setActiveOption("breathe") },
               { icon: PersonStanding, label: "Move my body for 2 minutes", action: () => openTool("activation-ramp") },
@@ -563,27 +563,10 @@ export default function HomePage() {
         streakFreezes={mounted ? streakFreezes : 0}
       />
 
-      {/* Quote (wide) + Today snapshot (narrow) */}
-      <div className="grid grid-cols-5 gap-3">
-        <div className="col-span-3 bg-gradient-to-br from-rose-50 to-stone-100 rounded-2xl p-4 border border-rose-100 flex flex-col justify-between min-h-[120px]">
-          <p className="text-xs font-semibold text-rose-400 uppercase tracking-wider">Today's reminder</p>
-          <blockquote className="mt-2">
-            <p className="text-sm text-slate-700 italic leading-relaxed font-medium">"{todayQuote}"</p>
-            <footer className="mt-2">
-              <span className="text-xs text-slate-400 not-italic">NeuroCompass</span>
-            </footer>
-          </blockquote>
-        </div>
-        <div className="col-span-2 flex flex-col gap-3">
-          <div className="flex-1 bg-cream-50 rounded-2xl p-3 border border-slate-100 shadow-sm flex flex-col justify-between min-h-[56px]">
-            <div className="flex items-center gap-1 mb-1">
-              <Zap size={12} className="text-[#9B8EC4]" />
-              <p className="text-xs text-slate-500 font-medium">Done</p>
-            </div>
-            <p className="text-2xl font-bold text-slate-800 leading-none">{completedToday}</p>
-            <p className="text-xs text-slate-400 mt-0.5">task{completedToday !== 1 ? "s" : ""}</p>
-          </div>
-        </div>
+      {/* Quote */}
+      <div className="relative px-1 py-2">
+        <span className="absolute -top-1 -left-0 text-6xl leading-none text-rose-200 font-serif select-none">&ldquo;</span>
+        <p className="text-base text-slate-700 italic leading-relaxed pl-7 pr-2 font-medium">{todayQuote}</p>
       </div>
 
       {/* Feeling Frozen */}

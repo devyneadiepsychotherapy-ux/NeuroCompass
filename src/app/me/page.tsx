@@ -707,9 +707,8 @@ export default function MePage() {
   return (
     <div className="px-4 pt-4 pb-24 space-y-4">
       {/* Header */}
-      <div className="rounded-3xl bg-gradient-to-br from-white/70 to-sage-100/40 border border-white/80 shadow-sm px-5 py-5">
-        <p className="text-xs font-bold uppercase tracking-widest text-sage-600 mb-0.5">Profile</p>
-        <div className="flex items-center gap-3 mt-1">
+      <div className="pt-2 pb-1">
+        <div className="flex items-center gap-3">
           {mounted && avatarInfo ? (
             <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center shrink-0", avatarInfo.bg)}>
               <avatarInfo.Icon size={28} className={avatarInfo.iconColor} />

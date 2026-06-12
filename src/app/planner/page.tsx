@@ -2346,10 +2346,10 @@ export default function PlannerPage() {
   return (
     <div className="px-4 pt-4 pb-10 space-y-6">
       {/* Header */}
-      <div className="rounded-3xl bg-gradient-to-br from-white/70 to-sage-100/40 border border-white/80 shadow-sm px-5 py-5">
+      <div className="pt-2 pb-1">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-xs font-bold uppercase tracking-widest text-sage-600 mb-0.5">
+            <p className="text-xs text-slate-400 font-medium tracking-wide uppercase">
               {new Date().toLocaleDateString("en-US", { weekday: "long" })}
             </p>
             <h1 className="text-3xl font-extrabold text-slate-800 leading-tight">

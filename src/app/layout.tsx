@@ -13,7 +13,7 @@ import ThemeProvider from "@/components/layout/ThemeProvider";
 import SidebarWrapper from "@/components/layout/SidebarWrapper";
 import StartPageGuard from "@/components/layout/StartPageGuard";
 import ReminderManager from "@/components/layout/ReminderManager";
-import ServiceWorkerRegistration from "@/components/layout/ServiceWorkerRegistration";
+// ServiceWorkerRegistration replaced by inline script in <head>;
 
 export const metadata: Metadata = {
   title: "NeuroCompass",
@@ -44,12 +44,24 @@ export default function RootLayout({
     <html lang="en" style={{ colorScheme: "light" }} className={nunito.variable}>
       <head>
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        {/* Register service worker as early as possible — before React hydration */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' })
+      .catch(function(err) { console.error('SW registration failed:', err); });
+  });
+}
+            `.trim(),
+          }}
+        />
       </head>
       <body className="pb-24">
         <ThemeProvider>
           <TourProvider>
-            <ServiceWorkerRegistration />
-            <StartPageGuard />
+<StartPageGuard />
             <ReminderManager />
             <SidebarWrapper />
             <main

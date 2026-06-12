@@ -267,8 +267,7 @@ export default function ToolsPage() {
 
   return (
     <div className="px-4 pt-4 pb-8 space-y-5">
-      <div className="rounded-3xl bg-gradient-to-br from-white/70 to-sage-100/40 border border-white/80 shadow-sm px-5 py-5">
-        <p className="text-xs font-bold uppercase tracking-widest text-sage-600 mb-0.5">Explore</p>
+      <div className="pt-2 pb-1">
         <h1 className="text-3xl font-extrabold text-slate-800 leading-tight">Tools</h1>
         <p className="text-sm text-slate-500 mt-1">ND-affirming tools for every challenge</p>
       </div>
@@ -287,7 +286,7 @@ export default function ToolsPage() {
       {/* Category pills */}
       {!search && (
         <div>
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Browse by category</p>
+          <p className="text-sm font-bold text-slate-700 mb-3">Browse by category</p>
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setActiveCategory(null)}
@@ -317,7 +316,7 @@ export default function ToolsPage() {
       {/* Favorites */}
       {mounted && favTools.length > 0 && !search && !activeCategory && (
         <div>
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Your Favourites</p>
+          <p className="text-sm font-bold text-slate-700 mb-3">Your Favourites</p>
           <div className="space-y-2">
             {favTools.map(t => <ToolCard key={t.id} tool={t} onOpen={() => openTool(t)} />)}
           </div>
@@ -327,9 +326,9 @@ export default function ToolsPage() {
       {/* Tool list */}
       <div>
         {activeCategory && (
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
+          <p className="text-sm font-bold text-slate-700 mb-3">
             {TOOL_CATEGORIES.find(c => c.id === activeCategory)?.label}
-            <span className="ml-2 text-slate-400 normal-case">{filtered.length} tools</span>
+            <span className="ml-2 text-slate-400 font-normal text-xs">{filtered.length} tools</span>
           </p>
         )}
         {search && (
