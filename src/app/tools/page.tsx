@@ -14,15 +14,15 @@ const CATEGORY_ICON_BG: Record<string, string> = {
   motivation:    "bg-stone-100",
   attention:     "bg-sage-100",
   planning:      "bg-sage-100",
-  impulsivity:   "bg-teal-100",
+  impulsivity:   "bg-stone-100",
   sensory:       "bg-sage-100",
-  selfcare:      "bg-rose-100",
+  selfcare:      "bg-stone-100",
   eating:        "bg-stone-100",
-  perfectionism: "bg-pink-100",
+  perfectionism: "bg-stone-100",
   people:        "bg-stone-100",
   burnout:       "bg-sage-100",
   interoception: "bg-sage-100",
-  emotion:       "bg-rose-100",
+  emotion:       "bg-stone-100",
 };
 
 // Left-border accent color per category
@@ -31,15 +31,15 @@ const CATEGORY_BORDER_ACCENT: Record<string, string> = {
   motivation:    "border-l-stone-300",
   attention:     "border-l-sage-300",
   planning:      "border-l-sage-300",
-  impulsivity:   "border-l-teal-300",
+  impulsivity:   "border-l-stone-400",
   sensory:       "border-l-sage-300",
-  selfcare:      "border-l-rose-300",
+  selfcare:      "border-l-stone-300",
   eating:        "border-l-stone-300",
-  perfectionism: "border-l-pink-300",
+  perfectionism: "border-l-stone-300",
   people:        "border-l-stone-300",
   burnout:       "border-l-sage-300",
   interoception: "border-l-sage-300",
-  emotion:       "border-l-rose-300",
+  emotion:       "border-l-stone-300",
 };
 
 // --------------- Recommendation logic ---------------
