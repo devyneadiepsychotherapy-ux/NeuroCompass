@@ -221,9 +221,7 @@ function FeelingFrozenCard({ openTool }: { openTool: (id: string) => void }) {
         className="w-full flex items-center gap-4 border border-stone-200 rounded-2xl p-4 hover:border-stone-300 hover:shadow-md transition-all active:scale-[0.98] text-left"
         style={{ background: "linear-gradient(135deg, #EAE8E5 0%, #DEDAD5 100%)" }}
       >
-        <div className="w-11 h-11 rounded-xl bg-stone-100 flex items-center justify-center shrink-0">
-          <Wind size={20} className="text-stone-500" />
-        </div>
+        <Wind size={20} className="text-stone-400 shrink-0" />
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-slate-800 text-sm">Feeling Frozen?</p>
           <p className="text-xs text-slate-500 mt-0.5">Tap to get unstuck</p>
@@ -515,7 +513,7 @@ export default function HomePage() {
       )}
 
       {/* Greeting header — flush with nav, breathing room inside */}
-      <div className="-mx-4 px-4 pt-8 pb-5 relative overflow-hidden" style={{ background: "linear-gradient(to bottom, var(--background) 0%, transparent 100%)" }}>
+      <div className="-mx-4 px-4 pt-3 pb-5 relative overflow-hidden" style={{ background: "linear-gradient(to bottom, var(--background) 0%, transparent 100%)" }}>
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             <p className="text-xs text-slate-400 font-medium tracking-wide uppercase">
@@ -593,9 +591,9 @@ export default function HomePage() {
           <div className="grid grid-cols-4 gap-2">
             {favTools.map((tool) => {
               const card = (
-                <div className="flex flex-col items-center gap-1.5 group">
-                  <div className="w-14 h-14 rounded-2xl bg-sage-50 border border-sage-100 flex items-center justify-center group-hover:border-sage-300 group-hover:shadow-sm transition-all active:scale-[0.95]">
-                    {(() => { const IC = ICON_MAP[tool.icon]; return IC ? <IC size={22} className="text-sage-500" /> : null; })()}
+                <div className="flex flex-col items-center gap-1.5 group active:scale-[0.95] transition-all">
+                  <div className="w-12 h-12 flex items-center justify-center">
+                    {(() => { const IC = ICON_MAP[tool.icon]; return IC ? <IC size={24} className="text-sage-500" /> : null; })()}
                   </div>
                   <p className="text-xs font-medium text-slate-600 text-center leading-tight w-full px-0.5 truncate">{tool.title}</p>
                 </div>
@@ -617,9 +615,7 @@ export default function HomePage() {
         href="/psychoed"
         className="bg-gradient-to-br from-sage-50 to-stone-50 border border-sage-200 rounded-2xl p-4 flex items-center gap-4 hover:border-sage-300 hover:shadow-md transition-all active:scale-[0.98]"
       >
-        <div className="w-10 h-10 rounded-xl bg-sage-100 flex items-center justify-center shrink-0">
-          <Brain size={18} className="text-sage-700" />
-        </div>
+        <Brain size={20} className="text-sage-600 shrink-0" />
         <div className="flex-1">
           <p className="font-semibold text-slate-800 text-sm">Learn</p>
           <p className="text-xs text-slate-500 mt-0.5">How your brain works</p>
