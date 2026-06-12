@@ -195,10 +195,8 @@ function ToolCard({ tool, onOpen }: { tool: Tool; onOpen: () => void }) {
 
   const inner = (
     <>
-      {/* Icon container */}
-      <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shrink-0", iconBg)}>
-        {(() => { const IC = ICON_MAP[tool.icon]; return IC ? <IC size={18} className="text-current opacity-70" /> : null; })()}
-      </div>
+      {/* Icon */}
+      {(() => { const IC = ICON_MAP[tool.icon]; return IC ? <IC size={20} className="text-slate-400 shrink-0" /> : null; })()}
 
       {/* Text */}
       <div className="flex-1 min-w-0">
