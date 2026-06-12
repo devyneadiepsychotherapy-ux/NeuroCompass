@@ -243,6 +243,7 @@ function WeekView({ date }: { date: Date }) {
               <div className="flex flex-col items-center justify-center shrink-0 w-9">
                 <span className={cn("text-[9px] font-bold uppercase leading-none", isToday ? "text-sage-600" : "text-slate-400")}>{WEEK_DAY_LABELS[i]}</span>
                 <span className={cn("text-base font-bold leading-tight", isToday ? "text-sage-700" : "text-slate-600")}>{day.getDate()}</span>
+                {isToday && <span className="w-1 h-1 rounded-full bg-sage-500 mt-0.5" />}
               </div>
               {!hasAnything && (
                 <span className="text-sm text-slate-400 italic">Nothing scheduled</span>
