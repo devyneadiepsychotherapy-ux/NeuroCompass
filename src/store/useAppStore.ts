@@ -802,10 +802,18 @@ export const useAppStore = create<AppState>()(
       setShowFreezeSaved: (v) => set({ showFreezeSaved: v }),
 
       checkAndUpdateStreak: () => {
-        const today = new Date().toISOString().split("T")[0];
+        // Day rolls over at 5am — opening at 11pm still counts as "today"
+        const getEffectiveDate = () => {
+          const now = new Date();
+          const offset = now.getHours() < 5 ? -86400000 : 0;
+          return new Date(now.getTime() + offset).toISOString().split("T")[0];
+        };
+        const today = getEffectiveDate();
         const { streak, lastOpenedDate, longestStreak, streakFreezes } = get();
         if (today === lastOpenedDate) return;
-        const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
+        const yesterday = new Date(
+          new Date(today + "T05:00:00").getTime() - 86400000
+        ).toISOString().split("T")[0];
 
         if (lastOpenedDate === yesterday) {
           // Consecutive day - increment streak
