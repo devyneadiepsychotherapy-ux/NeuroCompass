@@ -110,6 +110,16 @@ function taskMatchesView(task: Task, view: PlannerView): boolean {
   return task.showOn.includes(view);
 }
 
+/** Recurring tasks reset each day — only treat as done if completed today. */
+function isTaskDone(task: Task): boolean {
+  if (task.status !== "done") return false;
+  if (task.recurType) {
+    const today = getTodayKey();
+    return (task.completedAt?.startsWith(today)) ?? false;
+  }
+  return true;
+}
+
 function formatTimeStr(t: string): string {
   const [h, m] = t.split(":").map(Number);
   const ampm = h >= 12 ? "PM" : "AM";
@@ -213,10 +223,10 @@ function WeekView({ date }: { date: Date }) {
       {weekDays.map((day, i) => {
         const key = dateKey(day);
         const pendingTasks = tasks.filter(
-          (t) => taskMatchesView(t, "week") && t.status !== "done" && t.dueDate === key
+          (t) => taskMatchesView(t, "week") && !isTaskDone(t) && t.dueDate === key
         );
         const doneTasks = tasks.filter(
-          (t) => taskMatchesView(t, "week") && t.status === "done" && t.dueDate === key
+          (t) => taskMatchesView(t, "week") && isTaskDone(t) && t.dueDate === key
         );
         const dayAppts = appointments.filter(
           (a) => a.date === key && (!a.showOn || a.showOn.includes("week"))
@@ -319,7 +329,7 @@ function MonthView({ date, onDaySelect }: { date: Date; onDaySelect: (d: Date) =
           if (!cell) return <div key={`empty-${i}`} className="aspect-square" />;
           const key = dateKey(cell);
           const dayTaskCount = tasks.filter(
-            (t) => taskMatchesView(t, "month") && t.dueDate === key && t.status !== "done"
+            (t) => taskMatchesView(t, "month") && t.dueDate === key && !isTaskDone(t)
           ).length;
           const dayAppts = appointments.filter(
             (a) => a.date === key && (!a.showOn || a.showOn.includes("month"))
@@ -2072,7 +2082,7 @@ function TaskCard({ task }: { task: Task }) {
   const [showEdit, setShowEdit] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const cfg = priorityConfig[task.priority];
-  const isDone = task.status === "done";
+  const isDone = isTaskDone(task);
   const taskType = task.type ?? "task";
 
   const handleComplete = () => {
@@ -2238,16 +2248,16 @@ function TasksSection({
   const selKey = dateKey(selectedDate);
 
   const filtered = tasks.filter((t) => {
-    if (filter === "done") return t.status === "done";
+    if (filter === "done") return isTaskDone(t);
     if (!taskMatchesView(t, activeView)) return false;
     if (filter === "today") {
-      if (t.status === "done") return false;
+      if (isTaskDone(t)) return false;
       if (!t.dueDate) return true;                 // no due date: always show
       if (t.dueDate > selKey) return false;        // future task: hide
       if (t.dueDate === selKey) return true;       // today's task: show
       return t.carryOver === true;                 // past task: show only if carry-over
     }
-    return t.status !== "done";
+    return !isTaskDone(t);
   });
 
   const doneTodayCount = tasks.filter((t) => t.completedAt?.startsWith(today)).length;
