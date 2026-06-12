@@ -236,7 +236,7 @@ function WeekView({ date }: { date: Date }) {
   const weekDays = getWeekDays(date);
 
   return (
-    <div className="space-y-2">
+    <div>
       {weekDays.map((day, i) => {
         const key = dateKey(day);
         const pendingTasks = tasks.filter(
@@ -254,59 +254,65 @@ function WeekView({ date }: { date: Date }) {
         const hasAnything = dayAppts.length > 0 || taskCount > 0;
 
         return (
-          <div key={key} className="bg-cream-50 border border-slate-100 rounded-2xl overflow-hidden">
-            {/* Day header row */}
-            <div className="flex items-center gap-3 px-4 pt-3 pb-2">
-              <div className="flex flex-col items-center justify-center shrink-0 w-9">
-                <span className={cn("text-[9px] font-bold uppercase leading-none", isToday ? "text-sage-600" : "text-slate-400")}>{WEEK_DAY_LABELS[i]}</span>
-                <span className={cn("text-base font-bold leading-tight", isToday ? "text-sage-700" : "text-slate-600")}>{day.getDate()}</span>
+          <div key={key} className="border-b border-slate-100 last:border-0 py-3">
+            <div className="flex items-start gap-4">
+              {/* Day label */}
+              <div className="flex flex-col items-center w-8 shrink-0 pt-0.5">
+                <span className={cn("text-[9px] font-bold uppercase leading-none", isToday ? "text-sage-600" : "text-slate-400")}>
+                  {WEEK_DAY_LABELS[i]}
+                </span>
+                <span className={cn("text-lg font-bold leading-tight", isToday ? "text-sage-700" : "text-slate-700")}>
+                  {day.getDate()}
+                </span>
                 {isToday && <span className="w-1 h-1 rounded-full bg-sage-500 mt-0.5" />}
               </div>
-              {!hasAnything && (
-                <span className="text-sm text-slate-400 italic">Nothing scheduled</span>
-              )}
-              {taskCount > 0 && (
-                <button
-                  onClick={() => setExpandedDay(isExpanded ? null : key)}
-                  className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 transition-colors ml-auto"
-                >
-                  {taskCount} task{taskCount !== 1 ? "s" : ""}
-                  {isExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-                </button>
-              )}
+
+              {/* Content */}
+              <div className="flex-1 min-w-0 pt-1">
+                {!hasAnything && (
+                  <span className="text-xs text-slate-300 italic">Nothing scheduled</span>
+                )}
+
+                {/* Appointments */}
+                <div className="space-y-1">
+                  {dayAppts.map((appt) => {
+                    const c = appt.color ?? DEFAULT_APPT_COLOR;
+                    return (
+                      <div key={appt.id} className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full shrink-0 mt-0.5" style={{ background: c }} />
+                        <span className="text-sm text-slate-700 truncate">{appt.title}</span>
+                        {appt.startTime && !appt.allDay && (
+                          <span className="text-xs text-slate-400 shrink-0">{appt.startTime}</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Task count / expand */}
+                {taskCount > 0 && (
+                  <button
+                    onClick={() => setExpandedDay(isExpanded ? null : key)}
+                    className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 transition-colors mt-1"
+                  >
+                    {taskCount} task{taskCount !== 1 ? "s" : ""}
+                    {isExpanded ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
+                  </button>
+                )}
+
+                {/* Expanded tasks */}
+                {isExpanded && taskCount > 0 && (
+                  <div className="mt-2 space-y-1.5 pl-1">
+                    {[...pendingTasks, ...doneTasks].map((task) => (
+                      <div key={task.id} className={cn("flex items-center gap-2", isTaskDone(task) && "opacity-50")}>
+                        <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", isTaskDone(task) ? "bg-sage-400" : "bg-slate-300")} />
+                        <span className={cn("text-sm text-slate-700", isTaskDone(task) && "line-through text-slate-400")}>{task.title}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-
-            {/* Appointment chips — always visible */}
-            {dayAppts.length > 0 && (
-              <div className="px-4 pb-3 space-y-1.5">
-                {dayAppts.map((appt) => {
-                  const c = appt.color ?? DEFAULT_APPT_COLOR;
-                  const opt = APPT_COLOR_OPTIONS.find((o) => o.hex === c) ?? APPT_COLOR_OPTIONS[0];
-                  return (
-                    <div key={appt.id} className="flex items-center gap-2 py-1.5 px-3 rounded-xl border" style={{ background: opt.bg, borderColor: c + "30" }}>
-                      <span className="text-sm font-semibold flex-1 min-w-0 truncate" style={{ color: c }}>{appt.title}</span>
-                      {appt.allDay ? (
-                        <span className="text-xs font-medium shrink-0" style={{ color: c + "aa" }}>All day</span>
-                      ) : appt.startTime ? (
-                        <span className="text-xs font-medium shrink-0" style={{ color: c + "aa" }}>{appt.startTime}</span>
-                      ) : null}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* Tasks — collapsible */}
-            {isExpanded && taskCount > 0 && (
-              <div className="px-4 pb-3 space-y-2 border-t border-slate-100 pt-3">
-                {pendingTasks.map((task) => (
-                  <TaskCard key={task.id} task={task} />
-                ))}
-                {doneTasks.map((task) => (
-                  <TaskCard key={task.id} task={task} />
-                ))}
-              </div>
-            )}
           </div>
         );
       })}
@@ -326,7 +332,7 @@ function MonthView({ date, onDaySelect }: { date: Date; onDaySelect: (d: Date) =
   const todayKey = getTodayKey();
 
   return (
-    <div className="bg-cream-50 border border-slate-100 rounded-2xl p-4">
+    <div className="py-1">
       <div className="grid grid-cols-7 mb-3">
         {MONTH_DAY_HEADERS.map((d) => (
           <div
@@ -473,14 +479,9 @@ function Section({
   headerTint?: string;
 }) {
   return (
-    <div className="space-y-3 py-3">
-      <div
-        className="-mx-4 px-4 py-2.5 flex items-center justify-between"
-        style={{ background: headerTint ?? "#eceae5" }}
-      >
-        <div className="flex items-center gap-2">
-          <h2 className="text-sm font-semibold text-slate-600" style={{ fontFamily: "var(--font-fraunces)" }}>{title}</h2>
-        </div>
+    <div className="pt-7 pb-1">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">{title}</h2>
         <div className="flex items-center gap-2">
           {action}
           <button
@@ -1066,7 +1067,7 @@ function Top3Item({
   const [toast, setToast] = useState<string | null>(null);
   const [editingReward, setEditingReward] = useState(false);
   const [draftAmt, setDraftAmt] = useState<string>("");
-  const accentColors = ["border-l-sage-500", "border-l-[#B8897A]", "border-l-rose-300"];
+  const accentColors = ["border-l-sage-500", "border-l-[#B8897A]", "border-l-[#C4909A]"];
   const rewardAmt = priority.rewardAmount ?? TOP3_XP[index];
   const rewardType = priority.rewardType ?? "xp";
 
@@ -1093,7 +1094,7 @@ function Top3Item({
   };
 
   return (
-    <div className={cn("py-3 border-b border-slate-100 relative last:border-0", priority.completed && "opacity-50")}>
+    <div className={cn("py-3 relative", priority.completed && "opacity-50")}>
       {toast && (
         <div className="absolute -top-7 left-10 bg-emerald-600 text-white text-xs font-bold px-2.5 py-1 rounded-full z-10 animate-fade-in-up whitespace-nowrap">
           {toast}
@@ -1308,7 +1309,7 @@ function HabitRow({
   })();
 
   return (
-    <div className={cn("py-3 border-b border-slate-100 flex items-center gap-3 transition-all relative last:border-0", doneToday && "opacity-80")}>
+    <div className={cn("py-3 flex items-center gap-3 transition-all relative", doneToday && "opacity-80")}>
       {xpToast && (
         <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-emerald-600 text-white text-xs font-bold px-3 py-1.5 rounded-full z-10 animate-fade-in-up whitespace-nowrap">
           +5 XP
@@ -2123,7 +2124,7 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
             className={cn(
               "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all border",
               carryOver
-                ? "bg-blue-50 text-blue-700 border-blue-300"
+                ? "bg-[#dde4ec] text-[#4a607a] border-[#b8c8d8]"
                 : "bg-slate-100 text-slate-600 border-transparent"
             )}
           >
@@ -2175,7 +2176,7 @@ function TaskCard({ task }: { task: Task }) {
   };
 
   return (
-    <div className={cn("py-3 border-b border-slate-100 relative last:border-0", isDone && "opacity-60")}>
+    <div className={cn("py-3 relative", isDone && "opacity-60")}>
       {toast && (
         <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-xs font-bold px-3 py-1.5 rounded-full z-10 animate-fade-in-up whitespace-nowrap">
           {toast}
@@ -2255,7 +2256,7 @@ function TaskCard({ task }: { task: Task }) {
                   className={cn(
                     "flex items-center gap-0.5 text-xs px-2 py-0.5 rounded-full font-medium transition-all",
                     task.carryOver
-                      ? "bg-blue-100 text-blue-600"
+                      ? "bg-[#dde4ec] text-[#4a607a]"
                       : "bg-slate-100 text-slate-400 hover:text-slate-600"
                   )}
                   title={task.carryOver ? "Carry over: on" : "Carry over: off"}
@@ -2574,13 +2575,13 @@ export default function PlannerPage() {
 
       {/* Week view */}
       {activeView === "week" && (
-        <div className="space-y-6">
-          <div className="space-y-3">
-            <h2 className="text-sm font-semibold text-slate-600" style={{ fontFamily: "var(--font-fraunces)" }}>This Week</h2>
+        <div>
+          <div className="pt-5 pb-1">
+            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-4">This Week</h2>
             <WeekView date={selectedDate} />
           </div>
-          <div className="space-y-3 border-t border-[#d8e4d6] pt-5">
-            <h2 className="text-sm font-semibold text-slate-600" style={{ fontFamily: "var(--font-fraunces)" }}>This Week&apos;s Focus</h2>
+          <div className="pt-8 pb-1">
+            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-4">Weekly Focus</h2>
             <FocusList weekKey={getWeekKey(selectedDate)} />
           </div>
         </div>
@@ -2588,13 +2589,13 @@ export default function PlannerPage() {
 
       {/* Month view */}
       {activeView === "month" && (
-        <div className="space-y-6">
-          <div className="space-y-3">
-            <h2 className="text-sm font-semibold text-slate-600" style={{ fontFamily: "var(--font-fraunces)" }}>Monthly View</h2>
+        <div>
+          <div className="pt-5 pb-1">
+            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-4">This Month</h2>
             <MonthView date={selectedDate} onDaySelect={handleDaySelect} />
           </div>
-          <div className="space-y-3 border-t border-[#d8e4d6] pt-5">
-            <h2 className="text-sm font-semibold text-slate-600" style={{ fontFamily: "var(--font-fraunces)" }}>Monthly Intentions</h2>
+          <div className="pt-8 pb-1">
+            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-4">Monthly Intentions</h2>
             <FocusList monthKey={getMonthKey(selectedDate)} />
           </div>
         </div>
