@@ -60,25 +60,22 @@ function NDStrengthsCard({
           Tap to explore your strengths
         </p>
       ) : (
-        <div className="flex flex-wrap gap-1.5">
-          {allStrengths.slice(0, 8).map((s, i) => (
-            <span
-              key={i}
-              className="text-xs border px-2.5 py-1 rounded-full"
-              style={{
-                background: "#F0F4EE",
-                color: "#5E7A6E",
-                borderColor: "#D0DCCB",
-              }}
-            >
-              {s}
-            </span>
-          ))}
-          {allStrengths.length > 8 && (
-            <span className="text-xs text-slate-400">
-              +{allStrengths.length - 8} more
-            </span>
-          )}
+        <div className="-mx-4 overflow-x-auto scrollbar-hide">
+          <div className="flex gap-2 px-4">
+            {allStrengths.map((s, i) => (
+              <span
+                key={i}
+                className="shrink-0 text-xs border px-3 py-1.5 rounded-xl font-medium"
+                style={{
+                  background: "#F0F4EE",
+                  color: "#5E7A6E",
+                  borderColor: "#D0DCCB",
+                }}
+              >
+                {s}
+              </span>
+            ))}
+          </div>
         </div>
       )}
     </Link>

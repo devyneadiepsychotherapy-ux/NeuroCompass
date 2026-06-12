@@ -284,28 +284,28 @@ export default function ToolsPage() {
         onChange={(e) => setSearch(e.target.value)}
       />
 
-      {/* Category pills */}
+      {/* Category scroll */}
       {!search && (
-        <div>
-          <p className="text-sm font-bold text-slate-700 mb-3">Browse by category</p>
-          <div className="flex flex-wrap gap-2">
+        <div className="-mx-4">
+          <div className="flex gap-2 overflow-x-auto px-4 pb-1 scrollbar-hide">
             <button
               onClick={() => setActiveCategory(null)}
-              className={cn("px-3 py-1.5 rounded-full text-xs font-medium transition-all border",
-                !activeCategory ? "bg-sage-600 text-white border-sage-600" : "bg-cream-50 text-slate-600 border-slate-200 hover:border-sage-300")}>
+              className={cn("shrink-0 px-4 py-2 rounded-xl text-xs font-semibold transition-all",
+                !activeCategory ? "bg-slate-700 text-white" : "bg-cream-50 text-slate-600 border border-slate-200")}>
               All
             </button>
             {TOOL_CATEGORIES.map((cat) => {
               const CatIC = ICON_MAP[cat.icon];
+              const isActive = activeCategory === cat.id;
               return (
                 <button
                   key={cat.id}
-                  onClick={() => setActiveCategory(activeCategory === cat.id ? null : cat.id)}
-                  className={cn("px-3 py-1.5 rounded-full text-xs font-medium transition-all border flex items-center gap-1.5",
-                    activeCategory === cat.id
-                      ? "bg-sage-600 text-white border-sage-600"
-                      : "bg-cream-50 text-slate-600 border-slate-200 hover:border-sage-300")}>
-                  {CatIC && <CatIC size={12} className="opacity-70" />}
+                  onClick={() => setActiveCategory(isActive ? null : cat.id)}
+                  className={cn(
+                    "shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all",
+                    isActive ? "bg-slate-700 text-white" : cat.color
+                  )}>
+                  {CatIC && <CatIC size={12} className="opacity-80" />}
                   {cat.label}
                 </button>
               );
