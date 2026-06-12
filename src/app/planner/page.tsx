@@ -389,7 +389,7 @@ function Section({
   tint?: string;
 }) {
   return (
-    <div className={cn("rounded-2xl px-4 py-4 space-y-3", tint ?? "bg-transparent")}>
+    <div className={cn("-mx-4 px-4 py-5 space-y-3", tint ?? "")}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wider">{title}</h2>
@@ -2355,7 +2355,7 @@ export default function PlannerPage() {
   })();
 
   return (
-    <div className="px-4 pt-0 pb-10 space-y-6">
+    <div className="px-4 pt-0 pb-10 space-y-0">
       {/* Header */}
       <div className="pt-3 pb-2">
         <div className="flex items-start justify-between gap-3">
@@ -2386,7 +2386,7 @@ export default function PlannerPage() {
       </div>
 
       {/* View toggle + date navigation */}
-      <div className="space-y-3">
+      <div className="space-y-3 pb-4">
         <ViewToggle active={activeView} onChange={setActiveView} />
         <DateNavigation date={selectedDate} view={activeView} onNavigate={setSelectedDate} />
       </div>
