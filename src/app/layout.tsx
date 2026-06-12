@@ -13,7 +13,7 @@ const fraunces = Fraunces({
   subsets: ["latin"],
   variable: "--font-fraunces",
   display: "swap",
-  axes: ["WONK", "opsz", "SOFT"],
+  axes: ["opsz", "SOFT"],
 });
 import { TourProvider } from "@/components/layout/TourProvider";
 import ThemeProvider from "@/components/layout/ThemeProvider";
