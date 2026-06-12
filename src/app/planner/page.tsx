@@ -226,13 +226,13 @@ function DateNavigation({
       {view === "day" && (
         <div className="flex-1 flex justify-center">
           {isToday ? (
-            <span className="text-xs font-semibold text-slate-400 tracking-wide">today</span>
+            <span className="font-[family-name:var(--font-fraunces)] italic text-sm text-slate-400">today</span>
           ) : (
             <button
               onClick={() => onNavigate(new Date())}
-              className="text-xs font-semibold text-sage-600 hover:text-sage-700 transition-colors px-3 py-1 rounded-lg hover:bg-sage-50"
+              className="font-[family-name:var(--font-fraunces)] italic text-sm text-sage-600 hover:text-sage-700 transition-colors px-3 py-1 rounded-lg hover:bg-sage-50"
             >
-              ↩ Back to today
+              Back to today
             </button>
           )}
         </div>
@@ -300,10 +300,10 @@ function WeekView({ date }: { date: Date }) {
             )}>
               {/* Day label */}
               <div className="w-9 shrink-0 pt-0.5">
-                <span className={cn("text-[9px] font-bold uppercase block leading-none", isToday ? "text-sage-600" : "text-slate-400")}>
+                <span className={cn("text-[9px] font-bold uppercase block leading-none", isToday ? "text-sage-600" : "text-slate-500")}>
                   {WEEK_DAY_LABELS[i]}
                 </span>
-                <span className={cn("text-sm font-bold leading-snug", isToday ? "text-sage-700" : "text-slate-600")}>
+                <span className={cn("text-sm font-bold leading-snug", isToday ? "text-sage-700" : "text-slate-700")}>
                   {day.getDate()}
                 </span>
               </div>
@@ -311,7 +311,7 @@ function WeekView({ date }: { date: Date }) {
               {/* Content */}
               <div className="flex-1 min-w-0 pt-0.5">
                 {!hasAnything && (
-                  <span className="text-xs text-slate-300">—</span>
+                  <span className="text-xs text-slate-400">—</span>
                 )}
 
                 <div className="space-y-0.5">
@@ -522,9 +522,9 @@ function Section({
   card?: boolean;
 }) {
   return (
-    <div className="pt-7 pb-1">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">{title}</h2>
+    <div className="pt-5 pb-1">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="font-[family-name:var(--font-fraunces)] italic text-sm text-slate-500">{title}</h2>
         <div className="flex items-center gap-2">
           {action}
           <button
@@ -654,7 +654,7 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
   return (
     <div className="space-y-2">
       {dayAppointments.length === 0 && !showForm && (
-        <p className="text-sm text-slate-400 italic">No appointments yet for today.</p>
+        <p className="text-sm text-slate-500 italic">No appointments yet for today.</p>
       )}
 
       {/* All-day events */}
@@ -669,6 +669,7 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
 
       {/* Time grid */}
       {timedAppts.length > 0 && (
+        <div className="overflow-y-auto max-h-[320px] overflow-x-visible rounded-xl" style={{ WebkitOverflowScrolling: "touch" } as React.CSSProperties}>
         <div className="relative overflow-visible" style={{ height: gridHeight }}>
           {/* Hour lines */}
           {hourLabels.map((hour) => (
@@ -677,7 +678,7 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
               className="absolute left-0 right-0 flex items-center gap-2 pointer-events-none"
               style={{ top: (hour - gridStartHour) * PX_PER_HOUR }}
             >
-              <span className="text-[9px] text-slate-400 font-medium w-9 text-right shrink-0 leading-none">
+              <span className="text-[9px] text-slate-500 font-medium w-9 text-right shrink-0 leading-none">
                 {`${hour % 12 || 12}${hour < 12 ? "am" : "pm"}`}
               </span>
               <div className="flex-1 border-t border-slate-100" />
@@ -714,6 +715,7 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
               </div>
             );
           })}
+        </div>
         </div>
       )}
 
@@ -1314,11 +1316,12 @@ function HabitsSection({ selectedDate }: { selectedDate: Date }) {
         <p className="text-sm text-slate-400 italic">Add habits to track each day.</p>
       )}
 
-      {habits.map((habit) => (
+      {habits.map((habit, idx) => (
         <HabitRow
           key={habit.id}
           habit={habit}
           today={today}
+          index={idx}
           onToggle={() => toggleHabitToday(habit.id, today)}
           onUpdate={(name) => updateHabit(habit.id, name)}
           onDelete={() => deleteHabit(habit.id)}
@@ -1365,15 +1368,19 @@ function HabitsSection({ selectedDate }: { selectedDate: Date }) {
   );
 }
 
+const HABIT_ACCENT_COLORS = ["#6B8F71", "#C4909A", "#C9A96E", "#8B9BB4", "#A89B8C", "#7BA7A0", "#D4A27A"];
+
 function HabitRow({
   habit,
   today,
+  index,
   onToggle,
   onUpdate,
   onDelete,
 }: {
   habit: Habit;
   today: string;
+  index: number;
   onToggle: () => void;
   onUpdate: (name: string) => void;
   onDelete: () => void;
@@ -1409,6 +1416,8 @@ function HabitRow({
 
   useEffect(() => () => { if (toastRef.current) clearTimeout(toastRef.current); }, []);
 
+  const accentColor = HABIT_ACCENT_COLORS[index % HABIT_ACCENT_COLORS.length];
+
   const streak = (() => {
     if (habit.completedDates.length === 0) return 0;
     const sorted = [...habit.completedDates].sort().reverse();
@@ -1438,13 +1447,17 @@ function HabitRow({
   });
 
   return (
-    <div className={cn("py-2.5 relative", doneToday && "opacity-80")}>
+    <div className={cn("py-2 relative flex items-start gap-2.5", doneToday && "opacity-70")}>
       {xpToast && (
         <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-emerald-600 text-white text-xs font-bold px-3 py-1.5 rounded-full z-10 animate-fade-in-up whitespace-nowrap">
           +5 XP
         </div>
       )}
 
+      {/* Left accent bar */}
+      <div className="w-0.5 self-stretch rounded-full shrink-0 mt-0.5" style={{ background: accentColor, opacity: doneToday ? 1 : 0.5 }} />
+
+      <div className="flex-1">
       <div className="flex items-center gap-3">
         <button
           onClick={handleToggle}
@@ -1503,15 +1516,18 @@ function HabitRow({
             return (
               <div
                 key={i}
-                className={cn(
-                  "w-5 h-2 rounded-full transition-all",
-                  done ? "bg-emerald-400" : isToday ? "bg-slate-200 ring-1 ring-emerald-300" : "bg-slate-200"
-                )}
+                className="w-5 h-2 rounded-sm transition-all"
+                style={{
+                  background: done ? accentColor : isToday ? "#cbd5e1" : "#e2e8f0",
+                  opacity: done ? 1 : isToday ? 1 : 0.5 + (i * 0.07),
+                  outline: isToday && !done ? `1.5px solid ${accentColor}55` : undefined,
+                }}
               />
             );
           })}
         </div>
       )}
+      </div>
     </div>
   );
 }
@@ -2611,7 +2627,7 @@ export default function PlannerPage() {
       </div>
 
       {/* View toggle + date navigation */}
-      <div className="space-y-2 pb-2">
+      <div className="space-y-1.5">
         <ViewToggle active={activeView} onChange={setActiveView} />
         <DateNavigation date={selectedDate} view={activeView} onNavigate={setSelectedDate} />
       </div>
@@ -2702,7 +2718,6 @@ export default function PlannerPage() {
               icon={<Activity size={16} />}
               title="Habits"
               onToggle={() => toggleSection("habits")}
-              card
             >
               <HabitsSection selectedDate={selectedDate} />
             </Section>
@@ -2726,11 +2741,11 @@ export default function PlannerPage() {
       {activeView === "week" && (
         <div>
           <div className="pt-5 pb-1">
-            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-4">This Week</h2>
+            <h2 className="font-[family-name:var(--font-fraunces)] italic text-sm text-slate-600 mb-3">This Week</h2>
             <WeekView date={selectedDate} />
           </div>
           <div className="pt-8 pb-1">
-            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-4">Weekly Focus</h2>
+            <h2 className="font-[family-name:var(--font-fraunces)] italic text-sm text-slate-600 mb-3">Weekly Focus</h2>
             <FocusList weekKey={getWeekKey(selectedDate)} />
           </div>
         </div>
@@ -2740,11 +2755,11 @@ export default function PlannerPage() {
       {activeView === "month" && (
         <div>
           <div className="pt-5 pb-1">
-            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-4">This Month</h2>
+            <h2 className="font-[family-name:var(--font-fraunces)] italic text-sm text-slate-600 mb-3">This Month</h2>
             <MonthView date={selectedDate} onDaySelect={handleDaySelect} />
           </div>
           <div className="pt-8 pb-1">
-            <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-4">Monthly Intentions</h2>
+            <h2 className="font-[family-name:var(--font-fraunces)] italic text-sm text-slate-600 mb-3">Monthly Intentions</h2>
             <FocusList monthKey={getMonthKey(selectedDate)} />
           </div>
         </div>
