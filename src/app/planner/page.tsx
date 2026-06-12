@@ -496,7 +496,7 @@ function Section({
         </div>
       </div>
       {card ? (
-        <div className="bg-[#f5f2ec] rounded-2xl px-4 py-3">
+        <div className="bg-[#f7f4ef] rounded-xl px-4 py-2">
           {children}
         </div>
       ) : children}
@@ -1074,6 +1074,7 @@ function Top3Item({
   const [editingReward, setEditingReward] = useState(false);
   const [draftAmt, setDraftAmt] = useState<string>("");
   const accentColors = ["border-l-sage-500", "border-l-[#B8897A]", "border-l-[#C4909A]"];
+  const accentBgColors = ["bg-sage-500", "bg-[#B8897A]", "bg-[#C4909A]"];
   const rewardAmt = priority.rewardAmount ?? TOP3_XP[index];
   const rewardType = priority.rewardType ?? "xp";
 
@@ -1107,7 +1108,7 @@ function Top3Item({
         </div>
       )}
       <div className="flex items-center gap-3">
-        <div className={cn("w-1 h-8 rounded-full shrink-0", accentColors[index].replace("border-l-", "bg-"))} />
+        <div className={cn("w-1 h-8 rounded-full shrink-0", accentBgColors[index])} />
         <button
           onClick={handleToggle}
           className={cn(
