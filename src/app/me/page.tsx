@@ -707,8 +707,11 @@ export default function MePage() {
   return (
     <div className="px-4 pt-4 pb-24 space-y-4">
       {/* Header */}
-      <div className="-mx-4 px-4 pt-5 pb-4 bg-gradient-to-b from-sage-50 to-transparent">
-        <div className="flex items-center gap-3">
+      <div className="-mx-4 px-4 pt-5 pb-4 relative overflow-hidden" style={{ background: "linear-gradient(to bottom, #ede8f5 0%, transparent 100%)" }}>
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 opacity-[0.08] pointer-events-none">
+          <Brain size={96} className="text-slate-900" />
+        </div>
+        <div className="flex items-center gap-3 relative">
           {mounted && avatarInfo ? (
             <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center shrink-0", avatarInfo.bg)}>
               <avatarInfo.Icon size={28} className={avatarInfo.iconColor} />

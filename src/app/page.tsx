@@ -515,7 +515,10 @@ export default function HomePage() {
       )}
 
       {/* Greeting header — full bleed wash */}
-      <div className="-mx-4 px-4 pt-5 pb-5 bg-gradient-to-b from-sage-50 to-transparent">
+      <div className="-mx-4 px-4 pt-5 pb-5 relative overflow-hidden" style={{ background: "linear-gradient(to bottom, #e8efe8 0%, transparent 100%)" }}>
+        <div className="absolute right-3 bottom-0 opacity-[0.07] pointer-events-none">
+          <Sparkles size={100} className="text-sage-900" />
+        </div>
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             <p className="text-xs text-slate-400 font-medium tracking-wide uppercase">

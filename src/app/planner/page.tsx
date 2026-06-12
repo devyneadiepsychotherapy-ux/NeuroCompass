@@ -2346,9 +2346,12 @@ export default function PlannerPage() {
   return (
     <div className="px-4 pt-4 pb-10 space-y-6">
       {/* Header */}
-      <div className="-mx-4 px-4 pt-5 pb-4 bg-gradient-to-b from-sage-50 to-transparent">
+      <div className="-mx-4 px-4 pt-5 pb-4 relative overflow-hidden" style={{ background: "linear-gradient(to bottom, #e8eff5 0%, transparent 100%)" }}>
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 opacity-[0.08] pointer-events-none">
+          <Calendar size={96} className="text-slate-900" />
+        </div>
         <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
+          <div className="min-w-0 relative">
             <p className="text-xs text-slate-400 font-medium tracking-wide uppercase">
               {new Date().toLocaleDateString("en-US", { weekday: "long" })}
             </p>
