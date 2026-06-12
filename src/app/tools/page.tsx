@@ -267,9 +267,14 @@ export default function ToolsPage() {
 
   return (
     <div className="px-4 pt-4 pb-8 space-y-5">
-      <div className="-mx-4 px-4 pt-5 pb-4 bg-gradient-to-b from-sage-50 to-transparent">
-        <h1 className="text-3xl font-extrabold text-slate-800 leading-tight">Tools</h1>
-        <p className="text-sm text-slate-500 mt-1.5">ND-affirming tools for every challenge</p>
+      <div className="-mx-4 px-4 pt-5 pb-4 relative overflow-hidden" style={{ background: "linear-gradient(to bottom, #e8efe8 0%, transparent 100%)" }}>
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 opacity-[0.08] pointer-events-none">
+          <Wrench size={96} className="text-sage-900" />
+        </div>
+        <div className="relative">
+          <h1 className="text-3xl font-extrabold text-slate-800 leading-tight">Tools</h1>
+          <p className="text-sm text-slate-500 mt-1.5">ND-affirming tools for every challenge</p>
+        </div>
       </div>
 
       {/* Recommendation widget */}
