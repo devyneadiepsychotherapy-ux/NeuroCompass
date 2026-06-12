@@ -2434,10 +2434,10 @@ export default function PlannerPage() {
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="text-xs text-slate-500 font-semibold tracking-wide uppercase">
-              {new Date().toLocaleDateString("en-US", { weekday: "long" })}
+              {selectedDate.toLocaleDateString("en-US", { weekday: "long" })}
             </p>
             <h1 className="text-3xl font-bold text-slate-800 leading-tight" style={{ fontFamily: "var(--font-fraunces)" }}>
-              {new Date().toLocaleDateString("en-US", { month: "long", day: "numeric" })}
+              {selectedDate.toLocaleDateString("en-US", { month: "long", day: "numeric" })}
             </h1>
             <p className="text-sm text-slate-500 mt-1">{greeting}, let&apos;s plan your day</p>
           </div>
@@ -2461,9 +2461,7 @@ export default function PlannerPage() {
       {/* View toggle + date navigation */}
       <div className="space-y-2 pb-2">
         <ViewToggle active={activeView} onChange={setActiveView} />
-        {activeView !== "day" && (
-          <DateNavigation date={selectedDate} view={activeView} onNavigate={setSelectedDate} />
-        )}
+        <DateNavigation date={selectedDate} view={activeView} onNavigate={setSelectedDate} />
       </div>
 
       {/* Day view */}
