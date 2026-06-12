@@ -1,15 +1,15 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { House, Heart, Wrench, Gift, User } from "lucide-react";
+import { CheckSquare, Heart, Wrench, Gift, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const nav = [
-  { href: "/",      icon: House,  label: "Home"     },
-  { href: "/mood",  icon: Heart,  label: "Check-In" },
-  { href: "/tools", icon: Wrench, label: "Tools"    },
-  { href: "/shop",  icon: Gift,   label: "Shop"     },
-  { href: "/me",    icon: User,   label: "Me"       },
+  { href: "/planner", icon: CheckSquare, label: "Planner"  },
+  { href: "/mood",    icon: Heart,       label: "Check-In" },
+  { href: "/tools",   icon: Wrench,      label: "Tools"    },
+  { href: "/shop",    icon: Gift,        label: "Shop"     },
+  { href: "/me",      icon: User,        label: "Me"       },
 ];
 
 export default function BottomNav() {
@@ -19,12 +19,14 @@ export default function BottomNav() {
       <nav className="w-full max-w-lg bg-white/95 backdrop-blur-md rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-black/5 px-2">
         <div className="flex justify-around items-center h-[60px]">
           {nav.map(({ href, icon: Icon, label }) => {
-            const active = href === "/" ? path === "/" : path.startsWith(href);
+            // Only highlight if the path exactly matches or starts with this href
+            // (the home page "/" never matches any of these, so nothing is highlighted there)
+            const active = path === href || (path.startsWith(href) && href !== "/");
             return (
               <Link
                 key={href}
                 href={href}
-                className="flex flex-col items-center gap-0.5 px-3 py-2 relative"
+                className="flex flex-col items-center gap-0.5 px-3 py-2"
               >
                 <div className={cn(
                   "w-10 h-8 rounded-xl flex items-center justify-center transition-all duration-200",
