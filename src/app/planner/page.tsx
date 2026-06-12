@@ -292,7 +292,12 @@ function WeekView({ date }: { date: Date }) {
           const hasAnything = dayAppts.length > 0 || taskCount > 0;
 
           return (
-            <div key={key} className={cn("flex items-start gap-3 py-1.5 px-2 rounded-xl transition-colors", isToday && "bg-sage-50/60")}>
+            <div key={key} className={cn(
+              "flex items-start gap-3 py-2 px-2 rounded-r-xl transition-colors",
+              isToday
+                ? "border-l-2 border-sage-400 bg-sage-50/60 pl-3"
+                : "border-l-2 border-slate-200/70 pl-3"
+            )}>
               {/* Day label */}
               <div className="w-9 shrink-0 pt-0.5">
                 <span className={cn("text-[9px] font-bold uppercase block leading-none", isToday ? "text-sage-600" : "text-slate-400")}>
@@ -365,20 +370,20 @@ function MonthView({ date, onDaySelect }: { date: Date; onDaySelect: (d: Date) =
   const todayKey = getTodayKey();
 
   return (
-    <div className="py-1">
-      <div className="grid grid-cols-7 mb-1">
+    <div className="py-1 pb-6">
+      <div className="grid grid-cols-7 mb-1.5">
         {MONTH_DAY_HEADERS.map((d) => (
           <div
             key={d}
-            className="text-center text-[9px] font-bold text-slate-400 uppercase tracking-wider pb-1"
+            className="text-center text-[9px] font-bold text-slate-500 uppercase tracking-wider pb-1"
           >
             {d}
           </div>
         ))}
       </div>
-      <div className="grid grid-cols-7 gap-0.5">
+      <div className="grid grid-cols-7 gap-1">
         {cells.map((cell, i) => {
-          if (!cell) return <div key={`empty-${i}`} className="h-9" />;
+          if (!cell) return <div key={`empty-${i}`} className="h-10" />;
           const key = dateKey(cell);
           const dayTaskCount = tasks.filter(
             (t) => taskMatchesView(t, "month") && t.dueDate === key && !isTaskDone(t)
@@ -393,7 +398,7 @@ function MonthView({ date, onDaySelect }: { date: Date; onDaySelect: (d: Date) =
               key={key}
               onClick={() => onDaySelect(cell)}
               className={cn(
-                "h-9 flex flex-col items-center justify-center rounded-lg text-sm font-medium transition-all",
+                "h-10 flex flex-col items-center justify-center rounded-lg text-sm font-semibold transition-all",
                 isToday
                   ? "bg-sage-600 text-white"
                   : "text-slate-700 hover:bg-white/50"
@@ -405,12 +410,12 @@ function MonthView({ date, onDaySelect }: { date: Date; onDaySelect: (d: Date) =
                   {dayAppts.slice(0, 2).map((a) => (
                     <span
                       key={a.id}
-                      className="w-1 h-1 rounded-full shrink-0"
-                      style={{ background: isToday ? "rgba(255,255,255,0.7)" : (a.color ?? DEFAULT_APPT_COLOR) }}
+                      className="w-1.5 h-1.5 rounded-full shrink-0"
+                      style={{ background: isToday ? "rgba(255,255,255,0.8)" : (a.color ?? DEFAULT_APPT_COLOR) }}
                     />
                   ))}
                   {dayTaskCount > 0 && (
-                    <span className={cn("w-1 h-1 rounded-full shrink-0", isToday ? "bg-white/50" : "bg-slate-400")} />
+                    <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", isToday ? "bg-white/70" : "bg-slate-400")} />
                   )}
                 </div>
               )}
