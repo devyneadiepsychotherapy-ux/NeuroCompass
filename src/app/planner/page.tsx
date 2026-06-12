@@ -2354,7 +2354,7 @@ export default function PlannerPage() {
       <div className="pt-3 pb-2">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-xs text-slate-400 font-medium tracking-wide uppercase">
+            <p className="text-xs text-slate-500 font-semibold tracking-wide uppercase">
               {new Date().toLocaleDateString("en-US", { weekday: "long" })}
             </p>
             <h1 className="text-3xl font-bold text-slate-800 leading-tight" style={{ fontFamily: "var(--font-fraunces)" }}>
