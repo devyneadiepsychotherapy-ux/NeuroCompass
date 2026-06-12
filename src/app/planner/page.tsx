@@ -532,7 +532,7 @@ function Section({
         </div>
       </div>
       {card ? (
-        <div className="bg-[#f7f4ef] rounded-xl px-4 py-2">
+        <div className="bg-white/60 rounded-2xl px-4 py-3 shadow-sm">
           {children}
         </div>
       ) : children}
@@ -627,24 +627,24 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
     .filter((a) => !a.allDay && a.startTime)
     .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
-  const PX_PER_MIN = 80 / 60; // 80px per hour
-  const MIN_BLOCK = 48;
+  const PX_PER_HOUR = 56; // 56px per hour — compact but readable
+  const MIN_BLOCK = 36;
 
-  const blockHeight = (appt: Appointment) => {
-    if (!appt.endTime) return MIN_BLOCK;
-    const mins = calcDurationMins(appt.startTime, appt.endTime);
-    return Math.max(MIN_BLOCK, Math.round(mins * PX_PER_MIN));
+  const toMinutes = (t: string) => {
+    const [h, m] = t.split(":").map(Number);
+    return h * 60 + m;
   };
 
-  const gapPx = (prev: Appointment, next: Appointment) => {
-    if (!prev.endTime || !next.startTime) return 8;
-    const gap = calcDurationMins(prev.endTime, next.startTime);
-    if (gap <= 0) return 4;
-    if (gap <= 15) return 10;
-    if (gap <= 30) return 18;
-    if (gap <= 60) return 28;
-    return 40;
-  };
+  // Time grid range — 1 hour before first appt to 1 hour after last
+  const gridStartHour = timedAppts.length
+    ? Math.max(0, Math.floor(toMinutes(timedAppts[0].startTime) / 60) - 1)
+    : 8;
+  const lastAppt = timedAppts[timedAppts.length - 1];
+  const gridEndHour = timedAppts.length
+    ? Math.min(24, Math.ceil((lastAppt.endTime ? toMinutes(lastAppt.endTime) : toMinutes(lastAppt.startTime) + 60) / 60) + 1)
+    : 20;
+  const gridHeight = (gridEndHour - gridStartHour) * PX_PER_HOUR;
+  const hourLabels = Array.from({ length: gridEndHour - gridStartHour + 1 }, (_, i) => gridStartHour + i);
 
   return (
     <div className="space-y-2">
@@ -662,19 +662,55 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
         />
       ))}
 
-      {/* Proportional time blocks */}
-      <div>
-        {timedAppts.map((appt, i) => (
-          <div key={appt.id} style={{ marginTop: i === 0 ? 0 : gapPx(timedAppts[i - 1], appt) }}>
-            <AppointmentRow
-              appt={appt}
-              onDelete={() => deleteAppointment(appt.id)}
-              onUpdate={(updates) => updateAppointment(appt.id, updates)}
-              blockHeight={blockHeight(appt)}
+      {/* Time grid */}
+      {timedAppts.length > 0 && (
+        <div className="relative overflow-visible" style={{ height: gridHeight }}>
+          {/* Hour lines */}
+          {hourLabels.map((hour) => (
+            <div
+              key={hour}
+              className="absolute left-0 right-0 flex items-center gap-2 pointer-events-none"
+              style={{ top: (hour - gridStartHour) * PX_PER_HOUR }}
+            >
+              <span className="text-[9px] text-slate-400 font-medium w-9 text-right shrink-0 leading-none">
+                {`${hour % 12 || 12}${hour < 12 ? "am" : "pm"}`}
+              </span>
+              <div className="flex-1 border-t border-slate-100" />
+            </div>
+          ))}
+
+          {/* Half-hour lines */}
+          {hourLabels.slice(0, -1).map((hour) => (
+            <div
+              key={`h${hour}`}
+              className="absolute border-t border-slate-50 pointer-events-none"
+              style={{ top: (hour - gridStartHour) * PX_PER_HOUR + PX_PER_HOUR / 2, left: 44, right: 0 }}
             />
-          </div>
-        ))}
-      </div>
+          ))}
+
+          {/* Appointments — absolutely positioned on grid */}
+          {timedAppts.map((appt) => {
+            const apptStart = toMinutes(appt.startTime);
+            const durationMins = appt.endTime ? calcDurationMins(appt.startTime, appt.endTime) : 60;
+            const top = (apptStart - gridStartHour * 60) / 60 * PX_PER_HOUR + 2;
+            const height = Math.max(MIN_BLOCK, Math.round(durationMins / 60 * PX_PER_HOUR) - 4);
+            return (
+              <div
+                key={appt.id}
+                className="absolute z-10"
+                style={{ top, height, left: 44, right: 0 }}
+              >
+                <AppointmentRow
+                  appt={appt}
+                  onDelete={() => deleteAppointment(appt.id)}
+                  onUpdate={(updates) => updateAppointment(appt.id, updates)}
+                  blockHeight={height}
+                />
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {showForm ? (
         <div className="bg-cream-50 border border-slate-200 rounded-2xl p-4 space-y-3">
