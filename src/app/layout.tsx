@@ -65,7 +65,7 @@ if ('serviceWorker' in navigator) {
             <ReminderManager />
             <SidebarWrapper />
             <main
-              className="max-w-lg mx-auto pt-14"
+              className="max-w-lg mx-auto"
             >
               {children}
             </main>
