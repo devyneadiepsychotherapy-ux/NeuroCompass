@@ -467,6 +467,7 @@ function Section({
   action,
   tint,
   headerTint,
+  card,
 }: {
   id: string;
   icon: React.ReactNode;
@@ -477,6 +478,7 @@ function Section({
   action?: React.ReactNode;
   tint?: string;
   headerTint?: string;
+  card?: boolean;
 }) {
   return (
     <div className="pt-7 pb-1">
@@ -493,7 +495,11 @@ function Section({
           </button>
         </div>
       </div>
-      {children}
+      {card ? (
+        <div className="bg-[#f5f2ec] rounded-2xl px-4 py-3">
+          {children}
+        </div>
+      ) : children}
     </div>
   );
 }
@@ -2500,7 +2506,6 @@ export default function PlannerPage() {
               icon={<CalendarClock size={16} />}
               title="Schedule"
               onToggle={() => toggleSection("schedule")}
-              headerTint="#e4ebe2"
             >
               <ScheduleSection selectedDate={selectedDate} />
             </Section>
@@ -2513,7 +2518,7 @@ export default function PlannerPage() {
               icon={<Target size={16} />}
               title="Top 3 Priorities"
               onToggle={() => toggleSection("top3")}
-              headerTint="#ede8e0"
+              card
             >
               <Top3Section date={dateKey(selectedDate)} />
             </Section>
@@ -2526,7 +2531,7 @@ export default function PlannerPage() {
               icon={<ListTodo size={16} />}
               title="Tasks"
               onToggle={() => toggleSection("tasks")}
-              headerTint="#eceae5"
+              card
               action={
                 <button
                   onClick={() => setShowTaskModal(true)}
@@ -2552,7 +2557,7 @@ export default function PlannerPage() {
               icon={<Activity size={16} />}
               title="Habits"
               onToggle={() => toggleSection("habits")}
-              headerTint="#e4ebe2"
+              card
             >
               <HabitsSection selectedDate={selectedDate} />
             </Section>
@@ -2565,7 +2570,6 @@ export default function PlannerPage() {
               icon={<UtensilsCrossed size={16} />}
               title="Meal Plan"
               onToggle={() => toggleSection("meal")}
-              headerTint="#ede8e0"
             >
               <MealPlanSection selectedDate={selectedDate} />
             </Section>
