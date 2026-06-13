@@ -218,7 +218,7 @@ function DateNavigation({
       </button>
 
       {view !== "day" && (
-        <span className="text-sm font-semibold text-slate-700 text-center flex-1">
+        <span className="font-[family-name:var(--font-fraunces)] italic text-base text-slate-700 text-center flex-1">
           {formatDateLabel(date, view)}
         </span>
       )}
@@ -474,7 +474,7 @@ function FocusList({
           <span className={cn("text-sm flex-1", item.done ? "line-through text-slate-400" : "text-slate-700")}>
             {item.text}
           </span>
-          <button onClick={() => deleteItem(key, item.id)} className="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-red-500 transition-all">
+          <button onClick={() => deleteItem(key, item.id)} className="opacity-0 group-hover:opacity-100 text-slate-600 hover:text-red-500 transition-all">
             <Trash2 size={13} />
           </button>
         </div>
@@ -1194,10 +1194,10 @@ function AppointmentRow({
                 {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
               </button>
             )}
-            <button onClick={openEdit} className="p-1 text-slate-500 hover:text-sage-600 transition-colors">
+            <button onClick={openEdit} className="p-1 text-slate-600 hover:text-sage-700 transition-colors">
               <Pencil size={13} />
             </button>
-            <button onClick={onDelete} className="p-1 text-slate-500 hover:text-red-500 transition-colors">
+            <button onClick={onDelete} className="p-1 text-slate-600 hover:text-red-500 transition-colors">
               <Trash2 size={13} />
             </button>
           </div>
@@ -1520,7 +1520,7 @@ function HabitRow({
           onClick={handleToggle}
           className={cn(
             "w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
-            doneToday ? "bg-emerald-500 border-emerald-500" : "border-slate-400 hover:border-emerald-400"
+            doneToday ? "bg-emerald-500 border-emerald-500" : "border-slate-500 hover:border-emerald-500"
           )}
         >
           {doneToday && <Check size={12} className="text-white" strokeWidth={3} />}
@@ -1552,13 +1552,13 @@ function HabitRow({
         )}
 
         {!editing && (
-          <button onClick={startEdit} className="p-1 text-slate-500 hover:text-sage-600 transition-colors">
+          <button onClick={startEdit} className="p-1 text-slate-600 hover:text-sage-700 transition-colors">
             <Pencil size={13} />
           </button>
         )}
 
         {!editing && (
-          <button onClick={onDelete} className="p-1 text-slate-500 hover:text-red-500 transition-colors">
+          <button onClick={onDelete} className="p-1 text-slate-600 hover:text-red-500 transition-colors">
             <Trash2 size={14} />
           </button>
         )}
@@ -2503,14 +2503,14 @@ function TaskCard({ task }: { task: Task }) {
             )}
             <button
               onClick={() => setShowEdit(true)}
-              className="p-1 text-slate-500 hover:text-sage-600 transition-colors"
+              className="p-1 text-slate-600 hover:text-sage-700 transition-colors"
               aria-label="Edit activity"
             >
               <Pencil size={15} />
             </button>
             <button
               onClick={() => deleteTask(task.id)}
-              className="p-1 text-slate-500 hover:text-red-500 transition-colors"
+              className="p-1 text-slate-600 hover:text-red-500 transition-colors"
             >
               <Trash2 size={16} />
             </button>
