@@ -688,8 +688,9 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
     const touch = e.touches[0];
     const rect = gridRef.current?.getBoundingClientRect();
     if (!rect) return;
-    const scrollTop = (e.currentTarget.closest(".overflow-y-auto") as HTMLElement)?.scrollTop ?? 0;
-    const relY = touch.clientY - rect.top + scrollTop;
+    // getBoundingClientRect() is already viewport-relative (scroll-adjusted)
+    // so we do NOT add scrollTop — that would double-count it
+    const relY = touch.clientY - rect.top;
     const rawMins = gridStartHour * 60 + (relY / PX_PER_HOUR) * 60;
     const snapped = Math.round(rawMins / 30) * 30;
     const clamped = Math.max(0, Math.min(23 * 60 + 30, snapped));
