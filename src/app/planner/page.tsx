@@ -2480,35 +2480,35 @@ function TaskCard({ task }: { task: Task }) {
   };
 
   return (
-    <div className={cn("py-1.5 relative", isDone && "opacity-60")}>
+    <div className={cn("py-1 relative", isDone && "opacity-60")}>
       {toast && (
         <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-xs font-bold px-3 py-1.5 rounded-full z-10 animate-fade-in-up whitespace-nowrap">
           {toast}
         </div>
       )}
       <div>
-        <div className="flex items-start gap-3">
+        <div className="flex items-center gap-2">
           <button
             onClick={handleComplete}
             className={cn(
-              "mt-0.5 w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
+              "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
               isDone ? "bg-sage-500 border-sage-500" : "border-slate-300 hover:border-sage-400"
             )}
           >
-            {isDone && <Check size={12} className="text-white" strokeWidth={3} />}
+            {isDone && <Check size={10} className="text-white" strokeWidth={3} />}
           </button>
 
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 flex items-center gap-2 flex-wrap">
             <p
               className={cn(
-                "font-medium text-slate-800 leading-snug",
+                "text-sm font-medium text-slate-800 leading-tight",
                 isDone && "line-through text-slate-400"
               )}
             >
               {task.title}
             </p>
-            <div className="flex items-center gap-2 mt-1 flex-wrap">
-              <span className={cn("text-xs px-2 py-0.5 rounded-full font-medium", cfg.color)}>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className={cn("text-[10px] px-1.5 py-0.5 rounded-full font-medium", cfg.color)}>
                 {cfg.label}
               </span>
               {taskType !== "task" && (
@@ -2572,13 +2572,13 @@ function TaskCard({ task }: { task: Task }) {
             </div>
           </div>
 
-          <div className="flex items-center gap-1 shrink-0">
+          <div className="flex items-center gap-0.5 shrink-0">
             {task.description && (
               <button
                 onClick={() => setExpanded(!expanded)}
                 className="p-1 text-slate-400 hover:text-slate-600"
               >
-                {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
               </button>
             )}
             <button
@@ -2586,19 +2586,19 @@ function TaskCard({ task }: { task: Task }) {
               className="p-1 text-slate-600 hover:text-sage-700 transition-colors"
               aria-label="Edit activity"
             >
-              <Pencil size={15} />
+              <Pencil size={13} />
             </button>
             <button
               onClick={() => deleteTask(task.id)}
               className="p-1 text-slate-600 hover:text-red-500 transition-colors"
             >
-              <Trash2 size={16} />
+              <Trash2 size={13} />
             </button>
           </div>
         </div>
 
         {expanded && task.description && (
-          <p className="mt-2 text-sm text-slate-500 ml-9 leading-relaxed">{task.description}</p>
+          <p className="mt-1 text-xs text-slate-500 ml-7 leading-relaxed">{task.description}</p>
         )}
       </div>
       {showEdit && <AddTaskModal onClose={() => setShowEdit(false)} taskToEdit={task} />}
