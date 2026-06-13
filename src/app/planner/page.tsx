@@ -174,14 +174,14 @@ function calcDuration(startTime: string, endTime: string): string {
 
 function ViewToggle({ active, onChange }: { active: PlannerView; onChange: (v: PlannerView) => void }) {
   return (
-    <div className="flex gap-1 bg-slate-100 rounded-xl p-1">
+    <div className="flex gap-1 bg-white rounded-2xl p-1 shadow-[0_4px_16px_rgba(0,0,0,0.1)] border border-black/5">
       {(["day", "week", "month"] as PlannerView[]).map((v) => (
         <button
           key={v}
           onClick={() => onChange(v)}
           className={cn(
-            "flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all capitalize",
-            active === v ? "bg-white text-slate-800 shadow-sm" : "text-slate-500 hover:text-slate-700"
+            "flex-1 py-1.5 rounded-xl text-xs font-semibold transition-all capitalize",
+            active === v ? "bg-sage-100 text-sage-700 shadow-sm" : "text-slate-500 hover:text-slate-700"
           )}
         >
           {v.charAt(0).toUpperCase() + v.slice(1)}
@@ -226,7 +226,7 @@ function DateNavigation({
       {view === "day" && (
         <div className="flex-1 flex justify-center">
           {isToday ? (
-            <span className="font-[family-name:var(--font-fraunces)] italic text-sm text-slate-400 uppercase tracking-wider">TODAY</span>
+            <span className="font-[family-name:var(--font-fraunces)] italic text-sm text-sage-600 uppercase tracking-wider">TODAY</span>
           ) : (
             <button
               onClick={() => onNavigate(new Date())}
@@ -1016,7 +1016,8 @@ function AppointmentRow({
 
   if (showEdit) {
     return (
-      <div className="bg-cream-50 border border-slate-200 rounded-2xl p-4 space-y-3">
+      <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/30 px-4 pb-6" onClick={() => setShowEdit(false)}>
+      <div className="bg-cream-50 border border-slate-200 rounded-2xl p-4 space-y-3 w-full max-w-lg max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <input
           className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-400"
           placeholder="Appointment title"
@@ -1162,6 +1163,7 @@ function AppointmentRow({
             Cancel
           </button>
         </div>
+      </div>
       </div>
     );
   }
@@ -1692,27 +1694,27 @@ function MealPlanSection({ selectedDate }: { selectedDate: Date }) {
         const isExtra = extraSlots.includes(slot);
 
         return (
-          <div key={slot} className="bg-cream-50 border border-slate-100 rounded-2xl">
+          <div key={slot} className="bg-white/60 rounded-2xl shadow-sm">
             {/* Slot row */}
             <div className="flex items-center gap-2 px-3 py-2.5">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest w-20 shrink-0">{slot}</p>
-              <span className={cn("flex-1 text-sm", current ? "font-medium text-slate-700" : "text-slate-300")}>
+              <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest w-20 shrink-0">{slot}</p>
+              <span className={cn("flex-1 text-sm", current ? "font-medium text-slate-700" : "text-slate-500")}>
                 {current ?? "Tap + to plan"}
               </span>
               {current && (
-                <button type="button" onClick={() => handleClearMeal(slot)} className="text-slate-300 hover:text-rose-400 transition-colors p-1">
+                <button type="button" onClick={() => handleClearMeal(slot)} className="text-slate-500 hover:text-rose-500 transition-colors p-1">
                   <X size={12} />
                 </button>
               )}
               {isExtra && !current && (
-                <button type="button" onClick={() => removeExtraSlot(slot)} className="text-slate-200 hover:text-slate-400 transition-colors p-1">
+                <button type="button" onClick={() => removeExtraSlot(slot)} className="text-slate-400 hover:text-slate-600 transition-colors p-1">
                   <X size={12} />
                 </button>
               )}
               <button
                 type="button"
                 onClick={() => { setEditingSlot(isEditing ? null : slot); setAddingOption(false); setCustomInput(""); setSaveForFuture(false); }}
-                className="text-slate-400 hover:text-sage-600 transition-colors p-1"
+                className="text-slate-600 hover:text-sage-700 transition-colors p-1"
               >
                 {isEditing ? <ChevronUp size={14} /> : <Plus size={14} />}
               </button>
@@ -1720,7 +1722,7 @@ function MealPlanSection({ selectedDate }: { selectedDate: Date }) {
 
             {/* Picker */}
             {isEditing && (
-              <div className="border-t border-slate-100 px-3 pb-3 pt-2 space-y-2.5">
+              <div className="border-t border-slate-200/60 px-3 pb-3 pt-2 space-y-2.5">
                 <div className="flex flex-wrap gap-1.5">
                   {allOptions.map((opt) => (
                     <button
