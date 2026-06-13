@@ -632,8 +632,8 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
     .filter((a) => !a.allDay && a.startTime)
     .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
-  const PX_PER_HOUR = 56; // 56px per hour — compact but readable
-  const MIN_BLOCK = 36;
+  const PX_PER_HOUR = 64; // px per hour — gives clear proportional difference
+  const MIN_BLOCK = 26; // minimum block height so text is always readable
   const gridRef = useRef<HTMLDivElement>(null);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [pressGhost, setPressGhost] = useState<number | null>(null); // minutes from midnight
