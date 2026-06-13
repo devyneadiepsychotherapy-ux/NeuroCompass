@@ -2775,6 +2775,7 @@ export default function PlannerPage() {
               icon={<Activity size={16} />}
               title="Habits"
               onToggle={() => toggleSection("habits")}
+              card
             >
               <HabitsSection selectedDate={selectedDate} />
             </Section>
