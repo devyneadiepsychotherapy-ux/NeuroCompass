@@ -294,21 +294,22 @@ function WeekView({ date, onDayClick }: { date: Date; onDayClick?: (d: Date) => 
 
           const isWeekend = i >= 5;
           return (
-            <div key={key} className={cn(
-              "flex items-start gap-3 py-1.5 px-2 rounded-r-xl transition-colors",
-              isToday
-                ? "border-l-2 border-sage-400 bg-sage-50/60 pl-3"
-                : isWeekend
-                ? "border-l-2 pl-3"
-                : "border-l-2 border-slate-200/60 pl-3"
-            )}
-            style={isWeekend && !isToday ? { borderLeftColor: "#C4909A55" } : undefined}
+            <button
+              key={key}
+              className={cn(
+                "w-full flex items-start gap-3 py-1.5 px-2 rounded-r-xl transition-colors text-left",
+                isToday
+                  ? "border-l-2 border-sage-400 bg-sage-50/60 pl-3"
+                  : isWeekend
+                  ? "border-l-2 pl-3"
+                  : "border-l-2 border-slate-200/60 pl-3",
+                onDayClick && "active:bg-slate-50/80"
+              )}
+              style={isWeekend && !isToday ? { borderLeftColor: "#C4909A55" } : undefined}
+              onClick={() => onDayClick?.(day)}
             >
-              {/* Day label — tap to go to that day */}
-              <button
-                className="w-9 shrink-0 pt-0.5 text-left"
-                onClick={() => onDayClick?.(day)}
-              >
+              {/* Day label */}
+              <div className="w-9 shrink-0 pt-0.5">
                 <span className={cn("text-[9px] font-bold uppercase block leading-none",
                   isToday ? "text-sage-600" : isWeekend ? "text-[#C4909A]" : "text-slate-500")}>
                   {WEEK_DAY_LABELS[i]}
@@ -317,7 +318,7 @@ function WeekView({ date, onDayClick }: { date: Date; onDayClick?: (d: Date) => 
                   isToday ? "text-sage-700" : isWeekend ? "text-[#8f6559]" : "text-slate-700")}>
                   {day.getDate()}
                 </span>
-              </button>
+              </div>
 
               {/* Content */}
               <div className="flex-1 min-w-0 pt-0.5">
@@ -342,7 +343,7 @@ function WeekView({ date, onDayClick }: { date: Date; onDayClick?: (d: Date) => 
 
                 {taskCount > 0 && (
                   <button
-                    onClick={() => setExpandedDay(isExpanded ? null : key)}
+                    onClick={(e) => { e.stopPropagation(); setExpandedDay(isExpanded ? null : key); }}
                     className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 transition-colors mt-0.5"
                   >
                     {taskCount} task{taskCount !== 1 ? "s" : ""}
@@ -361,7 +362,7 @@ function WeekView({ date, onDayClick }: { date: Date; onDayClick?: (d: Date) => 
                   </div>
                 )}
               </div>
-            </div>
+            </button>
           );
         })}
       </div>
