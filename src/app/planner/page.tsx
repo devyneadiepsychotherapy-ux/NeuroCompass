@@ -555,7 +555,7 @@ function Section({
         </div>
       </div>
       {card ? (
-        <div className="bg-white/60 rounded-2xl px-4 py-3 shadow-sm">
+        <div className="bg-white/60 rounded-2xl px-3 py-2 shadow-sm">
           {children}
         </div>
       ) : children}
@@ -666,8 +666,8 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
     .filter((a) => !a.allDay && a.startTime)
     .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
-  const PX_PER_HOUR = 48; // px per hour — compact but proportional
-  const MIN_BLOCK = 36; // enough for one readable line
+  const PX_PER_HOUR = 40; // px per hour — compact
+  const MIN_BLOCK = 32; // enough for one readable line
   const gridRef = useRef<HTMLDivElement>(null);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [pressGhost, setPressGhost] = useState<number | null>(null); // minutes from midnight
@@ -738,7 +738,7 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
 
       {/* Time grid */}
       {timedAppts.length > 0 && (
-        <div className="overflow-y-auto max-h-[320px] overflow-x-visible rounded-xl" style={{ WebkitOverflowScrolling: "touch" } as React.CSSProperties}>
+        <div className="overflow-y-auto max-h-[240px] overflow-x-visible rounded-xl" style={{ WebkitOverflowScrolling: "touch" } as React.CSSProperties}>
         <div
           ref={gridRef}
           className="relative overflow-visible select-none"
@@ -1584,7 +1584,7 @@ function HabitRow({
   });
 
   return (
-    <div className={cn("py-2 relative flex items-start gap-2.5", doneToday && "opacity-70")}>
+    <div className={cn("py-1 relative flex items-start gap-2", doneToday && "opacity-70")}>
       {xpToast && (
         <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-emerald-600 text-white text-xs font-bold px-3 py-1.5 rounded-full z-10 animate-fade-in-up whitespace-nowrap">
           +5 XP
@@ -1646,7 +1646,7 @@ function HabitRow({
 
       {/* 7-day dot tracker */}
       {!editing && (
-        <div className="flex gap-1 mt-2 ml-9">
+        <div className="flex gap-1 mt-1 ml-8">
           {last7.map((dayKey, i) => {
             const done = habit.completedDates.includes(dayKey);
             const isToday = dayKey === today;
@@ -2480,7 +2480,7 @@ function TaskCard({ task }: { task: Task }) {
   };
 
   return (
-    <div className={cn("py-3 relative", isDone && "opacity-60")}>
+    <div className={cn("py-1.5 relative", isDone && "opacity-60")}>
       {toast && (
         <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-xs font-bold px-3 py-1.5 rounded-full z-10 animate-fade-in-up whitespace-nowrap">
           {toast}
