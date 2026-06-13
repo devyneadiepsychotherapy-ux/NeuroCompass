@@ -603,6 +603,22 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
   const [reminderMins, setReminderMins] = useState<number | undefined>(undefined);
   const [color, setColor] = useState(DEFAULT_APPT_COLOR);
 
+  // Lock body scroll when any overlay is open
+  useEffect(() => {
+    if (showForm) {
+      const y = window.scrollY;
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${y}px`;
+      document.body.style.width = "100%";
+      return () => {
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.width = "";
+        window.scrollTo(0, y);
+      };
+    }
+  }, [showForm]);
+
   const selectedKey = dateKey(selectedDate);
   const dayAppointments = appointments.filter((a) => a.date === selectedKey);
 
@@ -810,8 +826,9 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
       )}
 
       {showForm ? (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/30 px-4 pb-6 overflow-hidden" onClick={() => setShowForm(false)} onTouchMove={(e) => e.preventDefault()}>
-        <div className="bg-cream-50 border border-slate-200 rounded-2xl p-4 space-y-3 w-full max-w-lg max-h-[80vh] overflow-y-auto overscroll-contain" onClick={(e) => e.stopPropagation()} onTouchMove={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/30 px-4 pb-6" onClick={() => setShowForm(false)}>
+        <div className="bg-cream-50 border border-slate-200 rounded-2xl w-full max-w-lg max-h-[82vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+        <div className="overflow-y-auto overscroll-contain p-4 space-y-3 flex-1">
           {/* Title */}
           <input
             className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-400"
@@ -946,18 +963,19 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
               ))}
             </div>
           </div>
-          {/* Actions */}
-          <div className="flex gap-2">
+        </div>
+          {/* Sticky footer — always visible */}
+          <div className="flex gap-2 px-4 pb-4 pt-2 border-t border-slate-100 shrink-0">
             <button
               onClick={handleAdd}
               disabled={!title.trim()}
-              className="flex-1 bg-sage-600 hover:bg-sage-700 disabled:bg-slate-100 disabled:text-slate-400 text-white text-sm font-semibold rounded-xl py-2 transition-all"
+              className="flex-1 bg-sage-600 hover:bg-sage-700 disabled:bg-slate-100 disabled:text-slate-400 text-white text-sm font-semibold rounded-xl py-2.5 transition-all"
             >
               Add
             </button>
             <button
               onClick={() => setShowForm(false)}
-              className="px-4 py-2 rounded-xl text-sm text-slate-500 hover:bg-slate-100 transition-all"
+              className="px-4 py-2.5 rounded-xl text-sm text-slate-500 hover:bg-slate-100 transition-all"
             >
               Cancel
             </button>
@@ -1000,6 +1018,22 @@ function AppointmentRow({
   );
   const [editReminderMins, setEditReminderMins] = useState<number | undefined>(appt.reminderMinsBefore);
   const [editColor, setEditColor] = useState(appt.color ?? DEFAULT_APPT_COLOR);
+
+  // Lock body scroll when edit overlay is open
+  useEffect(() => {
+    if (showEdit) {
+      const y = window.scrollY;
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${y}px`;
+      document.body.style.width = "100%";
+      return () => {
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.width = "";
+        window.scrollTo(0, y);
+      };
+    }
+  }, [showEdit]);
 
   const toggleEditShowOn = (view: "day" | "week" | "month") => {
     setEditShowOn((prev) =>
@@ -1051,8 +1085,9 @@ function AppointmentRow({
 
   if (showEdit) {
     return (
-      <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/30 px-4 pb-6 overflow-hidden" onClick={() => setShowEdit(false)} onTouchMove={(e) => e.preventDefault()}>
-      <div className="bg-cream-50 border border-slate-200 rounded-2xl p-4 space-y-3 w-full max-w-lg max-h-[80vh] overflow-y-auto overscroll-contain" onClick={(e) => e.stopPropagation()} onTouchMove={(e) => e.stopPropagation()}>
+      <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/30 px-4 pb-6" onClick={() => setShowEdit(false)}>
+      <div className="bg-cream-50 border border-slate-200 rounded-2xl w-full max-w-lg max-h-[82vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+      <div className="overflow-y-auto overscroll-contain p-4 space-y-3 flex-1">
         <input
           className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-400"
           placeholder="Appointment title"
@@ -1183,17 +1218,19 @@ function AppointmentRow({
           </div>
         </div>
 
-        <div className="flex gap-2">
+      </div>
+        {/* Sticky footer — always visible */}
+        <div className="flex gap-2 px-4 pb-4 pt-2 border-t border-slate-100 shrink-0">
           <button
             onClick={handleSave}
             disabled={!editTitle.trim()}
-            className="flex-1 bg-sage-600 hover:bg-sage-700 disabled:bg-slate-100 disabled:text-slate-400 text-white text-sm font-semibold rounded-xl py-2 transition-all"
+            className="flex-1 bg-sage-600 hover:bg-sage-700 disabled:bg-slate-100 disabled:text-slate-400 text-white text-sm font-semibold rounded-xl py-2.5 transition-all"
           >
             Save
           </button>
           <button
             onClick={() => setShowEdit(false)}
-            className="px-4 py-2 rounded-xl text-sm text-slate-500 hover:bg-slate-100 transition-all"
+            className="px-4 py-2.5 rounded-xl text-sm text-slate-500 hover:bg-slate-100 transition-all"
           >
             Cancel
           </button>
