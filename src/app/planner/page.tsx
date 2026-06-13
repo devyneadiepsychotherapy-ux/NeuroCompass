@@ -291,19 +291,26 @@ function WeekView({ date }: { date: Date }) {
           const isExpanded = expandedDay === key;
           const hasAnything = dayAppts.length > 0 || taskCount > 0;
 
+          const isWeekend = i >= 5;
           return (
             <div key={key} className={cn(
-              "flex items-start gap-3 py-2 px-2 rounded-r-xl transition-colors",
+              "flex items-start gap-3 py-1.5 px-2 rounded-r-xl transition-colors",
               isToday
                 ? "border-l-2 border-sage-400 bg-sage-50/60 pl-3"
-                : "border-l-2 border-slate-200/70 pl-3"
-            )}>
+                : isWeekend
+                ? "border-l-2 pl-3"
+                : "border-l-2 border-slate-200/60 pl-3"
+            )}
+            style={isWeekend && !isToday ? { borderLeftColor: "#C4909A55" } : undefined}
+            >
               {/* Day label */}
               <div className="w-9 shrink-0 pt-0.5">
-                <span className={cn("text-[9px] font-bold uppercase block leading-none", isToday ? "text-sage-600" : "text-slate-500")}>
+                <span className={cn("text-[9px] font-bold uppercase block leading-none",
+                  isToday ? "text-sage-600" : isWeekend ? "text-[#C4909A]" : "text-slate-500")}>
                   {WEEK_DAY_LABELS[i]}
                 </span>
-                <span className={cn("text-sm font-bold leading-snug", isToday ? "text-sage-700" : "text-slate-700")}>
+                <span className={cn("text-sm font-bold leading-snug",
+                  isToday ? "text-sage-700" : isWeekend ? "text-[#8f6559]" : "text-slate-700")}>
                   {day.getDate()}
                 </span>
               </div>
