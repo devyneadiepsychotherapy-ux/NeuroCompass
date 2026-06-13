@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useAppStore, defaultTopPriorities } from "@/store/useAppStore";
 import { Task, TaskPriority, RecurType, RewardType, TaskItemType, Appointment, TopPriority, Habit } from "@/types";
@@ -825,8 +826,8 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
         </div>
       )}
 
-      {showForm ? (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/30 px-4 pb-6" onClick={() => setShowForm(false)}>
+      {showForm && createPortal(
+        <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/30 px-4 pb-6" onClick={() => setShowForm(false)}>
         <div className="bg-cream-50 border border-slate-200 rounded-2xl w-full max-w-lg max-h-[82vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
         <div className="overflow-y-auto overscroll-contain p-4 space-y-3 flex-1">
           {/* Title */}
@@ -982,7 +983,8 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
           </div>
         </div>
         </div>
-      ) : (
+      , document.body)}
+      {!showForm && (
         <button
           onClick={() => setShowForm(true)}
           className="flex items-center gap-2 text-sm text-sage-600 hover:text-sage-700 font-medium py-1"
@@ -1083,9 +1085,8 @@ function AppointmentRow({
     ? `${formatTimeStr(appt.startTime)} – ${formatTimeStr(appt.endTime)}`
     : appt.startTime ? formatTimeStr(appt.startTime) : "All day";
 
-  if (showEdit) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/30 px-4 pb-6" onClick={() => setShowEdit(false)}>
+  const editOverlay = showEdit && createPortal(
+      <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/30 px-4 pb-6" onClick={() => setShowEdit(false)}>
       <div className="bg-cream-50 border border-slate-200 rounded-2xl w-full max-w-lg max-h-[82vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
       <div className="overflow-y-auto overscroll-contain p-4 space-y-3 flex-1">
         <input
@@ -1237,14 +1238,15 @@ function AppointmentRow({
         </div>
       </div>
       </div>
-    );
-  }
+  , document.body);
 
   const cardColor = appt.color ?? DEFAULT_APPT_COLOR;
   const colorOpt = APPT_COLOR_OPTIONS.find((c) => c.hex === cardColor) ?? APPT_COLOR_OPTIONS[0];
   const minH = blockHeight ?? 52;
 
   return (
+    <>
+    {editOverlay}
     <div
       className="rounded-xl overflow-hidden flex items-stretch"
       style={{ minHeight: minH, background: colorOpt.bg }}
@@ -1280,6 +1282,7 @@ function AppointmentRow({
         </div>
       </div>
     </div>
+    </>
   );
 }
 
