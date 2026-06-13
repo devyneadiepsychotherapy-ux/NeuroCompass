@@ -226,13 +226,13 @@ function DateNavigation({
       {view === "day" && (
         <div className="flex-1 flex justify-center">
           {isToday ? (
-            <span className="font-[family-name:var(--font-fraunces)] italic text-sm text-slate-400">today</span>
+            <span className="font-[family-name:var(--font-fraunces)] italic text-sm text-slate-400 uppercase tracking-wider">TODAY</span>
           ) : (
             <button
               onClick={() => onNavigate(new Date())}
-              className="font-[family-name:var(--font-fraunces)] italic text-sm text-sage-600 hover:text-sage-700 transition-colors px-3 py-1 rounded-lg hover:bg-sage-50"
+              className="font-[family-name:var(--font-fraunces)] italic text-sm text-sage-600 hover:text-sage-700 transition-colors px-3 py-1 rounded-lg hover:bg-sage-50 uppercase tracking-wider"
             >
-              Back to today
+              Back to Today
             </button>
           )}
         </div>
@@ -466,7 +466,7 @@ function FocusList({
             onClick={() => toggleItem(key, item.id)}
             className={cn(
               "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
-              item.done ? "bg-sage-500 border-sage-500" : "border-slate-300 hover:border-sage-400"
+              item.done ? "bg-sage-500 border-sage-500" : "border-slate-500 hover:border-sage-500"
             )}
           >
             {item.done && <Check size={10} className="text-white" />}
@@ -474,7 +474,7 @@ function FocusList({
           <span className={cn("text-sm flex-1", item.done ? "line-through text-slate-400" : "text-slate-700")}>
             {item.text}
           </span>
-          <button onClick={() => deleteItem(key, item.id)} className="opacity-0 group-hover:opacity-100 text-slate-300 hover:text-red-400 transition-all">
+          <button onClick={() => deleteItem(key, item.id)} className="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-red-500 transition-all">
             <Trash2 size={13} />
           </button>
         </div>
@@ -485,9 +485,9 @@ function FocusList({
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleAdd()}
           placeholder={isWeekly ? "Add a weekly focus..." : "Add a monthly goal..."}
-          className="flex-1 text-sm bg-transparent border-b border-slate-200 pb-1 outline-none placeholder:text-slate-300 text-slate-700 focus:border-sage-400 transition-colors"
+          className="flex-1 text-sm bg-white/40 rounded-xl px-3 py-2 outline-none placeholder:text-sage-700/60 text-slate-700 focus:bg-white/60 transition-colors font-medium"
         />
-        <button onClick={handleAdd} className="text-slate-300 hover:text-sage-500 transition-colors">
+        <button onClick={handleAdd} className="text-sage-600 hover:text-sage-800 transition-colors">
           <Plus size={16} />
         </button>
       </div>
@@ -529,7 +529,7 @@ function Section({
           {action}
           <button
             onClick={onToggle}
-            className="p-1.5 rounded-lg text-slate-300 hover:text-slate-500 transition-all"
+            className="p-1.5 rounded-lg text-slate-500 hover:text-slate-700 transition-all"
             aria-label={`Hide ${title}`}
           >
             <EyeOff size={15} />
@@ -634,10 +634,44 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
 
   const PX_PER_HOUR = 56; // 56px per hour — compact but readable
   const MIN_BLOCK = 36;
+  const gridRef = useRef<HTMLDivElement>(null);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [pressGhost, setPressGhost] = useState<number | null>(null); // minutes from midnight
 
   const toMinutes = (t: string) => {
     const [h, m] = t.split(":").map(Number);
     return h * 60 + m;
+  };
+
+  const minutesToTimeStr = (mins: number) => {
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+  };
+
+  const handleGridTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (showForm) return;
+    const touch = e.touches[0];
+    const rect = gridRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const scrollTop = (e.currentTarget.closest(".overflow-y-auto") as HTMLElement)?.scrollTop ?? 0;
+    const relY = touch.clientY - rect.top + scrollTop;
+    const rawMins = gridStartHour * 60 + (relY / PX_PER_HOUR) * 60;
+    const snapped = Math.round(rawMins / 30) * 30;
+    const clamped = Math.max(0, Math.min(23 * 60 + 30, snapped));
+    longPressTimer.current = setTimeout(() => {
+      const endMins = Math.min(24 * 60, clamped + 60);
+      setStartTime(minutesToTimeStr(clamped));
+      setEndTime(minutesToTimeStr(endMins));
+      setShowForm(true);
+      setPressGhost(null);
+    }, 500);
+    setPressGhost(clamped);
+  };
+
+  const handleGridTouchEnd = () => {
+    if (longPressTimer.current) clearTimeout(longPressTimer.current);
+    setPressGhost(null);
   };
 
   // Time grid range — 1 hour before first appt to 1 hour after last
@@ -670,7 +704,14 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
       {/* Time grid */}
       {timedAppts.length > 0 && (
         <div className="overflow-y-auto max-h-[320px] overflow-x-visible rounded-xl" style={{ WebkitOverflowScrolling: "touch" } as React.CSSProperties}>
-        <div className="relative overflow-visible" style={{ height: gridHeight }}>
+        <div
+          ref={gridRef}
+          className="relative overflow-visible select-none"
+          style={{ height: gridHeight }}
+          onTouchStart={handleGridTouchStart}
+          onTouchEnd={handleGridTouchEnd}
+          onTouchMove={handleGridTouchEnd}
+        >
           {/* Hour lines */}
           {hourLabels.map((hour) => (
             <div
@@ -678,10 +719,10 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
               className="absolute left-0 right-0 flex items-center gap-2 pointer-events-none"
               style={{ top: (hour - gridStartHour) * PX_PER_HOUR }}
             >
-              <span className="text-[9px] text-slate-500 font-medium w-9 text-right shrink-0 leading-none">
+              <span className="text-[9px] font-semibold w-9 text-right shrink-0 leading-none" style={{ color: "#4a7c59" }}>
                 {`${hour % 12 || 12}${hour < 12 ? "am" : "pm"}`}
               </span>
-              <div className="flex-1 border-t border-slate-100" />
+              <div className="flex-1 border-t" style={{ borderColor: "rgba(74,124,89,0.25)" }} />
             </div>
           ))}
 
@@ -689,10 +730,26 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
           {hourLabels.slice(0, -1).map((hour) => (
             <div
               key={`h${hour}`}
-              className="absolute border-t border-slate-50 pointer-events-none"
-              style={{ top: (hour - gridStartHour) * PX_PER_HOUR + PX_PER_HOUR / 2, left: 44, right: 0 }}
+              className="absolute pointer-events-none border-t"
+              style={{ top: (hour - gridStartHour) * PX_PER_HOUR + PX_PER_HOUR / 2, left: 44, right: 0, borderColor: "rgba(74,124,89,0.1)" }}
             />
           ))}
+
+          {/* Long-press ghost indicator */}
+          {pressGhost !== null && (
+            <div
+              className="absolute left-11 right-0 h-7 rounded-lg pointer-events-none z-20 flex items-center px-2"
+              style={{
+                top: (pressGhost - gridStartHour * 60) / 60 * PX_PER_HOUR,
+                background: "rgba(74,124,89,0.15)",
+                border: "1.5px dashed rgba(74,124,89,0.5)",
+              }}
+            >
+              <span className="text-[10px] font-semibold" style={{ color: "#4a7c59" }}>
+                {minutesToTimeStr(pressGhost)}
+              </span>
+            </div>
+          )}
 
           {/* Appointments — absolutely positioned on grid */}
           {timedAppts.map((appt) => {
@@ -1133,14 +1190,14 @@ function AppointmentRow({
           </div>
           <div className="flex items-center gap-0.5 shrink-0 pt-0.5">
             {appt.notes && (
-              <button onClick={() => setExpanded(!expanded)} className="p-1 text-slate-300 hover:text-slate-500">
+              <button onClick={() => setExpanded(!expanded)} className="p-1 text-slate-500 hover:text-slate-700">
                 {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
               </button>
             )}
-            <button onClick={openEdit} className="p-1 text-slate-300 hover:text-sage-500 transition-colors">
+            <button onClick={openEdit} className="p-1 text-slate-500 hover:text-sage-600 transition-colors">
               <Pencil size={13} />
             </button>
-            <button onClick={onDelete} className="p-1 text-slate-300 hover:text-red-400 transition-colors">
+            <button onClick={onDelete} className="p-1 text-slate-500 hover:text-red-500 transition-colors">
               <Trash2 size={13} />
             </button>
           </div>
@@ -1463,7 +1520,7 @@ function HabitRow({
           onClick={handleToggle}
           className={cn(
             "w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
-            doneToday ? "bg-emerald-500 border-emerald-500" : "border-slate-300 hover:border-emerald-400"
+            doneToday ? "bg-emerald-500 border-emerald-500" : "border-slate-400 hover:border-emerald-400"
           )}
         >
           {doneToday && <Check size={12} className="text-white" strokeWidth={3} />}
@@ -1495,13 +1552,13 @@ function HabitRow({
         )}
 
         {!editing && (
-          <button onClick={startEdit} className="p-1 text-slate-300 hover:text-sage-500 transition-colors">
+          <button onClick={startEdit} className="p-1 text-slate-500 hover:text-sage-600 transition-colors">
             <Pencil size={13} />
           </button>
         )}
 
         {!editing && (
-          <button onClick={onDelete} className="p-1 text-slate-300 hover:text-red-400 transition-colors">
+          <button onClick={onDelete} className="p-1 text-slate-500 hover:text-red-500 transition-colors">
             <Trash2 size={14} />
           </button>
         )}
@@ -2446,14 +2503,14 @@ function TaskCard({ task }: { task: Task }) {
             )}
             <button
               onClick={() => setShowEdit(true)}
-              className="p-1 text-slate-300 hover:text-sage-500 transition-colors"
+              className="p-1 text-slate-500 hover:text-sage-600 transition-colors"
               aria-label="Edit activity"
             >
               <Pencil size={15} />
             </button>
             <button
               onClick={() => deleteTask(task.id)}
-              className="p-1 text-slate-300 hover:text-red-400 transition-colors"
+              className="p-1 text-slate-500 hover:text-red-500 transition-colors"
             >
               <Trash2 size={16} />
             </button>
