@@ -2,7 +2,7 @@
   "id": "/",
   "name": "NeuroCompass",
   "short_name": "NeuroCompass",
-  "description": "A neurodivergent-affirming companion app for ADHD and autism — tools, check-ins, habit building, and psychoeducation for everyday life.",
+  "description": "A daily planner and companion app built for ADHD, Autistic, and other Neurodivergent folks. Track habits, schedule your day, check in with yourself, and access tools designed with neurodivergent minds in mind.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
