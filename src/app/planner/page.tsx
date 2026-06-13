@@ -371,11 +371,14 @@ function MonthView({ date, onDaySelect }: { date: Date; onDaySelect: (d: Date) =
 
   return (
     <div className="py-1 pb-6">
-      <div className="grid grid-cols-7 mb-1.5">
-        {MONTH_DAY_HEADERS.map((d) => (
+      <div className="grid grid-cols-7 mb-2">
+        {MONTH_DAY_HEADERS.map((d, i) => (
           <div
             key={d}
-            className="text-center text-[9px] font-bold text-slate-500 uppercase tracking-wider pb-1"
+            className={cn(
+              "text-center text-[9px] font-bold uppercase tracking-wider pb-1",
+              i >= 5 ? "text-rose-400/70" : "text-slate-500"
+            )}
           >
             {d}
           </div>
@@ -383,7 +386,9 @@ function MonthView({ date, onDaySelect }: { date: Date; onDaySelect: (d: Date) =
       </div>
       <div className="grid grid-cols-7 gap-1">
         {cells.map((cell, i) => {
-          if (!cell) return <div key={`empty-${i}`} className="h-10" />;
+          const colIndex = i % 7;
+          const isWeekend = colIndex >= 5;
+          if (!cell) return <div key={`empty-${i}`} className={cn("h-10 rounded-lg", isWeekend && "bg-rose-50/40")} />;
           const key = dateKey(cell);
           const dayTaskCount = tasks.filter(
             (t) => taskMatchesView(t, "month") && t.dueDate === key && !isTaskDone(t)
@@ -400,8 +405,10 @@ function MonthView({ date, onDaySelect }: { date: Date; onDaySelect: (d: Date) =
               className={cn(
                 "h-10 flex flex-col items-center justify-center rounded-lg text-sm font-semibold transition-all",
                 isToday
-                  ? "bg-sage-600 text-white"
-                  : "text-slate-700 hover:bg-white/50"
+                  ? "bg-sage-600 text-white shadow-sm"
+                  : isWeekend
+                  ? "bg-rose-50/50 text-rose-700/80 hover:bg-rose-100/60"
+                  : "text-slate-700 hover:bg-white/70"
               )}
             >
               <span>{cell.getDate()}</span>
@@ -411,11 +418,11 @@ function MonthView({ date, onDaySelect }: { date: Date; onDaySelect: (d: Date) =
                     <span
                       key={a.id}
                       className="w-1.5 h-1.5 rounded-full shrink-0"
-                      style={{ background: isToday ? "rgba(255,255,255,0.8)" : (a.color ?? DEFAULT_APPT_COLOR) }}
+                      style={{ background: isToday ? "rgba(255,255,255,0.9)" : (a.color ?? DEFAULT_APPT_COLOR) }}
                     />
                   ))}
                   {dayTaskCount > 0 && (
-                    <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", isToday ? "bg-white/70" : "bg-slate-400")} />
+                    <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", isToday ? "bg-white/80" : "bg-slate-400")} />
                   )}
                 </div>
               )}
@@ -674,13 +681,13 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
     setPressGhost(null);
   };
 
-  // Time grid range — 1 hour before first appt to 1 hour after last
+  // Time grid range — start at exact hour of first appt, end 30min after last
   const gridStartHour = timedAppts.length
-    ? Math.max(0, Math.floor(toMinutes(timedAppts[0].startTime) / 60) - 1)
+    ? Math.max(0, Math.floor(toMinutes(timedAppts[0].startTime) / 60))
     : 8;
   const lastAppt = timedAppts[timedAppts.length - 1];
   const gridEndHour = timedAppts.length
-    ? Math.min(24, Math.ceil((lastAppt.endTime ? toMinutes(lastAppt.endTime) : toMinutes(lastAppt.startTime) + 60) / 60) + 1)
+    ? Math.min(24, Math.ceil((lastAppt.endTime ? toMinutes(lastAppt.endTime) : toMinutes(lastAppt.startTime) + 60) / 60))
     : 20;
   const gridHeight = (gridEndHour - gridStartHour) * PX_PER_HOUR;
   const hourLabels = Array.from({ length: gridEndHour - gridStartHour + 1 }, (_, i) => gridStartHour + i);
@@ -760,7 +767,7 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
             return (
               <div
                 key={appt.id}
-                className="absolute z-10"
+                className="absolute z-10 overflow-hidden"
                 style={{ top, height, left: 44, right: 0 }}
               >
                 <AppointmentRow
@@ -777,7 +784,8 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
       )}
 
       {showForm ? (
-        <div className="bg-cream-50 border border-slate-200 rounded-2xl p-4 space-y-3">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/30 px-4 pb-6" onClick={() => setShowForm(false)}>
+        <div className="bg-cream-50 border border-slate-200 rounded-2xl p-4 space-y-3 w-full max-w-lg max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
           {/* Title */}
           <input
             className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-400"
@@ -928,6 +936,7 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
               Cancel
             </button>
           </div>
+        </div>
         </div>
       ) : (
         <button
@@ -2798,32 +2807,46 @@ export default function PlannerPage() {
       )}
 
       {/* Week view */}
-      {activeView === "week" && (
-        <div>
-          <div className="pt-5 pb-1">
-            <h2 className="font-[family-name:var(--font-fraunces)] italic text-sm text-slate-600 mb-3">This Week</h2>
-            <WeekView date={selectedDate} />
+      {activeView === "week" && (() => {
+        const todayWeekKey = getWeekKey(new Date());
+        const isThisWeek = getWeekKey(selectedDate) === todayWeekKey;
+        const weekLabel = isThisWeek ? "This Week" : formatDateLabel(selectedDate, "week");
+        return (
+          <div>
+            <div className="pt-5 pb-1">
+              <h2 className="font-[family-name:var(--font-fraunces)] italic text-sm text-slate-600 mb-3">{weekLabel}</h2>
+              <div className="bg-white/60 rounded-2xl shadow-sm px-3 py-2">
+                <WeekView date={selectedDate} />
+              </div>
+            </div>
+            <div className="pt-6 pb-1">
+              <h2 className="font-[family-name:var(--font-fraunces)] italic text-sm text-slate-600 mb-3">Weekly Focus</h2>
+              <FocusList weekKey={getWeekKey(selectedDate)} />
+            </div>
           </div>
-          <div className="pt-8 pb-1">
-            <h2 className="font-[family-name:var(--font-fraunces)] italic text-sm text-slate-600 mb-3">Weekly Focus</h2>
-            <FocusList weekKey={getWeekKey(selectedDate)} />
-          </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Month view */}
-      {activeView === "month" && (
-        <div>
-          <div className="pt-5 pb-1">
-            <h2 className="font-[family-name:var(--font-fraunces)] italic text-sm text-slate-600 mb-3">This Month</h2>
-            <MonthView date={selectedDate} onDaySelect={handleDaySelect} />
+      {activeView === "month" && (() => {
+        const now = new Date();
+        const isThisMonth = selectedDate.getFullYear() === now.getFullYear() && selectedDate.getMonth() === now.getMonth();
+        const monthLabel = isThisMonth ? "This Month" : selectedDate.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+        return (
+          <div>
+            <div className="pt-5 pb-1">
+              <h2 className="font-[family-name:var(--font-fraunces)] italic text-sm text-slate-600 mb-3">{monthLabel}</h2>
+              <div className="bg-white/60 rounded-2xl shadow-sm px-2 py-3">
+                <MonthView date={selectedDate} onDaySelect={handleDaySelect} />
+              </div>
+            </div>
+            <div className="pt-6 pb-1">
+              <h2 className="font-[family-name:var(--font-fraunces)] italic text-sm text-slate-600 mb-3">Monthly Intentions</h2>
+              <FocusList monthKey={getMonthKey(selectedDate)} />
+            </div>
           </div>
-          <div className="pt-8 pb-1">
-            <h2 className="font-[family-name:var(--font-fraunces)] italic text-sm text-slate-600 mb-3">Monthly Intentions</h2>
-            <FocusList monthKey={getMonthKey(selectedDate)} />
-          </div>
-        </div>
-      )}
+        );
+      })()}
 
       {showTaskModal && <AddTaskModal onClose={() => setShowTaskModal(false)} />}
       {showScheduleModal && (
