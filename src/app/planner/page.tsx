@@ -255,7 +255,7 @@ function DateNavigation({
 
 const WEEK_DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-function WeekView({ date }: { date: Date }) {
+function WeekView({ date, onDayClick }: { date: Date; onDayClick?: (d: Date) => void }) {
   const { tasks, appointments } = useAppStore();
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
   const todayKey = getTodayKey();
@@ -303,8 +303,11 @@ function WeekView({ date }: { date: Date }) {
             )}
             style={isWeekend && !isToday ? { borderLeftColor: "#C4909A55" } : undefined}
             >
-              {/* Day label */}
-              <div className="w-9 shrink-0 pt-0.5">
+              {/* Day label — tap to go to that day */}
+              <button
+                className="w-9 shrink-0 pt-0.5 text-left"
+                onClick={() => onDayClick?.(day)}
+              >
                 <span className={cn("text-[9px] font-bold uppercase block leading-none",
                   isToday ? "text-sage-600" : isWeekend ? "text-[#C4909A]" : "text-slate-500")}>
                   {WEEK_DAY_LABELS[i]}
@@ -313,7 +316,7 @@ function WeekView({ date }: { date: Date }) {
                   isToday ? "text-sage-700" : isWeekend ? "text-[#8f6559]" : "text-slate-700")}>
                   {day.getDate()}
                 </span>
-              </div>
+              </button>
 
               {/* Content */}
               <div className="flex-1 min-w-0 pt-0.5">
@@ -647,7 +650,7 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
     .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
   const PX_PER_HOUR = 48; // px per hour — compact but proportional
-  const MIN_BLOCK = 24;
+  const MIN_BLOCK = 36; // enough for one readable line
   const gridRef = useRef<HTMLDivElement>(null);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [pressGhost, setPressGhost] = useState<number | null>(null); // minutes from midnight
@@ -790,7 +793,7 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
             return (
               <div
                 key={appt.id}
-                className="absolute z-10 overflow-hidden"
+                className="absolute z-10"
                 style={{ top, height, left: 44, right: 0 }}
               >
                 <AppointmentRow
@@ -807,8 +810,8 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
       )}
 
       {showForm ? (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/30 px-4 pb-6" onClick={() => setShowForm(false)}>
-        <div className="bg-cream-50 border border-slate-200 rounded-2xl p-4 space-y-3 w-full max-w-lg max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/30 px-4 pb-6 overflow-hidden" onClick={() => setShowForm(false)} onTouchMove={(e) => e.preventDefault()}>
+        <div className="bg-cream-50 border border-slate-200 rounded-2xl p-4 space-y-3 w-full max-w-lg max-h-[80vh] overflow-y-auto overscroll-contain" onClick={(e) => e.stopPropagation()} onTouchMove={(e) => e.stopPropagation()}>
           {/* Title */}
           <input
             className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-400"
@@ -1048,8 +1051,8 @@ function AppointmentRow({
 
   if (showEdit) {
     return (
-      <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/30 px-4 pb-6" onClick={() => setShowEdit(false)}>
-      <div className="bg-cream-50 border border-slate-200 rounded-2xl p-4 space-y-3 w-full max-w-lg max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+      <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/30 px-4 pb-6 overflow-hidden" onClick={() => setShowEdit(false)} onTouchMove={(e) => e.preventDefault()}>
+      <div className="bg-cream-50 border border-slate-200 rounded-2xl p-4 space-y-3 w-full max-w-lg max-h-[80vh] overflow-y-auto overscroll-contain" onClick={(e) => e.stopPropagation()} onTouchMove={(e) => e.stopPropagation()}>
         <input
           className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-400"
           placeholder="Appointment title"
@@ -1213,11 +1216,11 @@ function AppointmentRow({
       <div className="w-1 shrink-0" style={{ background: cardColor }} />
 
       {/* Content */}
-      <div className="flex-1 px-3 py-2.5 flex flex-col justify-center">
+      <div className={cn("flex-1 flex flex-col justify-center", blockHeight && blockHeight < 40 ? "px-2 py-1" : "px-3 py-2.5")}>
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-slate-800 leading-none truncate">{appt.title}</p>
-            {(!blockHeight || blockHeight >= 38) && (
+            {(!blockHeight || blockHeight >= 40) && (
               <p className="text-xs mt-0.5 font-medium leading-none" style={{ color: cardColor }}>{timeLabel}</p>
             )}
             {appt.notes && expanded && (
@@ -2842,7 +2845,7 @@ export default function PlannerPage() {
             <div className="pt-5 pb-1">
               <h2 className="font-[family-name:var(--font-fraunces)] italic text-sm text-slate-600 mb-3">{weekLabel}</h2>
               <div className="bg-white/60 rounded-2xl shadow-sm px-3 py-2">
-                <WeekView date={selectedDate} />
+                <WeekView date={selectedDate} onDayClick={handleDaySelect} />
               </div>
             </div>
             <div className="pt-6 pb-1">
