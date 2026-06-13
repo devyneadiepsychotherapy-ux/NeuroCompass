@@ -377,7 +377,7 @@ function MonthView({ date, onDaySelect }: { date: Date; onDaySelect: (d: Date) =
             key={d}
             className={cn(
               "text-center text-[9px] font-bold uppercase tracking-wider pb-1",
-              i >= 5 ? "text-rose-400/70" : "text-slate-500"
+              i >= 5 ? "text-[#C4909A]" : "text-slate-500"
             )}
           >
             {d}
@@ -388,7 +388,7 @@ function MonthView({ date, onDaySelect }: { date: Date; onDaySelect: (d: Date) =
         {cells.map((cell, i) => {
           const colIndex = i % 7;
           const isWeekend = colIndex >= 5;
-          if (!cell) return <div key={`empty-${i}`} className={cn("h-10 rounded-lg", isWeekend && "bg-rose-50/40")} />;
+          if (!cell) return <div key={`empty-${i}`} className={cn("h-10 rounded-lg", isWeekend && "bg-[#f0e8e5]/40")} />;
           const key = dateKey(cell);
           const dayTaskCount = tasks.filter(
             (t) => taskMatchesView(t, "month") && t.dueDate === key && !isTaskDone(t)
@@ -407,7 +407,7 @@ function MonthView({ date, onDaySelect }: { date: Date; onDaySelect: (d: Date) =
                 isToday
                   ? "bg-sage-600 text-white shadow-sm"
                   : isWeekend
-                  ? "bg-rose-50/50 text-rose-700/80 hover:bg-rose-100/60"
+                  ? "bg-[#f0e8e5]/50 text-[#8f6559] hover:bg-[#ede0db]/70"
                   : "text-slate-700 hover:bg-white/70"
               )}
             >
@@ -639,8 +639,8 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
     .filter((a) => !a.allDay && a.startTime)
     .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
-  const PX_PER_HOUR = 64; // px per hour — gives clear proportional difference
-  const MIN_BLOCK = 26; // minimum block height so text is always readable
+  const PX_PER_HOUR = 48; // px per hour — compact but proportional
+  const MIN_BLOCK = 24;
   const gridRef = useRef<HTMLDivElement>(null);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [pressGhost, setPressGhost] = useState<number | null>(null); // minutes from midnight
@@ -757,6 +757,22 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
               </span>
             </div>
           )}
+
+          {/* Current time indicator */}
+          {(() => {
+            const now = new Date();
+            const nowMins = now.getHours() * 60 + now.getMinutes();
+            const gridStartMins = gridStartHour * 60;
+            const gridEndMins = gridEndHour * 60;
+            if (nowMins < gridStartMins || nowMins > gridEndMins) return null;
+            const top = (nowMins - gridStartMins) / 60 * PX_PER_HOUR;
+            return (
+              <div className="absolute z-20 pointer-events-none flex items-center" style={{ top, left: 36, right: 0 }}>
+                <div className="w-2 h-2 rounded-full shrink-0 -ml-1" style={{ background: "#4a7c59" }} />
+                <div className="flex-1 h-px" style={{ background: "#4a7c59", opacity: 0.7 }} />
+              </div>
+            );
+          })()}
 
           {/* Appointments — absolutely positioned on grid */}
           {timedAppts.map((appt) => {
@@ -1193,8 +1209,10 @@ function AppointmentRow({
       <div className="flex-1 px-3 py-2.5 flex flex-col justify-center">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-slate-800 leading-snug">{appt.title}</p>
-            <p className="text-xs mt-0.5 font-medium" style={{ color: cardColor }}>{timeLabel}</p>
+            <p className="text-sm font-semibold text-slate-800 leading-none truncate">{appt.title}</p>
+            {(!blockHeight || blockHeight >= 38) && (
+              <p className="text-xs mt-0.5 font-medium leading-none" style={{ color: cardColor }}>{timeLabel}</p>
+            )}
             {appt.notes && expanded && (
               <p className="mt-1 text-xs text-slate-500 leading-relaxed">{appt.notes}</p>
             )}
@@ -2735,6 +2753,7 @@ export default function PlannerPage() {
               icon={<CalendarClock size={16} />}
               title="Schedule"
               onToggle={() => toggleSection("schedule")}
+              card
             >
               <ScheduleSection selectedDate={selectedDate} />
             </Section>
