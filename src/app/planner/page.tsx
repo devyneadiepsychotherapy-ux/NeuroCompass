@@ -2491,12 +2491,14 @@ function TaskCard({ task }: { task: Task }) {
         <div className="flex items-center gap-2">
           <button
             onClick={handleComplete}
-            className={cn(
-              "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
-              isDone ? "bg-sage-500 border-sage-500" : "border-slate-300 hover:border-sage-400"
-            )}
+            className="p-2 -m-2 shrink-0 flex items-center justify-center"
           >
-            {isDone && <Check size={10} className="text-white" strokeWidth={3} />}
+            <span className={cn(
+              "w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all",
+              isDone ? "bg-sage-500 border-sage-500" : "border-slate-300 hover:border-sage-400"
+            )}>
+              {isDone && <Check size={10} className="text-white" strokeWidth={3} />}
+            </span>
           </button>
 
           <div className="flex-1 min-w-0 flex items-center gap-2 flex-wrap">
