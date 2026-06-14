@@ -134,9 +134,10 @@ function PastCheckIns({ entries }: { entries: MoodEntry[] }) {
         {displayed.map((entry) => {
           const isOpen = expanded === entry.id;
           return (
-            <div key={entry.id} className="bg-cream-50 rounded-2xl border border-slate-100 overflow-hidden">
+            <div key={entry.id} className="bg-cream-50 rounded-2xl border border-slate-100 overflow-hidden relative">
               <button
-                className="w-full flex items-center gap-3 px-4 py-3 text-left"
+                className="w-full flex items-center gap-3 px-4 py-3 text-left cursor-pointer"
+                style={{ WebkitTapHighlightColor: "transparent" }}
                 onClick={() => setExpanded(isOpen ? null : entry.id)}
               >
                 <div className={cn("w-2.5 h-2.5 rounded-full shrink-0", dot(entry.pleasantness))} />
