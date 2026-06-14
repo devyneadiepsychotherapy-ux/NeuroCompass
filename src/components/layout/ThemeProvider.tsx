@@ -12,9 +12,17 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
   const theme = getTheme(activeTheme);
 
   // Apply data-theme to <html> so [data-theme="x"] CSS overrides cascade to all Tailwind classes
+  // Also update the browser theme-color meta tag to match current theme
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", activeTheme);
-  }, [activeTheme]);
+    let metaTheme = document.querySelector('meta[name="theme-color"]');
+    if (!metaTheme) {
+      metaTheme = document.createElement("meta");
+      metaTheme.setAttribute("name", "theme-color");
+      document.head.appendChild(metaTheme);
+    }
+    metaTheme.setAttribute("content", theme.background);
+  }, [activeTheme, theme.background]);
 
   const cssVars = {
     "--bg": theme.background,

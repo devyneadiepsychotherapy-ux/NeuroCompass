@@ -1877,14 +1877,14 @@ const scheduleTypeConfig: Record<ScheduleItemType, { label: string; color: strin
 };
 
 const APPT_COLOR_OPTIONS = [
-  { hex: "#5e8272", bg: "#d6e5d8", label: "Sage" },
-  { hex: "#4d7a80", bg: "#cde4e6", label: "Teal" },
-  { hex: "#7a8fb8", bg: "#dce3f5", label: "Slate Blue" },
-  { hex: "#9B8EC4", bg: "#e8e4f5", label: "Lavender" },
-  { hex: "#C4929A", bg: "#f5e4e6", label: "Dusty Rose" },
-  { hex: "#B8897A", bg: "#f0ddd8", label: "Terracotta" },
-  { hex: "#B8A96A", bg: "#f0ead4", label: "Gold" },
-  { hex: "#8a9e7a", bg: "#dce8d4", label: "Moss" },
+  { hex: "#5e8272", bg: "#bdd4c0", label: "Sage" },
+  { hex: "#4d7a80", bg: "#b4ced1", label: "Teal" },
+  { hex: "#7a8fb8", bg: "#c4cfe8", label: "Slate Blue" },
+  { hex: "#9B8EC4", bg: "#d2cce8", label: "Lavender" },
+  { hex: "#C4929A", bg: "#e4c8cc", label: "Dusty Rose" },
+  { hex: "#B8897A", bg: "#dcc4bc", label: "Terracotta" },
+  { hex: "#B8A96A", bg: "#dcd0b0", label: "Gold" },
+  { hex: "#8a9e7a", bg: "#c4d4b8", label: "Moss" },
 ];
 const DEFAULT_APPT_COLOR = APPT_COLOR_OPTIONS[0].hex;
 

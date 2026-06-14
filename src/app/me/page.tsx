@@ -141,7 +141,7 @@ function MyToolboxCard({ favorites }: { favorites: ToolFavorite[] }) {
             const inner = (
               <>
                 <div className="w-7 h-7 rounded-lg bg-stone-100 flex items-center justify-center shrink-0">
-                  {IC && <IC size={14} className="text-slate-600 opacity-70" />}
+                  {IC && <IC size={14} className="text-stone-500" />}
                 </div>
                 <p className="flex-1 text-sm font-medium text-slate-700 truncate">
                   {tool.title}
@@ -183,7 +183,7 @@ function MyToolboxCard({ favorites }: { favorites: ToolFavorite[] }) {
                 onMouseLeave={(e) => (e.currentTarget.style.borderColor = "")}
               >
                 <div className="w-10 h-10 rounded-xl bg-stone-100 flex items-center justify-center">
-                  {IC && <IC size={18} className="text-slate-600 opacity-70" />}
+                  {IC && <IC size={18} className="text-stone-500" />}
                 </div>
                 <p className="text-xs font-medium text-slate-700 text-center leading-tight">
                   {tool.title}
