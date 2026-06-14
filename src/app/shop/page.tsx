@@ -103,7 +103,7 @@ function EditRewardForm({
 
   return (
     <div className="bg-stone-50 border border-sage-300 rounded-2xl p-4 space-y-3">
-      <p className="text-sm font-bold text-slate-700">Edit Reward</p>
+      <p className="text-sm font-bold text-stone-700">Edit Reward</p>
 
       <input
         className="w-full border border-stone-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-400 bg-white"
@@ -188,7 +188,7 @@ function RewardCard({
       <div className="absolute top-3 right-3 flex items-center gap-1">
         {confirmDelete ? (
           <>
-            <span className="text-xs text-slate-500 mr-1">Delete?</span>
+            <span className="text-xs text-stone-500 mr-1">Delete?</span>
             <button
               onClick={onDelete}
               className="px-2 py-1 rounded-lg bg-red-500 text-white text-xs font-semibold hover:bg-red-600 transition-colors"
@@ -225,8 +225,8 @@ function RewardCard({
       <div className="flex items-start gap-3 pr-16">
         <RewardIcon name={reward.icon} size={22} className="text-sage-500 shrink-0" />
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-slate-800 text-sm leading-snug">{reward.name}</p>
-          <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{reward.description}</p>
+          <p className="font-semibold text-stone-800 text-sm leading-snug">{reward.name}</p>
+          <p className="text-xs text-stone-500 mt-0.5 leading-relaxed">{reward.description}</p>
         </div>
       </div>
 
@@ -278,10 +278,10 @@ function PurchasedRow({ reward }: { reward: ShopReward }) {
         <RewardIcon name={reward.icon} size={16} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className={cn("text-sm font-semibold text-slate-800", used && "line-through text-slate-400")}>
+        <p className={cn("text-sm font-semibold text-stone-800", used && "line-through text-stone-400")}>
           {reward.name}
         </p>
-        <p className="text-xs text-slate-400">{reward.description}</p>
+        <p className="text-xs text-stone-400">{reward.description}</p>
       </div>
       <span className="flex items-center gap-0.5 text-xs text-[#B8A96A] font-semibold shrink-0">
         <Coins size={11} />
@@ -327,7 +327,7 @@ function AddRewardForm({ onAdd }: { onAdd: (r: Omit<ShopReward, "id">) => void }
   return (
     <div className="bg-stone-50 border border-stone-200 rounded-2xl p-4 space-y-3">
       <div className="flex items-center justify-between">
-        <p className="text-sm font-bold text-slate-700">Custom Reward</p>
+        <p className="text-sm font-bold text-stone-700">Custom Reward</p>
         <button onClick={() => setOpen(false)} className="p-1 text-slate-400 hover:text-slate-600">
           <X size={15} />
         </button>

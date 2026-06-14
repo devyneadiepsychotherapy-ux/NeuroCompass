@@ -755,10 +755,10 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
               className="absolute left-0 right-0 flex items-center gap-2 pointer-events-none"
               style={{ top: (hour - gridStartHour) * PX_PER_HOUR }}
             >
-              <span className="text-[9px] font-semibold w-9 text-right shrink-0 leading-none" style={{ color: "#4a7c59" }}>
+              <span className="text-[9px] font-semibold w-9 text-right shrink-0 leading-none text-sage-600">
                 {`${hour % 12 || 12}${hour < 12 ? "am" : "pm"}`}
               </span>
-              <div className="flex-1 border-t" style={{ borderColor: "rgba(74,124,89,0.25)" }} />
+              <div className="flex-1 border-t border-sage-400/25" />
             </div>
           ))}
 
@@ -766,8 +766,8 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
           {hourLabels.slice(0, -1).map((hour) => (
             <div
               key={`h${hour}`}
-              className="absolute pointer-events-none border-t"
-              style={{ top: (hour - gridStartHour) * PX_PER_HOUR + PX_PER_HOUR / 2, left: 44, right: 0, borderColor: "rgba(74,124,89,0.1)" }}
+              className="absolute pointer-events-none border-t border-sage-600/10"
+              style={{ top: (hour - gridStartHour) * PX_PER_HOUR + PX_PER_HOUR / 2, left: 44, right: 0 }}
             />
           ))}
 
@@ -777,11 +777,11 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
               className="absolute left-11 right-0 h-7 rounded-lg pointer-events-none z-20 flex items-center px-2"
               style={{
                 top: (pressGhost - gridStartHour * 60) / 60 * PX_PER_HOUR,
-                background: "rgba(74,124,89,0.15)",
-                border: "1.5px dashed rgba(74,124,89,0.5)",
+                background: "color-mix(in srgb, var(--color-sage-600) 15%, transparent)",
+                border: "1.5px dashed color-mix(in srgb, var(--color-sage-600) 50%, transparent)",
               }}
             >
-              <span className="text-[10px] font-semibold" style={{ color: "#4a7c59" }}>
+              <span className="text-[10px] font-semibold text-sage-600">
                 {minutesToTimeStr(pressGhost)}
               </span>
             </div>
@@ -797,8 +797,8 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
             const top = (nowMins - gridStartMins) / 60 * PX_PER_HOUR;
             return (
               <div className="absolute z-20 pointer-events-none flex items-center" style={{ top, left: 36, right: 0 }}>
-                <div className="w-2 h-2 rounded-full shrink-0 -ml-1" style={{ background: "#4a7c59" }} />
-                <div className="flex-1 h-px" style={{ background: "#4a7c59", opacity: 0.7 }} />
+                <div className="w-2 h-2 rounded-full shrink-0 -ml-1 bg-sage-600" />
+                <div className="flex-1 h-px bg-sage-600 opacity-70" />
               </div>
             );
           })()}
@@ -1260,24 +1260,24 @@ function AppointmentRow({
       <div className={cn("flex-1 flex flex-col justify-center", blockHeight && blockHeight < 40 ? "px-2 py-1" : "px-3 py-2.5")}>
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-slate-800 leading-none truncate">{appt.title}</p>
+            <p className="text-sm font-semibold text-stone-800 leading-none truncate">{appt.title}</p>
             {(!blockHeight || blockHeight >= 40) && (
               <p className="text-xs mt-0.5 font-medium leading-none" style={{ color: cardColor }}>{timeLabel}</p>
             )}
             {appt.notes && expanded && (
-              <p className="mt-1 text-xs text-slate-500 leading-relaxed">{appt.notes}</p>
+              <p className="mt-1 text-xs text-stone-500 leading-relaxed">{appt.notes}</p>
             )}
           </div>
           <div className="flex items-center gap-0.5 shrink-0 pt-0.5">
             {appt.notes && (
-              <button onClick={() => setExpanded(!expanded)} className="p-1 text-slate-500 hover:text-slate-700">
+              <button onClick={() => setExpanded(!expanded)} className="p-1 text-stone-500 hover:text-stone-700">
                 {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
               </button>
             )}
-            <button onClick={openEdit} className="p-1 text-slate-600 hover:text-sage-700 transition-colors">
+            <button onClick={openEdit} className="p-1 text-stone-600 hover:text-stone-800 transition-colors">
               <Pencil size={13} />
             </button>
-            <button onClick={onDelete} className="p-1 text-slate-600 hover:text-red-500 transition-colors">
+            <button onClick={onDelete} className="p-1 text-stone-600 hover:text-red-500 transition-colors">
               <Trash2 size={13} />
             </button>
           </div>

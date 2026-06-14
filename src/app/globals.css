@@ -141,6 +141,12 @@
   --color-slate-900: #F4F8FC;
 }
 
+/* text-white uses --color-white which we override to dark for bg-white cards.
+   Restore it to an actual light color so buttons with text-white stay readable. */
+[data-theme="midnight-ocean"] .text-white {
+  color: #E8F4F8;
+}
+
 [data-theme="autumn-leaves"] {
   --background: #FBF1E9;
   --foreground: #3B2010;
