@@ -41,7 +41,7 @@ const taskTypeConfig: Record<TaskItemType, { label: string; color: string }> = {
   "time-block": { label: "Time Block", color: "bg-violet-100 text-violet-700" },
 };
 
-const CATEGORIES = ["Personal", "Work", "Health", "Self-care", "Admin", "Social", "Other"];
+const CATEGORIES = ["Personal", "Work"];
 const TIME_ESTIMATES = [5, 10, 15, 20, 30, 45, 60, 90, 120];
 const TOP3_LABELS = ["Most Important", "Also Important", "If I Have Energy"];
 
@@ -2368,35 +2368,6 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
           />
-        </div>
-
-        {/* Show on */}
-        <div>
-          <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">Show on</p>
-          <div className="flex gap-2">
-            {(["day", "week", "month"] as const).map((v) => (
-              <button
-                key={v}
-                onClick={() => toggleShowOn(v)}
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-2 min-h-[44px] rounded-xl text-xs font-medium border-2 transition-all",
-                  showOn.includes(v)
-                    ? "border-sage-400 bg-sage-50 text-sage-700"
-                    : "border-transparent bg-slate-100 text-slate-500"
-                )}
-              >
-                <div
-                  className={cn(
-                    "w-3.5 h-3.5 rounded border-2 flex items-center justify-center shrink-0",
-                    showOn.includes(v) ? "bg-sage-500 border-sage-500" : "border-slate-300"
-                  )}
-                >
-                  {showOn.includes(v) && <Check size={8} className="text-white" strokeWidth={3} />}
-                </div>
-                {v.charAt(0).toUpperCase() + v.slice(1)} view
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* Recurring */}
