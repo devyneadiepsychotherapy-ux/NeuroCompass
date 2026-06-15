@@ -147,6 +147,20 @@
   color: #E8F4F8;
 }
 
+/* Flip stone scale so bg-stone-* cards become dark and text-stone-800/900 stays light */
+[data-theme="midnight-ocean"] {
+  --color-stone-50:  #1A2B3A;
+  --color-stone-100: #213545;
+  --color-stone-200: #2C4255;
+  --color-stone-300: #7AAABB;
+  --color-stone-400: #8ABCCC;
+  --color-stone-500: #A0CCDA;
+  --color-stone-600: #B8D8E8;
+  --color-stone-700: #CCE4F0;
+  --color-stone-800: #DEF0F8;
+  --color-stone-900: #F0F8FC;
+}
+
 [data-theme="autumn-leaves"] {
   --background: #FBF1E9;
   --foreground: #3B2010;

@@ -1260,24 +1260,24 @@ function AppointmentRow({
       <div className={cn("flex-1 flex flex-col justify-center", blockHeight && blockHeight < 40 ? "px-2 py-1" : "px-3 py-2.5")}>
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-stone-800 leading-none truncate">{appt.title}</p>
+            <p className="text-sm font-semibold leading-none truncate" style={{ color: "#292524" }}>{appt.title}</p>
             {(!blockHeight || blockHeight >= 40) && (
               <p className="text-xs mt-0.5 font-medium leading-none" style={{ color: cardColor }}>{timeLabel}</p>
             )}
             {appt.notes && expanded && (
-              <p className="mt-1 text-xs text-stone-500 leading-relaxed">{appt.notes}</p>
+              <p className="mt-1 text-xs leading-relaxed" style={{ color: "#78716c" }}>{appt.notes}</p>
             )}
           </div>
           <div className="flex items-center gap-0.5 shrink-0 pt-0.5">
             {appt.notes && (
-              <button onClick={() => setExpanded(!expanded)} className="p-1 text-stone-500 hover:text-stone-700">
+              <button onClick={() => setExpanded(!expanded)} className="p-1 hover:opacity-70" style={{ color: "#57534e" }}>
                 {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
               </button>
             )}
-            <button onClick={openEdit} className="p-1 text-stone-600 hover:text-stone-800 transition-colors">
+            <button onClick={openEdit} className="p-1 hover:opacity-70 transition-opacity" style={{ color: "#57534e" }}>
               <Pencil size={13} />
             </button>
-            <button onClick={onDelete} className="p-1 text-stone-600 hover:text-red-500 transition-colors">
+            <button onClick={onDelete} className="p-1 hover:text-red-500 transition-colors" style={{ color: "#57534e" }}>
               <Trash2 size={13} />
             </button>
           </div>
@@ -2483,7 +2483,7 @@ function TaskCard({ task }: { task: Task }) {
   return (
     <div className={cn("py-1 relative", isDone && "opacity-60")}>
       {toast && (
-        <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-xs font-bold px-3 py-1.5 rounded-full z-10 animate-fade-in-up whitespace-nowrap">
+        <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-emerald-600 text-xs font-bold px-3 py-1.5 rounded-full z-10 animate-fade-in-up whitespace-nowrap" style={{ color: "#fff" }}>
           {toast}
         </div>
       )}

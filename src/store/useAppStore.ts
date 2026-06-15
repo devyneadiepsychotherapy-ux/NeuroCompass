@@ -411,7 +411,7 @@ export const useAppStore = create<AppState>()(
         set((s) => ({
           tasks: s.tasks.map((t) =>
             t.id === id
-              ? { ...t, status: "done", completedAt: new Date().toISOString() }
+              ? { ...t, status: "done", completedAt: getTodayKey() + "T" + new Date().toISOString().slice(11) }
               : t
           ),
         }));
