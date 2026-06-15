@@ -807,7 +807,10 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
           {timedAppts.map((appt) => {
             const apptStart = toMinutes(appt.startTime);
             const durationMins = appt.endTime ? calcDurationMins(appt.startTime, appt.endTime) : 60;
-            const top = (apptStart - gridStartHour * 60) / 60 * PX_PER_HOUR + 2;
+            // +6 instead of +2: the hour label row uses items-center, pushing the
+            // rendered border-t ~4px below the container's top value. Adding 6 places
+            // blocks 2px below the actual visible line (4px label offset + 2px gap).
+            const top = (apptStart - gridStartHour * 60) / 60 * PX_PER_HOUR + 6;
             const height = Math.max(MIN_BLOCK, Math.round(durationMins / 60 * PX_PER_HOUR) - 4);
             return (
               <div

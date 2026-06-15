@@ -143,7 +143,7 @@ function FreezeSavedBanner({ onDismiss }: { onDismiss: () => void }) {
 
 function StreakCard({ streak, longestStreak, streakFreezes }: { streak: number; longestStreak: number; streakFreezes: number }) {
   return (
-    <div className="rounded-3xl p-5 overflow-hidden relative" style={{ background: "linear-gradient(135deg, #f0ebe8 0%, #e2d0c8 100%)" }}>
+    <div className="rounded-3xl p-5 overflow-hidden relative" style={{ background: "linear-gradient(135deg, var(--color-cream-50) 0%, var(--color-cream-100) 100%)" }}>
       {/* Background flame decoration */}
       <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-10">
         <Flame size={80} className="text-[#B8897A] fill-[#B8897A]" />
@@ -151,11 +151,11 @@ function StreakCard({ streak, longestStreak, streakFreezes }: { streak: number; 
       <div className="flex items-center gap-4 relative">
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-2">
-            <p className="text-5xl font-black text-[#7a4f40] leading-none">{streak}</p>
+            <p className="text-5xl font-black text-slate-700 leading-none">{streak}</p>
             <Flame size={22} className="text-[#B8897A] fill-[#d4b8b0] mb-1" />
           </div>
-          <p className="text-sm font-bold text-[#7a4f40] mt-0.5 opacity-80">day streak</p>
-          <p className="text-xs text-[#9b7060] mt-1">Best: {longestStreak} days</p>
+          <p className="text-sm font-bold text-slate-700 mt-0.5 opacity-80">day streak</p>
+          <p className="text-xs text-slate-500 mt-1">Best: {longestStreak} days</p>
         </div>
         <span className="text-xs font-semibold text-slate-400 shrink-0">
           {streakFreezes} freeze{streakFreezes !== 1 ? "s" : ""}
@@ -216,7 +216,7 @@ function FeelingFrozenCard({ openTool }: { openTool: (id: string) => void }) {
       <button
         onClick={() => setExpanded(true)}
         className="w-full flex items-center gap-4 border border-stone-200 rounded-2xl p-4 hover:border-stone-300 hover:shadow-md transition-all active:scale-[0.98] text-left"
-        style={{ background: "linear-gradient(135deg, #EAE8E5 0%, #DEDAD5 100%)" }}
+        style={{ background: "linear-gradient(135deg, var(--color-stone-100) 0%, var(--color-stone-200) 100%)" }}
       >
         <Wind size={20} className="text-stone-400 shrink-0" />
         <div className="flex-1 min-w-0">
@@ -229,7 +229,7 @@ function FeelingFrozenCard({ openTool }: { openTool: (id: string) => void }) {
   }
 
   return (
-    <div className="border border-stone-200 rounded-2xl p-5 space-y-4" style={{ background: "linear-gradient(160deg, #EAE8E5 0%, #DEDAD5 100%)" }}>
+    <div className="border border-stone-200 rounded-2xl p-5 space-y-4" style={{ background: "linear-gradient(160deg, var(--color-stone-100) 0%, var(--color-stone-200) 100%)" }}>
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
         <h3 className="font-bold text-slate-800 text-base">
@@ -554,7 +554,7 @@ export default function HomePage() {
       />
 
       {/* Quote */}
-      <div className="rounded-2xl px-4 py-3.5 border-l-4 border-sage-300" style={{ background: "linear-gradient(135deg, #f0f4ef 0%, #e8efe8 100%)" }}>
+      <div className="rounded-2xl px-4 py-3.5 border-l-4 border-sage-300" style={{ background: "linear-gradient(135deg, var(--color-sage-50) 0%, var(--color-sage-100) 100%)" }}>
         <p className="text-xs font-semibold text-sage-600 mb-1">Today's thought</p>
         <p className="text-sm text-slate-600 italic leading-relaxed">&ldquo;{todayQuote}&rdquo;</p>
       </div>
@@ -563,7 +563,7 @@ export default function HomePage() {
       <FeelingFrozenCard openTool={handleOpenToolById} />
 
       {/* My Toolbox (favourites) */}
-      <div className="p-4 rounded-3xl" style={{ background: "linear-gradient(135deg, #f0f4ef 0%, #e8efe8 100%)" }}>
+      <div className="p-4 rounded-3xl" style={{ background: "linear-gradient(135deg, var(--color-sage-50) 0%, var(--color-sage-100) 100%)" }}>
         <div className="flex items-center justify-between mb-3">
           <p className="text-sm font-bold text-slate-700">My Toolbox</p>
           <Link href="/tools" className="text-xs text-sage-600 font-semibold">Browse all</Link>

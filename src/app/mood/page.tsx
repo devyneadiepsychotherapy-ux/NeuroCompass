@@ -588,7 +588,7 @@ export default function MoodPage() {
           <button
             onClick={() => startFlow("both")}
             className="w-full text-left rounded-2xl p-5 transition-all active:scale-[0.98]"
-            style={{ background: "linear-gradient(135deg, #f0f4ef 0%, #e4ece3 100%)" }}
+            style={{ background: "linear-gradient(135deg, var(--color-sage-50) 0%, var(--color-sage-100) 100%)" }}
           >
             <p className="text-base font-bold text-slate-800">Full check-in</p>
             <p className="text-sm text-slate-500 mt-0.5">Emotions, body scan, and notes</p>

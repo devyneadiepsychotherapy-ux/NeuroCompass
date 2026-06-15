@@ -5,49 +5,38 @@ import { THEMES, Theme, ThemeId } from "@/lib/themes";
 import { ArrowLeft, Check, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-/** Mini UI mockup showing a theme's actual colours */
+/** Abstract colour swatch — feels modern, not like a fake old website */
 function ThemePreview({ theme }: { theme: Theme }) {
+  const [c1, c2, c3] = theme.preview;
   return (
     <div
-      className="w-full rounded-xl overflow-hidden border border-black/10"
-      style={{ background: theme.background }}
+      className="w-full h-28 relative overflow-hidden"
+      style={{ background: `linear-gradient(145deg, ${theme.background} 0%, ${c1}55 100%)` }}
     >
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-3 py-2" style={{ background: theme.primary }}>
-        <div className="flex items-center gap-1.5">
-          <div className="w-4 h-4 rounded-full" style={{ background: theme.card, opacity: 0.8 }} />
-          <div className="text-[9px] font-bold" style={{ color: theme.card }}>NeuroCompass</div>
-        </div>
-        <div className="w-12 h-2 rounded-full" style={{ background: theme.card, opacity: 0.4 }} />
-      </div>
-
-      {/* Body */}
-      <div className="p-2.5 space-y-1.5">
-        {/* Card row */}
-        <div className="rounded-lg p-2 flex items-center gap-2" style={{ background: theme.card }}>
-          <div className="w-3 h-3 rounded-full shrink-0" style={{ background: theme.primary }} />
-          <div className="flex-1 space-y-1">
-            <div className="h-1.5 rounded-full w-3/4" style={{ background: theme.text, opacity: 0.7 }} />
-            <div className="h-1 rounded-full w-1/2" style={{ background: theme.textMuted, opacity: 0.5 }} />
-          </div>
-        </div>
-        {/* Second card */}
-        <div className="rounded-lg p-2 flex items-center gap-2" style={{ background: theme.card }}>
-          <div className="w-3 h-3 rounded-full shrink-0" style={{ background: theme.secondary }} />
-          <div className="flex-1 space-y-1">
-            <div className="h-1.5 rounded-full w-2/3" style={{ background: theme.text, opacity: 0.7 }} />
-            <div className="h-1 rounded-full w-1/3" style={{ background: theme.textMuted, opacity: 0.5 }} />
-          </div>
-          <div className="px-1.5 py-0.5 rounded-full text-[7px] font-bold" style={{ background: theme.primary, color: theme.card }}>
-            XP
-          </div>
-        </div>
-        {/* Bottom nav strip */}
-        <div className="flex justify-around pt-1">
-          {[theme.primary, theme.textMuted, theme.textMuted, theme.textMuted, theme.textMuted].map((c, i) => (
-            <div key={i} className="w-5 h-1.5 rounded-full" style={{ background: c, opacity: i === 0 ? 1 : 0.35 }} />
-          ))}
-        </div>
+      {/* Large primary blob — top right */}
+      <div
+        className="absolute -right-12 -top-12 w-40 h-40 rounded-full"
+        style={{ background: c2, opacity: 0.5 }}
+      />
+      {/* Secondary blob — bottom left */}
+      <div
+        className="absolute -left-6 -bottom-6 w-24 h-24 rounded-full"
+        style={{ background: c3, opacity: 0.35 }}
+      />
+      {/* Colour chip row */}
+      <div className="absolute bottom-3 right-3 flex items-center gap-1.5">
+        {theme.preview.map((color, i) => (
+          <div
+            key={i}
+            className="rounded-full shadow-sm"
+            style={{
+              background: color,
+              width: i === 0 ? 28 : 18,
+              height: i === 0 ? 28 : 18,
+              boxShadow: "0 1px 4px rgba(0,0,0,0.18)",
+            }}
+          />
+        ))}
       </div>
     </div>
   );
@@ -76,7 +65,7 @@ export default function ThemesPage() {
 
       <div className="px-4 pt-5 space-y-3">
         <p className="text-xs text-slate-400 px-1">
-          Unlock new themes by levelling up: levels 2, 3, 5, 10, then every 5 after that. Each card shows exactly what that theme looks like.
+          Unlock new themes by levelling up. Each card shows that theme&apos;s real colours.
         </p>
 
         {THEMES.map((theme) => {
@@ -86,61 +75,71 @@ export default function ThemesPage() {
           return (
             <div
               key={theme.id}
-              className={cn(
-                "rounded-2xl border overflow-hidden transition-all",
-                isActive ? "border-[3px]" : "border",
-              )}
+              className="rounded-2xl overflow-hidden transition-all"
               style={{
-                borderColor: isActive ? theme.primary : "rgba(0,0,0,0.08)",
+                border: isActive
+                  ? `2.5px solid ${theme.primary}`
+                  : "1.5px solid rgba(0,0,0,0.08)",
               }}
             >
-              {/* Preview */}
+              {/* Preview swatch */}
               <div className="relative">
                 <ThemePreview theme={theme} />
 
                 {/* Locked overlay */}
                 {!unlocked && (
-                  <div className="absolute inset-0 rounded-xl flex flex-col items-center justify-center gap-1.5"
-                    style={{ background: "rgba(0,0,0,0.45)" }}>
+                  <div
+                    className="absolute inset-0 flex flex-col items-center justify-center gap-1.5"
+                    style={{ background: "rgba(0,0,0,0.42)" }}
+                  >
                     <Lock size={20} className="text-white" />
-                    <span className="text-white text-xs font-semibold">Unlocks at Level {theme.unlockLevel}</span>
+                    <span className="text-white text-xs font-semibold">
+                      Unlocks at Level {theme.unlockLevel}
+                    </span>
                   </div>
                 )}
               </div>
 
-              {/* Footer row */}
+              {/* Info footer — rendered in that theme's own card colour */}
               <div
-                className="flex items-center justify-between px-3 py-2.5"
+                className="flex items-center justify-between px-3.5 py-2.5 gap-3"
                 style={{ background: theme.card }}
               >
-                <div>
-                  <p className="text-sm font-bold" style={{ color: theme.text }}>{theme.name}</p>
+                <div className="min-w-0">
+                  <p className="text-sm font-bold leading-tight" style={{ color: theme.text }}>
+                    {theme.name}
+                  </p>
                   {!unlocked && (
-                    <p className="text-[11px]" style={{ color: theme.textMuted }}>
-                      Level {theme.unlockLevel} · {theme.unlockLevel - userLevel} level{theme.unlockLevel - userLevel !== 1 ? "s" : ""} away
+                    <p className="text-[11px] mt-0.5" style={{ color: theme.textMuted }}>
+                      {theme.unlockLevel - userLevel} level{theme.unlockLevel - userLevel !== 1 ? "s" : ""} away
                     </p>
                   )}
                   {isActive && (
-                    <p className="text-[11px] font-semibold" style={{ color: theme.primary }}>Active</p>
+                    <p className="text-[11px] font-semibold mt-0.5" style={{ color: theme.primary }}>
+                      Active
+                    </p>
                   )}
                 </div>
 
                 {unlocked && !isActive && (
                   <button
                     onClick={() => setActiveTheme(theme.id as ThemeId)}
-                    className="px-3 py-1.5 rounded-xl text-xs font-semibold"
+                    className="shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition-all active:scale-95"
                     style={{ background: theme.primary, color: theme.card }}
                   >
                     Apply
                   </button>
                 )}
                 {isActive && (
-                  <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ background: theme.primary }}>
-                    <Check size={14} style={{ color: theme.card }} strokeWidth={2.5} />
+                  <div
+                    className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center"
+                    style={{ background: theme.primary }}
+                  >
+                    <Check size={13} style={{ color: theme.card }} strokeWidth={2.5} />
                   </div>
                 )}
                 {!unlocked && (
-                  <Lock size={14} style={{ color: theme.textMuted }} />
+                  <Lock size={14} className="shrink-0" style={{ color: theme.textMuted }} />
                 )}
               </div>
             </div>
@@ -149,11 +148,11 @@ export default function ThemesPage() {
 
         {/* Next unlock hint */}
         {(() => {
-          const nextTheme = THEMES.find((t) => t.unlockLevel > userLevel);
-          if (!nextTheme) return null;
+          const next = THEMES.find((t) => t.unlockLevel > userLevel);
+          if (!next) return null;
           return (
             <p className="text-xs text-slate-400 mt-2 px-1">
-              Next unlock: <span className="font-semibold text-slate-500">{nextTheme.name}</span> at Level {nextTheme.unlockLevel}
+              Next: <span className="font-semibold text-slate-500">{next.name}</span> at Level {next.unlockLevel}
             </p>
           );
         })()}
