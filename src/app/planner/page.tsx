@@ -2689,8 +2689,8 @@ function TasksSection({
         <div className="flex gap-1.5">
           {([
             { id: "all",      label: "Everything" },
-            { id: "personal", label: "🏠 Personal" },
-            { id: "work",     label: "💼 Work" },
+            { id: "personal", label: "Personal" },
+            { id: "work",     label: "Work" },
           ] as const).map(({ id, label }) => (
             <button
               key={id}
