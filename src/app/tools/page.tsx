@@ -291,7 +291,7 @@ export default function ToolsPage() {
             <button
               onClick={() => setActiveCategory(null)}
               className={cn("shrink-0 px-4 py-2 rounded-xl text-xs font-semibold transition-all",
-                !activeCategory ? "bg-slate-700 text-white" : "bg-cream-50 text-slate-600 border border-slate-200")}>
+                !activeCategory ? "bg-sage-600 text-white" : "bg-cream-50 text-slate-600 border border-slate-200")}>
               All
             </button>
             {TOOL_CATEGORIES.map((cat) => {
@@ -303,7 +303,7 @@ export default function ToolsPage() {
                   onClick={() => setActiveCategory(isActive ? null : cat.id)}
                   className={cn(
                     "shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all",
-                    isActive ? "bg-slate-700 text-white" : cat.color
+                    isActive ? "bg-sage-600 text-white" : cat.color
                   )}>
                   {CatIC && <CatIC size={12} className="opacity-80" />}
                   {cat.label}
