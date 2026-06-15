@@ -503,16 +503,17 @@
   --color-cream-100: #E4EFE5;
   --color-cream-200: #D0E4D2;
   --color-cream-300: #B8D4BB;
-  --color-sage-50: #F2EEF8;
-  --color-sage-100: #E0D4F0;
-  --color-sage-200: #C8B4E4;
-  --color-sage-300: #AC90D4;
-  --color-sage-400: #9070BE;
-  --color-sage-500: #7856A3;
-  --color-sage-600: #6444A8;
-  --color-sage-700: #4E3290;
-  --color-sage-800: #392278;
-  --color-sage-900: #261460;
+  /* sage = rich botanical green (primary action colour) */
+  --color-sage-50: #EEF6EE;
+  --color-sage-100: #D4EAD8;
+  --color-sage-200: #AACFB2;
+  --color-sage-300: #7EB490;
+  --color-sage-400: #5A9870;
+  --color-sage-500: #4A7A58;
+  --color-sage-600: #3D6B4A;
+  --color-sage-700: #2E5438;
+  --color-sage-800: #1E3C28;
+  --color-sage-900: #102418;
 }
 
 [data-theme="holographic"] {
