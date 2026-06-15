@@ -556,7 +556,7 @@ function Section({
         </div>
       </div>
       {card ? (
-        <div className="bg-white/60 rounded-2xl px-3 py-2 shadow-sm">
+        <div className="bg-white/60 rounded-2xl px-3 py-2 shadow-sm overflow-visible">
           {children}
         </div>
       ) : children}
@@ -1358,7 +1358,7 @@ function Top3Item({
   return (
     <div className={cn("py-3 relative", priority.completed && "opacity-50")}>
       {toast && (
-        <div className="absolute -top-7 left-10 bg-emerald-600 text-white text-xs font-bold px-2.5 py-1 rounded-full z-10 animate-fade-in-up whitespace-nowrap">
+        <div className="absolute -top-7 left-10 bg-emerald-600 text-xs font-bold px-2.5 py-1 rounded-full z-10 animate-fade-in-up whitespace-nowrap" style={{ color: "#fff" }}>
           {toast}
         </div>
       )}
@@ -1366,12 +1366,15 @@ function Top3Item({
         <div className={cn("w-1 h-8 rounded-full shrink-0", accentBgColors[index])} />
         <button
           onClick={handleToggle}
-          className={cn(
-            "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
-            priority.completed ? "bg-sage-500 border-sage-500" : "border-slate-300 hover:border-sage-400"
-          )}
+          className="p-3 -m-3 shrink-0 flex items-center justify-center touch-manipulation"
+          style={{ WebkitTapHighlightColor: "transparent" }}
         >
-          {priority.completed && <Check size={10} className="text-white" strokeWidth={3} />}
+          <span className={cn(
+            "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all",
+            priority.completed ? "bg-sage-500 border-sage-500" : "border-slate-300 hover:border-sage-400"
+          )}>
+            {priority.completed && <Check size={11} className="text-white" strokeWidth={3} />}
+          </span>
         </button>
 
         <div className="flex-1">
@@ -2491,13 +2494,14 @@ function TaskCard({ task }: { task: Task }) {
         <div className="flex items-center gap-2">
           <button
             onClick={handleComplete}
-            className="p-2 -m-2 shrink-0 flex items-center justify-center"
+            className="p-3 -m-3 shrink-0 flex items-center justify-center touch-manipulation"
+            style={{ WebkitTapHighlightColor: "transparent" }}
           >
             <span className={cn(
-              "w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all",
+              "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all",
               isDone ? "bg-sage-500 border-sage-500" : "border-slate-300 hover:border-sage-400"
             )}>
-              {isDone && <Check size={10} className="text-white" strokeWidth={3} />}
+              {isDone && <Check size={11} className="text-white" strokeWidth={3} />}
             </span>
           </button>
 
