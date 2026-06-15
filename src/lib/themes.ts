@@ -3,11 +3,22 @@ export type ThemeId =
   | 'monochrome'
   | 'pastel-dream'
   | 'midnight-ocean'
+  | 'deep-amethyst'
+  | 'sand-stone'
   | 'autumn-leaves'
+  | 'cloudy-day'
+  | 'rose-quartz'
   | 'earthy-green'
+  | 'citrus-grove'
   | 'botanical'
+  | 'berry-patch'
   | 'holographic'
+  | 'winter-frost'
   | 'rainbow'
+  | 'stormy-night'
+  | 'cherry-blossom'
+  | 'hyperfocus'
+  | 'sensory-rest'
 
 export interface Theme {
   id: ThemeId
@@ -72,6 +83,30 @@ export const THEMES: Theme[] = [
     preview: ['#0D1B2A', '#4A9EBF', '#E8F4F8'],
   },
   {
+    id: 'deep-amethyst',
+    name: 'Deep Amethyst',
+    unlockLevel: 7,
+    background: '#1A1030',
+    card: '#271A45',
+    primary: '#9B7FD4',
+    secondary: '#C484B0',
+    text: '#EDE8F8',
+    textMuted: '#A090CC',
+    preview: ['#1A1030', '#9B7FD4', '#C484B0'],
+  },
+  {
+    id: 'sand-stone',
+    name: 'Sand & Stone',
+    unlockLevel: 8,
+    background: '#F0E8D8',
+    card: '#FAF5ED',
+    primary: '#8B6840',
+    secondary: '#C4A882',
+    text: '#3D2A14',
+    textMuted: '#806040',
+    preview: ['#F0E8D8', '#8B6840', '#C4A882'],
+  },
+  {
     id: 'autumn-leaves',
     name: 'Autumn Leaves',
     unlockLevel: 10,
@@ -82,6 +117,30 @@ export const THEMES: Theme[] = [
     text: '#3B2010',
     textMuted: '#8B5A35',
     preview: ['#FBF1E9', '#C4622D', '#E09547'],
+  },
+  {
+    id: 'cloudy-day',
+    name: 'Cloudy Day',
+    unlockLevel: 12,
+    background: '#E8EAEE',
+    card: '#F4F6F8',
+    primary: '#5A7080',
+    secondary: '#8AA0B0',
+    text: '#2A3240',
+    textMuted: '#607080',
+    preview: ['#E8EAEE', '#5A7080', '#8AA0B0'],
+  },
+  {
+    id: 'rose-quartz',
+    name: 'Rose Quartz',
+    unlockLevel: 13,
+    background: '#F8EEF2',
+    card: '#FEF8FA',
+    primary: '#C4849A',
+    secondary: '#D4A8B8',
+    text: '#3A2030',
+    textMuted: '#9A6878',
+    preview: ['#F8EEF2', '#C4849A', '#D4A8B8'],
   },
   {
     id: 'earthy-green',
@@ -96,6 +155,18 @@ export const THEMES: Theme[] = [
     preview: ['#EAF0E6', '#4A7C59', '#7BA88A'],
   },
   {
+    id: 'citrus-grove',
+    name: 'Citrus Grove',
+    unlockLevel: 18,
+    background: '#FFF8E4',
+    card: '#FFFDF4',
+    primary: '#C87C28',
+    secondary: '#4A8A7C',
+    text: '#2A1808',
+    textMuted: '#806040',
+    preview: ['#FFF8E4', '#C87C28', '#4A8A7C'],
+  },
+  {
     id: 'botanical',
     name: 'Botanical Garden',
     unlockLevel: 20,
@@ -106,6 +177,18 @@ export const THEMES: Theme[] = [
     text: '#1A2420',
     textMuted: '#5A7060',
     preview: ['#EDF3EE', '#7856A3', '#C9849A'],
+  },
+  {
+    id: 'berry-patch',
+    name: 'Berry Patch',
+    unlockLevel: 22,
+    background: '#F4EEF8',
+    card: '#FBF7FE',
+    primary: '#8B3A7A',
+    secondary: '#B87498',
+    text: '#2A0A28',
+    textMuted: '#8A5280',
+    preview: ['#F4EEF8', '#8B3A7A', '#B87498'],
   },
   {
     id: 'holographic',
@@ -120,6 +203,18 @@ export const THEMES: Theme[] = [
     preview: ['#F0EEF8', '#8B6FBF', '#6FB8BF'],
   },
   {
+    id: 'winter-frost',
+    name: 'Winter Frost',
+    unlockLevel: 27,
+    background: '#EEF4F8',
+    card: '#F8FCFE',
+    primary: '#3A6A8A',
+    secondary: '#7AAABB',
+    text: '#1A2838',
+    textMuted: '#5A7888',
+    preview: ['#EEF4F8', '#3A6A8A', '#7AAABB'],
+  },
+  {
     id: 'rainbow',
     name: 'Rainbow',
     unlockLevel: 30,
@@ -130,6 +225,54 @@ export const THEMES: Theme[] = [
     text: '#1A1A2E',
     textMuted: '#8A7A9A',
     preview: ['#FFF8F0', '#E06B6B', '#6B9FE0'],
+  },
+  {
+    id: 'stormy-night',
+    name: 'Stormy Night',
+    unlockLevel: 32,
+    background: '#080F18',
+    card: '#0E1A28',
+    primary: '#00C4E0',
+    secondary: '#0088A8',
+    text: '#DDF0F8',
+    textMuted: '#5090A8',
+    preview: ['#080F18', '#00C4E0', '#5090A8'],
+  },
+  {
+    id: 'cherry-blossom',
+    name: 'Cherry Blossom',
+    unlockLevel: 35,
+    background: '#FFF0F4',
+    card: '#FFFCFD',
+    primary: '#CC607A',
+    secondary: '#E8A0B4',
+    text: '#3A1820',
+    textMuted: '#9A6070',
+    preview: ['#FFF0F4', '#CC607A', '#E8A0B4'],
+  },
+  {
+    id: 'hyperfocus',
+    name: 'Hyperfocus',
+    unlockLevel: 40,
+    background: '#0A0A0E',
+    card: '#141420',
+    primary: '#00FF88',
+    secondary: '#FF4488',
+    text: '#F0F0FF',
+    textMuted: '#8888AA',
+    preview: ['#0A0A0E', '#00FF88', '#FF4488'],
+  },
+  {
+    id: 'sensory-rest',
+    name: 'Sensory Rest',
+    unlockLevel: 45,
+    background: '#F2F2F2',
+    card: '#FAFAFA',
+    primary: '#5A5A68',
+    secondary: '#8A8A98',
+    text: '#1A1A22',
+    textMuted: '#6A6A78',
+    preview: ['#F2F2F2', '#5A5A68', '#8A8A98'],
   },
 ]
 

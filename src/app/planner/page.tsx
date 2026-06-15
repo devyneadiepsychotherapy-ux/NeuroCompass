@@ -2633,29 +2633,37 @@ function TasksSection({
 }) {
   const { tasks } = useAppStore();
   const [filter, setFilter] = useState<"all" | "today" | "done">("today");
+  const [categoryFilter, setCategoryFilter] = useState<"all" | "personal" | "work">("all");
   const today = getTodayKey();
   const selKey = dateKey(selectedDate);
 
   const filtered = tasks.filter((t) => {
+    // Category filter
+    if (categoryFilter === "personal" && t.category?.toLowerCase() !== "personal") return false;
+    if (categoryFilter === "work" && t.category?.toLowerCase() !== "work") return false;
+
     if (filter === "done") return isTaskDone(t);
     if (!taskMatchesView(t, activeView)) return false;
     if (filter === "today") {
       if (isTaskDone(t)) return false;
-      if (!t.dueDate) return true;                 // no due date: always show
-      if (t.dueDate > selKey) return false;        // future task: hide
-      if (t.dueDate === selKey) return true;       // today's task: show
-      return t.carryOver === true;                 // past task: show only if carry-over
+      if (!t.dueDate) return true;
+      if (t.dueDate > selKey) return false;
+      if (t.dueDate === selKey) return true;
+      return t.carryOver === true;
     }
     return !isTaskDone(t);
   });
 
   const doneTodayCount = tasks.filter((t) => t.completedAt?.startsWith(today)).length;
 
+  const categoryLabel = categoryFilter === "personal" ? "personal" : categoryFilter === "work" ? "work" : "";
+
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5">
+      {/* Row 1: status + time filter pills */}
       <div className="flex items-center justify-between">
         <p className="text-xs text-slate-400">
-          {doneTodayCount} done today · {filtered.length} remaining
+          {doneTodayCount} done today · {filtered.length} showing
         </p>
         <div className="flex gap-1.5">
           {(["today", "all", "done"] as const).map((f) => (
@@ -2670,6 +2678,31 @@ function TasksSection({
               )}
             >
               {f === "today" ? "Today" : f === "all" ? "All" : "Done"}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Row 2: category filter */}
+      <div className="flex items-center gap-2">
+        <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide shrink-0">Show:</span>
+        <div className="flex gap-1.5">
+          {([
+            { id: "all",      label: "Everything" },
+            { id: "personal", label: "🏠 Personal" },
+            { id: "work",     label: "💼 Work" },
+          ] as const).map(({ id, label }) => (
+            <button
+              key={id}
+              onClick={() => setCategoryFilter(id)}
+              className={cn(
+                "px-2.5 py-0.5 rounded-full text-[11px] font-semibold transition-all border",
+                categoryFilter === id
+                  ? "bg-sage-500 text-white border-sage-500"
+                  : "bg-cream-50 text-slate-500 border-slate-200 hover:border-sage-300"
+              )}
+            >
+              {label}
             </button>
           ))}
         </div>
@@ -2691,11 +2724,17 @@ function TasksSection({
       {filtered.length === 0 && tasks.length > 0 && (
         <div className="bg-cream-50 rounded-2xl p-5 text-center border border-slate-100">
           <p className="font-semibold text-slate-700 text-sm">
-            {filter === "done" ? "No completed tasks yet" : "All caught up!"}
+            {filter === "done"
+              ? "No completed tasks yet"
+              : categoryLabel
+              ? `No ${categoryLabel} tasks here`
+              : "All caught up!"}
           </p>
           <p className="text-xs text-slate-400 mt-1">
             {filter === "done"
               ? "Complete a task to see it here"
+              : categoryLabel
+              ? `Tasks tagged "${categoryLabel}" will show here`
               : "Great work! Add a new task anytime."}
           </p>
         </div>

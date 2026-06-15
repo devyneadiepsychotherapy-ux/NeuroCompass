@@ -161,6 +161,300 @@
   --color-stone-900: #F0F8FC;
 }
 
+/* ── Deep Amethyst (dark purple) ─────────────────────────────────────────── */
+[data-theme="deep-amethyst"] {
+  --background: #1A1030;
+  --foreground: #EDE8F8;
+  --color-white: #271A45;
+  --color-cream-50: #1C1235;
+  --color-cream-100: #221840;
+  --color-cream-200: #2C2050;
+  --color-cream-300: #382860;
+  --color-sage-50: #1C1235;
+  --color-sage-100: #241A40;
+  --color-sage-200: #362860;
+  --color-sage-300: #5A4090;
+  --color-sage-400: #7A60B8;
+  --color-sage-500: #9078CC;
+  --color-sage-600: #9B7FD4;
+  --color-sage-700: #B09AE0;
+  --color-sage-800: #C8B8EC;
+  --color-sage-900: #E0D8F8;
+  --color-slate-50:  #1C1238;
+  --color-slate-100: #221840;
+  --color-slate-200: #2E2050;
+  --color-slate-300: #9080C8;
+  --color-slate-400: #A898D8;
+  --color-slate-500: #C0B0E8;
+  --color-slate-600: #CCCAF0;
+  --color-slate-700: #D8D0F8;
+  --color-slate-800: #EAE8FC;
+  --color-slate-900: #F4F0FE;
+  --color-stone-50:  #1E1438;
+  --color-stone-100: #241A44;
+  --color-stone-200: #302250;
+  --color-stone-300: #8070C0;
+  --color-stone-400: #9880D0;
+  --color-stone-500: #B0A0E0;
+  --color-stone-600: #C4B8EE;
+  --color-stone-700: #D8D0F8;
+  --color-stone-800: #EAE4FC;
+  --color-stone-900: #F4F0FE;
+}
+[data-theme="deep-amethyst"] .text-white { color: #EDE8F8; }
+
+/* ── Sand & Stone (warm beige) ───────────────────────────────────────────── */
+[data-theme="sand-stone"] {
+  --background: #F0E8D8;
+  --foreground: #3D2A14;
+  --color-white: #FAF5ED;
+  --color-cream-50: #FAF5ED;
+  --color-cream-100: #F5EDE0;
+  --color-cream-200: #EDE0CC;
+  --color-cream-300: #E0CCBA;
+  --color-sage-50: #F5EEE4;
+  --color-sage-100: #E8D8C0;
+  --color-sage-200: #D4BC98;
+  --color-sage-300: #C0A070;
+  --color-sage-400: #A88450;
+  --color-sage-500: #966040;
+  --color-sage-600: #8B6840;
+  --color-sage-700: #745430;
+  --color-sage-800: #5C4024;
+  --color-sage-900: #442E18;
+}
+
+/* ── Cloudy Day (muted blue-grey) ────────────────────────────────────────── */
+[data-theme="cloudy-day"] {
+  --background: #E8EAEE;
+  --foreground: #2A3240;
+  --color-white: #F4F6F8;
+  --color-cream-50: #F4F6F8;
+  --color-cream-100: #EDF0F3;
+  --color-cream-200: #E3E7EB;
+  --color-cream-300: #D4DAE0;
+  --color-sage-50: #EDF1F4;
+  --color-sage-100: #D4DEE6;
+  --color-sage-200: #AABCCB;
+  --color-sage-300: #80A0B3;
+  --color-sage-400: #607C8E;
+  --color-sage-500: #5A7080;
+  --color-sage-600: #4A5E6C;
+  --color-sage-700: #384A56;
+  --color-sage-800: #283440;
+  --color-sage-900: #18222C;
+}
+
+/* ── Rose Quartz (dusty rose) ────────────────────────────────────────────── */
+[data-theme="rose-quartz"] {
+  --background: #F8EEF2;
+  --foreground: #3A2030;
+  --color-white: #FEF8FA;
+  --color-cream-50: #FEF8FA;
+  --color-cream-100: #F8EEF4;
+  --color-cream-200: #F0E0EA;
+  --color-cream-300: #E4CCDA;
+  --color-sage-50: #FDF0F4;
+  --color-sage-100: #F4D8E4;
+  --color-sage-200: #E8B8CC;
+  --color-sage-300: #D898B0;
+  --color-sage-400: #CC84A0;
+  --color-sage-500: #C4849A;
+  --color-sage-600: #B07086;
+  --color-sage-700: #8C5468;
+  --color-sage-800: #68384C;
+  --color-sage-900: #442030;
+}
+
+/* ── Citrus Grove (warm amber + teal) ───────────────────────────────────── */
+[data-theme="citrus-grove"] {
+  --background: #FFF8E4;
+  --foreground: #2A1808;
+  --color-white: #FFFDF4;
+  --color-cream-50: #FFFDF4;
+  --color-cream-100: #FFF4D8;
+  --color-cream-200: #FCECC0;
+  --color-cream-300: #F8E0A0;
+  --color-sage-50: #FFF8EA;
+  --color-sage-100: #FFE8B8;
+  --color-sage-200: #F8CC80;
+  --color-sage-300: #F0B040;
+  --color-sage-400: #E09820;
+  --color-sage-500: #D08420;
+  --color-sage-600: #C87C28;
+  --color-sage-700: #A86020;
+  --color-sage-800: #844818;
+  --color-sage-900: #603010;
+}
+
+/* ── Berry Patch (deep berry/plum) ──────────────────────────────────────── */
+[data-theme="berry-patch"] {
+  --background: #F4EEF8;
+  --foreground: #2A0A28;
+  --color-white: #FBF7FE;
+  --color-cream-50: #FBF7FE;
+  --color-cream-100: #F4EEF8;
+  --color-cream-200: #EAE0F2;
+  --color-cream-300: #DACCEC;
+  --color-sage-50: #F8F0FA;
+  --color-sage-100: #EDD4F0;
+  --color-sage-200: #DCB0E4;
+  --color-sage-300: #C888D0;
+  --color-sage-400: #B060BC;
+  --color-sage-500: #9C44A4;
+  --color-sage-600: #8B3A7A;
+  --color-sage-700: #6C2A5E;
+  --color-sage-800: #4E1C44;
+  --color-sage-900: #300E2C;
+}
+
+/* ── Winter Frost (icy blue-white) ──────────────────────────────────────── */
+[data-theme="winter-frost"] {
+  --background: #EEF4F8;
+  --foreground: #1A2838;
+  --color-white: #F8FCFE;
+  --color-cream-50: #F8FCFE;
+  --color-cream-100: #EDF4F8;
+  --color-cream-200: #E0EDF5;
+  --color-cream-300: #CCDFEC;
+  --color-sage-50: #EEF5FA;
+  --color-sage-100: #D4E8F4;
+  --color-sage-200: #AAD0E8;
+  --color-sage-300: #80B8DC;
+  --color-sage-400: #5898C8;
+  --color-sage-500: #407AB0;
+  --color-sage-600: #3A6A8A;
+  --color-sage-700: #2C5068;
+  --color-sage-800: #1E3848;
+  --color-sage-900: #122030;
+}
+
+/* ── Stormy Night (very dark teal) ──────────────────────────────────────── */
+[data-theme="stormy-night"] {
+  --background: #080F18;
+  --foreground: #DDF0F8;
+  --color-white: #0E1A28;
+  --color-cream-50: #0E1A28;
+  --color-cream-100: #14222E;
+  --color-cream-200: #1C2E3C;
+  --color-cream-300: #263A4C;
+  --color-sage-50: #0A1520;
+  --color-sage-100: #102030;
+  --color-sage-200: #183848;
+  --color-sage-300: #206878;
+  --color-sage-400: #2896B0;
+  --color-sage-500: #20B0CC;
+  --color-sage-600: #00C4E0;
+  --color-sage-700: #40D8F0;
+  --color-sage-800: #80E8F8;
+  --color-sage-900: #C0F4FC;
+  --color-slate-50:  #0A1520;
+  --color-slate-100: #102030;
+  --color-slate-200: #183848;
+  --color-slate-300: #5090A8;
+  --color-slate-400: #60A8C0;
+  --color-slate-500: #80C0D8;
+  --color-slate-600: #A0D4E8;
+  --color-slate-700: #C0E4F4;
+  --color-slate-800: #DDF0F8;
+  --color-slate-900: #F0F8FC;
+  --color-stone-50:  #0C1820;
+  --color-stone-100: #122030;
+  --color-stone-200: #1A3040;
+  --color-stone-300: #4888A0;
+  --color-stone-400: #60A0B8;
+  --color-stone-500: #80B8D0;
+  --color-stone-600: #A0CCE0;
+  --color-stone-700: #C0E0F0;
+  --color-stone-800: #DCEEF8;
+  --color-stone-900: #F0F8FC;
+}
+[data-theme="stormy-night"] .text-white { color: #DDF0F8; }
+
+/* ── Cherry Blossom (pale pink) ─────────────────────────────────────────── */
+[data-theme="cherry-blossom"] {
+  --background: #FFF0F4;
+  --foreground: #3A1820;
+  --color-white: #FFFCFD;
+  --color-cream-50: #FFFCFD;
+  --color-cream-100: #FFEEF4;
+  --color-cream-200: #FAE0EA;
+  --color-cream-300: #F4CCDC;
+  --color-sage-50: #FFF4F6;
+  --color-sage-100: #FFD8E0;
+  --color-sage-200: #FFB0C4;
+  --color-sage-300: #EE88A0;
+  --color-sage-400: #DC7090;
+  --color-sage-500: #CC607A;
+  --color-sage-600: #BC4868;
+  --color-sage-700: #903454;
+  --color-sage-800: #682040;
+  --color-sage-900: #400E2A;
+}
+
+/* ── Hyperfocus (dark + neon) ────────────────────────────────────────────── */
+[data-theme="hyperfocus"] {
+  --background: #0A0A0E;
+  --foreground: #F0F0FF;
+  --color-white: #141420;
+  --color-cream-50: #141420;
+  --color-cream-100: #1C1C28;
+  --color-cream-200: #242434;
+  --color-cream-300: #2C2C40;
+  --color-sage-50: #0C1014;
+  --color-sage-100: #102014;
+  --color-sage-200: #183820;
+  --color-sage-300: #20A840;
+  --color-sage-400: #00CC60;
+  --color-sage-500: #00E878;
+  --color-sage-600: #00FF88;
+  --color-sage-700: #44FFA8;
+  --color-sage-800: #88FFCC;
+  --color-sage-900: #CCFFE8;
+  --color-slate-50:  #0C0C14;
+  --color-slate-100: #141420;
+  --color-slate-200: #1C1C30;
+  --color-slate-300: #7070A0;
+  --color-slate-400: #9090C0;
+  --color-slate-500: #B0B0D8;
+  --color-slate-600: #C8C8EC;
+  --color-slate-700: #DCDCF8;
+  --color-slate-800: #EEEEFF;
+  --color-slate-900: #F6F6FF;
+  --color-stone-50:  #0E0E16;
+  --color-stone-100: #161622;
+  --color-stone-200: #1E1E30;
+  --color-stone-300: #606080;
+  --color-stone-400: #808098;
+  --color-stone-500: #A0A0B8;
+  --color-stone-600: #C0C0D0;
+  --color-stone-700: #D8D8E8;
+  --color-stone-800: #ECECE8;
+  --color-stone-900: #F6F6F4;
+}
+[data-theme="hyperfocus"] .text-white { color: #F0F0FF; }
+
+/* ── Sensory Rest (near-greyscale, minimal) ──────────────────────────────── */
+[data-theme="sensory-rest"] {
+  --background: #F2F2F2;
+  --foreground: #1A1A22;
+  --color-white: #FAFAFA;
+  --color-cream-50: #FAFAFA;
+  --color-cream-100: #F2F2F2;
+  --color-cream-200: #E8E8E8;
+  --color-cream-300: #D8D8D8;
+  --color-sage-50: #F4F4F6;
+  --color-sage-100: #E8E8EC;
+  --color-sage-200: #D0D0D8;
+  --color-sage-300: #A8A8B8;
+  --color-sage-400: #787888;
+  --color-sage-500: #646474;
+  --color-sage-600: #5A5A68;
+  --color-sage-700: #4A4A58;
+  --color-sage-800: #383840;
+  --color-sage-900: #282830;
+}
+
 [data-theme="autumn-leaves"] {
   --background: #FBF1E9;
   --foreground: #3B2010;
