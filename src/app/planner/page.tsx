@@ -125,12 +125,26 @@ function taskMatchesView(task: Task, view: PlannerView): boolean {
   return task.showOn.includes(view);
 }
 
-/** Recurring tasks reset each day — only treat as done if completed today. */
+/** Recurring tasks reset on their cadence — daily resets daily, weekly resets per calendar week. */
 function isTaskDone(task: Task): boolean {
   if (task.status !== "done") return false;
   if (task.recurType) {
+    const completedDate = task.completedAt?.slice(0, 10);
+    if (!completedDate) return false;
+    if (task.recurType === "weekly") {
+      // Done if completed anywhere in the same Mon–Sun calendar week
+      const getMondayKey = (d: Date) => {
+        const copy = new Date(d);
+        const day = copy.getDay(); // 0=Sun
+        copy.setDate(copy.getDate() - (day === 0 ? 6 : day - 1));
+        return copy.toISOString().slice(0, 10);
+      };
+      const todayMon = getMondayKey(new Date());
+      const completedMon = getMondayKey(new Date(completedDate + "T00:00:00"));
+      return todayMon === completedMon;
+    }
     const today = getTodayKey();
-    return (task.completedAt?.startsWith(today)) ?? false;
+    return completedDate === today;
   }
   return true;
 }
@@ -2310,8 +2324,9 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
               min={1}
               max={999}
               className="w-20 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sage-400 text-center"
-              value={rewardAmount}
-              onChange={(e) => setRewardAmount(Math.max(1, parseInt(e.target.value) || 1))}
+              value={rewardAmount || ""}
+              onChange={(e) => setRewardAmount(parseInt(e.target.value) || 0)}
+              onBlur={() => setRewardAmount((v) => Math.max(1, v || 1))}
             />
             <span className="text-xs text-slate-400">{rewardType === "xp" ? "XP" : "coins"}</span>
           </div>

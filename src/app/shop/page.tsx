@@ -127,8 +127,9 @@ function EditRewardForm({
           min={1}
           max={999}
           className="w-full border border-stone-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sage-400 bg-white"
-          value={cost}
-          onChange={(e) => setCost(Math.max(1, parseInt(e.target.value) || 1))}
+          value={cost || ""}
+          onChange={(e) => setCost(parseInt(e.target.value) || 0)}
+          onBlur={() => setCost((v) => Math.max(1, v || 1))}
         />
       </div>
 
@@ -355,8 +356,9 @@ function AddRewardForm({ onAdd }: { onAdd: (r: Omit<ShopReward, "id">) => void }
           min={1}
           max={999}
           className="w-full border border-stone-200 rounded-xl px-3 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sage-400 bg-white"
-          value={cost}
-          onChange={(e) => setCost(Math.max(1, parseInt(e.target.value) || 1))}
+          value={cost || ""}
+          onChange={(e) => setCost(parseInt(e.target.value) || 0)}
+          onBlur={() => setCost((v) => Math.max(1, v || 1))}
         />
       </div>
 
