@@ -33,6 +33,7 @@ const recurOptions: { value: RecurType; label: string }[] = [
   { value: "weekdays", label: "Weekdays" },
   { value: "weekends", label: "Weekends" },
   { value: "weekly", label: "Weekly" },
+  { value: "monthly", label: "Monthly" },
 ];
 
 const taskTypeConfig: Record<TaskItemType, { label: string; color: string }> = {
@@ -125,7 +126,7 @@ function taskMatchesView(task: Task, view: PlannerView): boolean {
   return task.showOn.includes(view);
 }
 
-/** Recurring tasks reset on their cadence — daily resets daily, weekly resets per calendar week. */
+/** Recurring tasks reset on their cadence — daily resets daily, weekly resets per calendar week, monthly per calendar month. */
 function isTaskDone(task: Task): boolean {
   if (task.status !== "done") return false;
   if (task.recurType) {
@@ -142,6 +143,12 @@ function isTaskDone(task: Task): boolean {
       const todayMon = getMondayKey(new Date());
       const completedMon = getMondayKey(new Date(completedDate + "T00:00:00"));
       return todayMon === completedMon;
+    }
+    if (task.recurType === "monthly") {
+      // Done if completed in the same calendar month
+      const today = new Date();
+      const completed = new Date(completedDate + "T00:00:00");
+      return today.getFullYear() === completed.getFullYear() && today.getMonth() === completed.getMonth();
     }
     const today = getTodayKey();
     return completedDate === today;
@@ -522,6 +529,104 @@ function FocusList({
         />
         <button onClick={handleAdd} className="text-sage-600 hover:text-sage-800 transition-colors">
           <Plus size={16} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Recurring to-do list (weekly / monthly)
+// ---------------------------------------------------------------------------
+
+function RecurringTodosList({ recurType }: { recurType: "weekly" | "monthly" }) {
+  const { tasks, addTask, updateTask, completeTask, deleteTask } = useAppStore();
+  const [input, setInput] = useState("");
+  const [repeat, setRepeat] = useState(true);
+
+  const recurTasks = tasks.filter((t) => t.isRecurring && t.recurType === recurType);
+
+  const handleToggle = (task: Task) => {
+    if (isTaskDone(task)) {
+      updateTask(task.id, { status: "todo", completedAt: undefined });
+    } else {
+      completeTask(task.id);
+    }
+  };
+
+  const handleAdd = () => {
+    const t = input.trim();
+    if (!t) return;
+    addTask({
+      title: t,
+      priority: "medium",
+      type: "task",
+      status: "todo",
+      isRecurring: repeat,
+      recurType: repeat ? recurType : undefined,
+      tags: [],
+      xpReward: 10,
+    });
+    setInput("");
+  };
+
+  return (
+    <div className="space-y-2">
+      {recurTasks.length === 0 && (
+        <p className="text-sm text-slate-400 italic">Nothing added yet.</p>
+      )}
+      {recurTasks.map((task) => {
+        const done = isTaskDone(task);
+        return (
+          <div key={task.id} className="flex items-center gap-3 group">
+            <button
+              onClick={() => handleToggle(task)}
+              className={cn(
+                "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
+                done ? "bg-sage-500 border-sage-500" : "border-slate-300 hover:border-sage-500"
+              )}
+            >
+              {done && <Check size={10} className="text-white" />}
+            </button>
+            <span className={cn("text-sm flex-1", done ? "line-through text-slate-400" : "text-slate-700")}>
+              {task.title}
+            </span>
+            {task.isRecurring && (
+              <Repeat size={11} className="text-sage-400 shrink-0 opacity-60" />
+            )}
+            <button
+              onClick={() => deleteTask(task.id)}
+              className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 transition-all"
+            >
+              <Trash2 size={13} />
+            </button>
+          </div>
+        );
+      })}
+      <div className="space-y-1.5 pt-1">
+        <div className="flex items-center gap-2">
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+            placeholder={recurType === "weekly" ? "Add a weekly to-do..." : "Add a monthly to-do..."}
+            className="flex-1 text-sm bg-white/40 rounded-xl px-3 py-2 outline-none placeholder:text-sage-700/60 text-slate-700 focus:bg-white/60 transition-colors font-medium"
+          />
+          <button onClick={handleAdd} className="text-sage-600 hover:text-sage-800 transition-colors">
+            <Plus size={16} />
+          </button>
+        </div>
+        <button
+          onClick={() => setRepeat(!repeat)}
+          className={cn(
+            "flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all",
+            repeat
+              ? "border-sage-300 bg-sage-50 text-sage-600"
+              : "border-slate-200 bg-white/40 text-slate-400"
+          )}
+        >
+          <Repeat size={11} />
+          {repeat ? `Repeats ${recurType}` : `Repeat ${recurType}`}
         </button>
       </div>
     </div>
@@ -2928,6 +3033,10 @@ export default function PlannerPage() {
               <h2 className="font-[family-name:var(--font-fraunces)] italic text-sm text-slate-600 mb-3">Weekly Focus</h2>
               <FocusList weekKey={getWeekKey(selectedDate)} />
             </div>
+            <div className="pt-6 pb-1">
+              <h2 className="font-[family-name:var(--font-fraunces)] italic text-sm text-slate-600 mb-3">Weekly To-Do&apos;s</h2>
+              <RecurringTodosList recurType="weekly" />
+            </div>
           </div>
         );
       })()}
@@ -2948,6 +3057,10 @@ export default function PlannerPage() {
             <div className="pt-6 pb-1">
               <h2 className="font-[family-name:var(--font-fraunces)] italic text-sm text-slate-600 mb-3">Monthly Intentions</h2>
               <FocusList monthKey={getMonthKey(selectedDate)} />
+            </div>
+            <div className="pt-6 pb-1">
+              <h2 className="font-[family-name:var(--font-fraunces)] italic text-sm text-slate-600 mb-3">Monthly To-Do&apos;s</h2>
+              <RecurringTodosList recurType="monthly" />
             </div>
           </div>
         );

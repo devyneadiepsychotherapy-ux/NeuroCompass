@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "app.vercel.neuro_compass.twa",
+        "sha256_cert_fingerprints": ["D2:BA:CA:0B:D4:1E:0E:25:FE:07:70:74:4A:B2:57:18:DC:54:8F:F6:3C:74:51:4E:BB:43:1B:55:10:B5:06:D6"]
+      }
+    }]

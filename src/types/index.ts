@@ -1,6 +1,6 @@
 export type TaskPriority = "low" | "medium" | "high" | "urgent";
 export type TaskStatus = "todo" | "in_progress" | "done" | "skipped";
-export type RecurType = "daily" | "weekdays" | "weekends" | "weekly" | "custom";
+export type RecurType = "daily" | "weekdays" | "weekends" | "weekly" | "monthly" | "custom";
 export type RewardType = "xp" | "coins";
 export type TaskItemType = "task" | "appointment" | "time-block";
 

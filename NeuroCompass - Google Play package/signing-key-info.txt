@@ -1,0 +1,10 @@
+Keep this file and signing.keystore in a safe place. You'll need these files if you want to upload future versions of your PWA to the Google Play Store.
+
+Key store file: signing.keystore
+Key store password: VdlAhWH9aw8Y
+Key alias: my-key-alias
+Key password: VdlAhWH9aw8Y
+Signer's full name: NeuroCompass Admin
+Signer's organization: NeuroCompass
+Signer's organizational unit: Engineering
+Signer's country code: US
