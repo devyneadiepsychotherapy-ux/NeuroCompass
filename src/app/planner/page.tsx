@@ -787,7 +787,7 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
     .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
   const PX_PER_HOUR = 40; // px per hour — compact
-  const MIN_BLOCK = 32; // enough for one readable line
+  const MIN_BLOCK = 18; // minimum readable height (text-sm + py-1 padding)
   const gridRef = useRef<HTMLDivElement>(null);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [pressGhost, setPressGhost] = useState<number | null>(null); // minutes from midnight
