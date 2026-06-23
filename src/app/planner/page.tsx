@@ -786,7 +786,7 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
     .filter((a) => !a.allDay && a.startTime)
     .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
-  const PX_PER_HOUR = 40; // px per hour — compact
+  const PX_PER_HOUR = 64; // px per hour
   const MIN_BLOCK = 18; // minimum readable height (text-sm + py-1 padding)
   const gridRef = useRef<HTMLDivElement>(null);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);

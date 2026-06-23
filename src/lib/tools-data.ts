@@ -168,7 +168,8 @@ export const TOOLS: Tool[] = [
         "What feels like a reward, not a chore?",
       ],
       affirmation: "Your dopamine needs are real. Meeting them is self-care, not self-indulgence."
-    }
+    },
+    linkTo: "/tools/dopamine-menu",
   },
   {
     id: "pinch-motivators",
