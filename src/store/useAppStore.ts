@@ -55,7 +55,7 @@ interface AppState {
   updateTask: (id: string, updates: Partial<Task>) => void;
   editTask: (id: string, updates: Partial<Task>) => void;
   deleteTask: (id: string) => void;
-  completeTask: (id: string) => void;
+  completeTask: (id: string, asOfDate?: string) => void;
 
   // Mood
   addMoodEntry: (entry: Omit<MoodEntry, "id" | "timestamp">) => void;
@@ -405,13 +405,14 @@ export const useAppStore = create<AppState>()(
       deleteTask: (id) =>
         set((s) => ({ tasks: s.tasks.filter((t) => t.id !== id) })),
 
-      completeTask: (id) => {
+      completeTask: (id, asOfDate) => {
         const task = get().tasks.find((t) => t.id === id);
         if (!task) return;
+        const dateStr = asOfDate ?? getTodayKey();
         set((s) => ({
           tasks: s.tasks.map((t) =>
             t.id === id
-              ? { ...t, status: "done", completedAt: getTodayKey() + "T" + new Date().toISOString().slice(11) }
+              ? { ...t, status: "done", completedAt: dateStr + "T" + new Date().toISOString().slice(11) }
               : t
           ),
         }));

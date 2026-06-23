@@ -871,7 +871,7 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
           {hourLabels.map((hour) => (
             <div
               key={hour}
-              className="absolute left-0 right-0 flex items-center gap-2 pointer-events-none"
+              className="absolute left-0 right-0 flex items-start gap-2 pointer-events-none"
               style={{ top: (hour - gridStartHour) * PX_PER_HOUR }}
             >
               <span className="text-[9px] font-semibold w-9 text-right shrink-0 leading-none text-sage-600">
@@ -926,15 +926,12 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
           {timedAppts.map((appt) => {
             const apptStart = toMinutes(appt.startTime);
             const durationMins = appt.endTime ? calcDurationMins(appt.startTime, appt.endTime) : 60;
-            // +6 instead of +2: the hour label row uses items-center, pushing the
-            // rendered border-t ~4px below the container's top value. Adding 6 places
-            // blocks 2px below the actual visible line (4px label offset + 2px gap).
-            const top = (apptStart - gridStartHour * 60) / 60 * PX_PER_HOUR + 6;
-            const height = Math.max(MIN_BLOCK, Math.round(durationMins / 60 * PX_PER_HOUR) - 4);
+            const top = (apptStart - gridStartHour * 60) / 60 * PX_PER_HOUR;
+            const height = Math.max(MIN_BLOCK, Math.round(durationMins / 60 * PX_PER_HOUR));
             return (
               <div
                 key={appt.id}
-                className="absolute z-10"
+                className="absolute z-10 overflow-hidden"
                 style={{ top, height, left: 44, right: 0 }}
               >
                 <AppointmentRow
@@ -2567,7 +2564,7 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
 // Task Card
 // ---------------------------------------------------------------------------
 
-function TaskCard({ task }: { task: Task }) {
+function TaskCard({ task, selectedDate }: { task: Task; selectedDate?: string }) {
   const { completeTask, deleteTask, updateTask, addXP } = useAppStore();
   const [expanded, setExpanded] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
@@ -2583,7 +2580,7 @@ function TaskCard({ task }: { task: Task }) {
       const msg = task.rewardType === "coins" ? `+${task.xpReward} coins` : `+${task.xpReward} XP`;
       setToast(msg);
       setTimeout(() => setToast(null), 1500);
-      completeTask(task.id);
+      completeTask(task.id, selectedDate);
       addXP(5);
     }
   };
@@ -2844,7 +2841,7 @@ function TasksSection({
 
       <div>
         {filtered.map((task) => (
-          <TaskCard key={task.id} task={task} />
+          <TaskCard key={task.id} task={task} selectedDate={selKey} />
         ))}
       </div>
     </div>
