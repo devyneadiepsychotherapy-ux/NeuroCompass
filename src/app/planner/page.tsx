@@ -931,7 +931,7 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
             return (
               <div
                 key={appt.id}
-                className="absolute z-10 overflow-hidden"
+                className="absolute z-10 overflow-hidden rounded-xl"
                 style={{ top, height, left: 44, right: 0 }}
               >
                 <AppointmentRow
