@@ -786,7 +786,7 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
     .filter((a) => !a.allDay && a.startTime)
     .sort((a, b) => a.startTime.localeCompare(b.startTime));
 
-  const PX_PER_HOUR = 64; // px per hour
+  const PX_PER_HOUR = 48; // px per hour
   const MIN_BLOCK = 18; // minimum readable height (text-sm + py-1 padding)
   const gridRef = useRef<HTMLDivElement>(null);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -1379,19 +1379,30 @@ function AppointmentRow({
       <div className="w-1 shrink-0" style={{ background: cardColor }} />
 
       {/* Content */}
-      <div className={cn("flex-1 flex flex-col justify-center", blockHeight && blockHeight < 40 ? "px-2 py-1" : "px-3 py-2.5")}>
-        <div className="flex items-start justify-between gap-2">
+      <div className={cn("flex-1 flex flex-col justify-center", blockHeight && blockHeight < 36 ? "px-2 py-1" : "px-3 py-2.5")}>
+        <div className={cn("flex justify-between gap-2", blockHeight && blockHeight < 36 ? "items-center" : "items-start")}>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold leading-none truncate" style={{ color: "#292524" }}>{appt.title}</p>
-            {(!blockHeight || blockHeight >= 40) && (
-              <p className="text-xs mt-0.5 font-medium leading-none" style={{ color: cardColor }}>{timeLabel}</p>
-            )}
-            {appt.notes && expanded && (
-              <p className="mt-1 text-xs leading-relaxed" style={{ color: "#78716c" }}>{appt.notes}</p>
+            {blockHeight && blockHeight < 36 ? (
+              /* Short block: title + time inline on one row */
+              <div className="flex items-baseline gap-1.5 min-w-0">
+                <p className="text-sm font-semibold leading-none truncate" style={{ color: "#292524" }}>{appt.title}</p>
+                <span className="text-[10px] font-medium leading-none whitespace-nowrap shrink-0" style={{ color: cardColor }}>{timeLabel}</span>
+              </div>
+            ) : (
+              /* Taller block: title then time on separate lines */
+              <>
+                <p className="text-sm font-semibold leading-none truncate" style={{ color: "#292524" }}>{appt.title}</p>
+                {(!blockHeight || blockHeight >= 36) && (
+                  <p className="text-xs mt-0.5 font-medium leading-none" style={{ color: cardColor }}>{timeLabel}</p>
+                )}
+                {appt.notes && expanded && (
+                  <p className="mt-1 text-xs leading-relaxed" style={{ color: "#78716c" }}>{appt.notes}</p>
+                )}
+              </>
             )}
           </div>
-          <div className="flex items-center gap-0.5 shrink-0 pt-0.5">
-            {appt.notes && (
+          <div className={cn("flex items-center gap-0.5 shrink-0", !(blockHeight && blockHeight < 36) && "pt-0.5")}>
+            {appt.notes && !(blockHeight && blockHeight < 36) && (
               <button onClick={() => setExpanded(!expanded)} className="p-1 hover:opacity-70" style={{ color: "#57534e" }}>
                 {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
               </button>
