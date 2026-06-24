@@ -2580,7 +2580,7 @@ function TaskCard({ task, selectedDate }: { task: Task; selectedDate?: string })
       const msg = task.rewardType === "coins" ? `+${task.xpReward} coins` : `+${task.xpReward} XP`;
       setToast(msg);
       setTimeout(() => setToast(null), 1500);
-      completeTask(task.id, selectedDate);
+      completeTask(task.id, selectedDate !== getTodayKey() ? selectedDate : undefined);
       addXP(5);
     }
   };

@@ -409,18 +409,43 @@ export const useAppStore = create<AppState>()(
         const task = get().tasks.find((t) => t.id === id);
         if (!task) return;
         const dateStr = asOfDate ?? getTodayKey();
-        set((s) => ({
-          tasks: s.tasks.map((t) =>
+        const isCoins = task.rewardType === "coins";
+        const xpAmount = task.xpReward ?? 0;
+        set((s) => {
+          const newTasks = s.tasks.map((t) =>
             t.id === id
-              ? { ...t, status: "done", completedAt: dateStr + "T" + new Date().toISOString().slice(11) }
+              ? { ...t, status: "done" as const, completedAt: dateStr + "T" + new Date().toISOString().slice(11) }
               : t
-          ),
-        }));
-        if (task.rewardType === "coins") {
-          get().addCoins(task.xpReward);
-        } else {
-          get().addXp(task.xpReward);
-        }
+          );
+          if (isCoins) {
+            return { tasks: newTasks, coins: s.coins + xpAmount };
+          }
+          const oldLevel = s.profile.level;
+          const newXp = s.profile.totalXp + xpAmount;
+          const newLevel = levelFromXp(newXp);
+          const leveledUp = newLevel > oldLevel;
+          let pendingLevelUp = s.pendingLevelUp;
+          let streakFreezes = s.streakFreezes;
+          if (leveledUp) {
+            streakFreezes = streakFreezes + 1;
+            const unlocked = THEMES.find(
+              (t) => t.unlockLevel > 1 && t.unlockLevel <= newLevel && t.unlockLevel > oldLevel
+            );
+            const nextTheme = THEMES.find((t) => t.unlockLevel > newLevel);
+            pendingLevelUp = {
+              level: newLevel,
+              gotFreeze: true,
+              unlockedTheme: unlocked ? unlocked.id : null,
+              nextThemeLevel: nextTheme ? nextTheme.unlockLevel : null,
+            };
+          }
+          return {
+            tasks: newTasks,
+            profile: { ...s.profile, totalXp: newXp, level: newLevel },
+            streakFreezes,
+            pendingLevelUp,
+          };
+        });
       },
 
       addMoodEntry: (entry) =>
