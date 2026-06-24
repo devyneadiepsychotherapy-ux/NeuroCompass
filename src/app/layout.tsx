@@ -19,6 +19,7 @@ import ThemeProvider from "@/components/layout/ThemeProvider";
 import SidebarWrapper from "@/components/layout/SidebarWrapper";
 import StartPageGuard from "@/components/layout/StartPageGuard";
 import ReminderManager from "@/components/layout/ReminderManager";
+import { Analytics } from "@vercel/analytics/react";
 // ServiceWorkerRegistration replaced by inline script in <head>;
 
 export const metadata: Metadata = {
@@ -79,6 +80,7 @@ if ('serviceWorker' in navigator) {
             <BottomNav />
           </TourProvider>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
