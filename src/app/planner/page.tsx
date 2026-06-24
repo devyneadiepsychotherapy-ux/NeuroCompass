@@ -126,32 +126,33 @@ function taskMatchesView(task: Task, view: PlannerView): boolean {
   return task.showOn.includes(view);
 }
 
-/** Recurring tasks reset on their cadence — daily resets daily, weekly resets per calendar week, monthly per calendar month. */
-function isTaskDone(task: Task): boolean {
+/** Recurring tasks reset on their cadence — daily resets daily, weekly resets per calendar week, monthly per calendar month.
+ *  Pass asOfDate (YYYY-MM-DD) to evaluate "done" relative to a specific day instead of today. */
+function isTaskDone(task: Task, asOfDate?: string): boolean {
   if (task.status !== "done") return false;
   if (task.recurType) {
     const completedDate = task.completedAt?.slice(0, 10);
     if (!completedDate) return false;
+    const ref = asOfDate ?? getTodayKey();
     if (task.recurType === "weekly") {
-      // Done if completed anywhere in the same Mon–Sun calendar week
+      // Done if completed anywhere in the same Mon–Sun calendar week as ref
       const getMondayKey = (d: Date) => {
         const copy = new Date(d);
         const day = copy.getDay(); // 0=Sun
         copy.setDate(copy.getDate() - (day === 0 ? 6 : day - 1));
         return dateKey(copy);
       };
-      const todayMon = getMondayKey(new Date());
+      const refMon = getMondayKey(new Date(ref + "T12:00:00"));
       const completedMon = getMondayKey(new Date(completedDate + "T00:00:00"));
-      return todayMon === completedMon;
+      return refMon === completedMon;
     }
     if (task.recurType === "monthly") {
-      // Done if completed in the same calendar month
-      const today = new Date();
+      // Done if completed in the same calendar month as ref
+      const refDate = new Date(ref + "T12:00:00");
       const completed = new Date(completedDate + "T00:00:00");
-      return today.getFullYear() === completed.getFullYear() && today.getMonth() === completed.getMonth();
+      return refDate.getFullYear() === completed.getFullYear() && refDate.getMonth() === completed.getMonth();
     }
-    const today = getTodayKey();
-    return completedDate === today;
+    return completedDate === ref;
   }
   return true;
 }
@@ -2570,7 +2571,7 @@ function TaskCard({ task, selectedDate }: { task: Task; selectedDate?: string })
   const [showEdit, setShowEdit] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const cfg = priorityConfig[task.priority];
-  const isDone = isTaskDone(task);
+  const isDone = isTaskDone(task, selectedDate);
   const taskType = task.type ?? "task";
 
   const handleComplete = () => {
@@ -2580,7 +2581,7 @@ function TaskCard({ task, selectedDate }: { task: Task; selectedDate?: string })
       const msg = task.rewardType === "coins" ? `+${task.xpReward} coins` : `+${task.xpReward} XP`;
       setToast(msg);
       setTimeout(() => setToast(null), 1500);
-      completeTask(task.id, selectedDate !== getTodayKey() ? selectedDate : undefined);
+      completeTask(task.id, selectedDate);
       addXP(5);
     }
   };
@@ -2741,16 +2742,16 @@ function TasksSection({
     if (categoryFilter === "personal" && t.category?.toLowerCase() !== "personal") return false;
     if (categoryFilter === "work" && t.category?.toLowerCase() !== "work") return false;
 
-    if (filter === "done") return isTaskDone(t);
+    if (filter === "done") return isTaskDone(t, selKey);
     if (!taskMatchesView(t, activeView)) return false;
     if (filter === "today") {
-      if (isTaskDone(t)) return false;
+      if (isTaskDone(t, selKey)) return false;
       if (!t.dueDate) return true;
       if (t.dueDate > selKey) return false;
       if (t.dueDate === selKey) return true;
       return t.carryOver === true;
     }
-    return !isTaskDone(t);
+    return !isTaskDone(t, selKey);
   });
 
   const doneTodayCount = tasks.filter((t) => t.completedAt?.startsWith(today)).length;
