@@ -7,7 +7,7 @@ import {
   ArrowLeft, Plus, Sprout, RefreshCw, Check, Star,
   Trash2, ChevronDown, ChevronUp, Flame, Heart,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, getTodayKey, localDateKey } from "@/lib/utils";
 
 const FREQUENCY_LABELS: Record<HabitBuilderItem["frequency"], string> = {
   daily: "Every day",
@@ -27,17 +27,13 @@ const ANCHOR_PRESETS = [
   "Before bed",
 ];
 
-function getTodayKey() {
-  return new Date().toISOString().split("T")[0];
-}
-
 function getStreakCount(completions: Record<string, "full" | "good-enough">): number {
   let streak = 0;
   const today = new Date();
   for (let i = 0; i < 60; i++) {
     const d = new Date(today);
     d.setDate(today.getDate() - i);
-    const key = d.toISOString().split("T")[0];
+    const key = localDateKey(d);
     if (completions[key]) {
       streak++;
     } else if (i > 0) {
@@ -318,7 +314,7 @@ function HabitCard({ habit }: { habit: HabitBuilderItem }) {
   const last7 = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() - (6 - i));
-    const key = d.toISOString().split("T")[0];
+    const key = localDateKey(d);
     return { key, status: habit.completions[key] ?? null, isToday: key === today };
   });
 

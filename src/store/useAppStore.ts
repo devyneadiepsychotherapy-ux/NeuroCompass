@@ -35,7 +35,7 @@ import {
   HabitBuilderItem,
   CheckInReminders,
 } from "@/types";
-import { generateId, levelFromXp, getTodayKey } from "@/lib/utils";
+import { generateId, levelFromXp, getTodayKey, localDateKey } from "@/lib/utils";
 import { ThemeId, THEMES } from "@/lib/themes";
 
 interface AppState {
@@ -841,15 +841,15 @@ export const useAppStore = create<AppState>()(
         // Day rolls over at 5am — opening at 11pm still counts as "today"
         const getEffectiveDate = () => {
           const now = new Date();
-          const offset = now.getHours() < 5 ? -86400000 : 0;
-          return new Date(now.getTime() + offset).toISOString().split("T")[0];
+          const effective = new Date(now.getTime() + (now.getHours() < 5 ? -86400000 : 0));
+          return localDateKey(effective);
         };
         const today = getEffectiveDate();
         const { streak, lastOpenedDate, longestStreak, streakFreezes } = get();
         if (today === lastOpenedDate) return;
-        const yesterday = new Date(
-          new Date(today + "T05:00:00").getTime() - 86400000
-        ).toISOString().split("T")[0];
+        const d = new Date(today + "T12:00:00");
+        d.setDate(d.getDate() - 1);
+        const yesterday = localDateKey(d);
 
         if (lastOpenedDate === yesterday) {
           // Consecutive day - increment streak

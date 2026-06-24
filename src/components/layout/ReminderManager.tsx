@@ -7,6 +7,7 @@
 import { useEffect, useState } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import { useRouter } from "next/navigation";
+import { getTodayKey } from "@/lib/utils";
 import { Heart, Scan, ClipboardList, X, Flame } from "lucide-react";
 
 type ReminderType = "mood" | "body" | "full";
@@ -32,9 +33,6 @@ const REMINDER_CONFIG: Record<ReminderType, { label: string; body: string; href:
   },
 };
 
-function getTodayKey() {
-  return new Date().toISOString().split("T")[0];
-}
 
 function isTimePast(time: string): boolean {
   const [h, m] = time.split(":").map(Number);

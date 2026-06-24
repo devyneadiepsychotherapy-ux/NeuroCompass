@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import { SpecialInterest } from "@/types";
-import { cn } from "@/lib/utils";
+import { cn, getTodayKey } from "@/lib/utils";
 import {
   Sparkles, Plus, Pencil, Trash2, X, ChevronLeft, Check,
 } from "lucide-react";
@@ -42,7 +42,7 @@ function InterestForm({
   const [name, setName] = useState(initial?.name ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
   const [intensity, setIntensity] = useState<Intensity>(initial?.intensity ?? "active");
-  const [startDate, setStartDate] = useState(initial?.startDate ?? new Date().toISOString().split("T")[0]);
+  const [startDate, setStartDate] = useState(initial?.startDate ?? getTodayKey());
 
   const handleSave = () => {
     if (!name.trim()) return;

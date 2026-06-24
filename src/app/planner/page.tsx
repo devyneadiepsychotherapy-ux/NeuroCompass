@@ -138,7 +138,7 @@ function isTaskDone(task: Task): boolean {
         const copy = new Date(d);
         const day = copy.getDay(); // 0=Sun
         copy.setDate(copy.getDate() - (day === 0 ? 6 : day - 1));
-        return copy.toISOString().slice(0, 10);
+        return dateKey(copy);
       };
       const todayMon = getMondayKey(new Date());
       const completedMon = getMondayKey(new Date(completedDate + "T00:00:00"));
