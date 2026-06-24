@@ -190,7 +190,7 @@ function xpForMinutes(mins: number): number {
   return 10;
 }
 
-export default function FocusFriendPage() {
+export default function FocusGardenPage() {
   const {
     focusSession,
     startFocusSession,
@@ -205,7 +205,7 @@ export default function FocusFriendPage() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  const isFavourited = mounted && favorites.some((f) => f.toolId === "focus-friend");
+  const isFavourited = mounted && favorites.some((f) => f.toolId === "focus-garden");
 
   const [selectedMinutes, setSelectedMinutes] = useState(25);
   const [customInput, setCustomInput] = useState("");
@@ -296,9 +296,9 @@ export default function FocusFriendPage() {
         >
           <ArrowLeft size={20} className="text-slate-600" />
         </Link>
-        <h1 className="text-base font-semibold text-slate-700 ml-3 flex-1">The Grove</h1>
+        <h1 className="text-base font-semibold text-slate-700 ml-3 flex-1">The Focus Garden</h1>
         <button
-          onClick={() => toggleFavorite("focus-friend")}
+          onClick={() => toggleFavorite("focus-garden")}
           className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-sage-100 transition-colors"
           aria-label={isFavourited ? "Remove from favourites" : "Add to favourites"}
         >

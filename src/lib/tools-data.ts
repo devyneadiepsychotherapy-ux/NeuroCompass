@@ -295,13 +295,13 @@ export const TOOLS: Tool[] = [
   },
 
   {
-    id: "focus-friend",
-    title: "Focus Friend: The Grove",
+    id: "focus-garden",
+    title: "The Focus Garden",
     description: "A focus timer with a growing plant. The longer you focus, the more your plant grows.",
     category: "attention",
     icon: "TreePine",
     type: "interactive",
-    linkTo: "/focus-friend",
+    linkTo: "/focus-garden",
     content: {
       steps: [
         "Set your focus duration",
