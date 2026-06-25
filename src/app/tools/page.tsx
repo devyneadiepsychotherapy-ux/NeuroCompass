@@ -1,6 +1,7 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { TOOL_CATEGORIES, TOOLS, Tool } from "@/lib/tools-data";
 import { ICON_MAP } from "@/lib/icon-map";
 import { cn } from "@/lib/utils";
@@ -236,8 +237,18 @@ function ToolCard({ tool, onOpen }: { tool: Tool; onOpen: () => void }) {
   return <button onClick={onOpen} className={baseClass}>{inner}</button>;
 }
 
-export default function ToolsPage() {
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+function ToolsPageInner() {
+  const searchParams = useSearchParams();
+  const activeCategory = searchParams.get("category");
+
+  const setActiveCategory = (cat: string | null) => {
+    if (cat) {
+      window.history.replaceState(null, "", `/tools?category=${encodeURIComponent(cat)}`);
+    } else {
+      window.history.replaceState(null, "", "/tools");
+    }
+  };
+
   const [selectedTool, setSelectedTool] = useState<Tool | null>(null);
   const [search, setSearch] = useState("");
   const [mounted, setMounted] = useState(false);
@@ -379,5 +390,13 @@ export default function ToolsPage() {
 
       {selectedTool && <ToolModal tool={selectedTool} onClose={() => setSelectedTool(null)} />}
     </div>
+  );
+}
+
+export default function ToolsPage() {
+  return (
+    <Suspense fallback={null}>
+      <ToolsPageInner />
+    </Suspense>
   );
 }
