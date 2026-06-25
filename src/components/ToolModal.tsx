@@ -4,7 +4,32 @@ import { Tool } from "@/lib/tools-data";
 import { ICON_MAP } from "@/lib/icon-map";
 import { cn, getTodayKey } from "@/lib/utils";
 import { useAppStore } from "@/store/useAppStore";
-import { Heart, X, CheckCircle, Copy, Trash2, RotateCcw, Plus, Rocket } from "lucide-react";
+import { Heart, X, CheckCircle, Copy, Trash2, RotateCcw, Plus, Rocket, Bell } from "lucide-react";
+
+// ─────────────────────────────────────────────
+// HELPER: Play a completion sound + vibrate
+// ─────────────────────────────────────────────
+function playCompletionAlert() {
+  try {
+    const AudioCtx = window.AudioContext || (window as typeof window & { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const ctx = new AudioCtx();
+    const play = (freq: number, start: number, dur: number) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
+      gain.gain.setValueAtTime(0.35, ctx.currentTime + start);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + dur);
+      osc.start(ctx.currentTime + start);
+      osc.stop(ctx.currentTime + start + dur);
+    };
+    play(880, 0, 0.25);
+    play(1100, 0.28, 0.25);
+    play(880, 0.56, 0.4);
+    if (navigator.vibrate) navigator.vibrate([150, 80, 150, 80, 300]);
+  } catch { /* silently ignore if audio not available */ }
+}
 
 // ─────────────────────────────────────────────
 // HELPER: Guided step-through widget
@@ -320,17 +345,23 @@ function EmotionMatrixTool() {
         <p className="text-xs text-slate-500">Tap anywhere in a quadrant to place yourself</p>
       </div>
       <div className="relative">
+        {/* Top label */}
         <div className="text-center text-xs text-slate-400 mb-1 font-medium">↑ High Energy</div>
-        <div className="flex items-center gap-1">
-          <div className="text-xs text-slate-400 font-medium w-14 text-center leading-tight flex-shrink-0"
-            style={{ writingMode: "vertical-rl" as const, transform: "rotate(180deg)", height: 140 }}>
-            Unpleasant ←
+        {/* Side labels + grid */}
+        <div className="flex items-stretch gap-1">
+          {/* Left axis label */}
+          <div className="flex items-center justify-center w-6 shrink-0">
+            <span className="text-[10px] text-slate-400 font-medium"
+              style={{ writingMode: "vertical-rl" as const, transform: "rotate(180deg)", whiteSpace: "nowrap" }}>
+              Unpleasant
+            </span>
           </div>
+          {/* Quadrant grid */}
           <div className="flex-1 grid grid-cols-2 gap-1">
             {QUADRANTS.map((q) => (
               <div key={`${q.qx}-${q.qy}`}
                 className="relative rounded-xl border cursor-pointer select-none overflow-hidden"
-                style={{ height: 120, background: q.bg, borderColor: q.border }}
+                style={{ height: 110, background: q.bg, borderColor: q.border }}
                 onClick={(e) => handleQuadrantClick(e, q.qx, q.qy)}>
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-2">
                   <p className="text-xs font-semibold text-slate-600 text-center leading-tight whitespace-pre-line">{q.label}</p>
@@ -343,12 +374,21 @@ function EmotionMatrixTool() {
               </div>
             ))}
           </div>
-          <div className="text-xs text-slate-400 font-medium w-14 text-center leading-tight flex-shrink-0"
-            style={{ writingMode: "vertical-rl" as const, height: 140 }}>
-            → Pleasant
+          {/* Right axis label */}
+          <div className="flex items-center justify-center w-6 shrink-0">
+            <span className="text-[10px] text-slate-400 font-medium"
+              style={{ writingMode: "vertical-rl" as const, whiteSpace: "nowrap" }}>
+              Pleasant
+            </span>
           </div>
         </div>
-        <div className="text-center text-xs text-slate-400 mt-1 font-medium">↓ Low Energy</div>
+        {/* Bottom labels */}
+        <div className="flex items-center mt-1 px-7">
+          <span className="text-[10px] text-slate-400 font-medium">← Unpleasant</span>
+          <div className="flex-1" />
+          <span className="text-[10px] text-slate-400 font-medium">Pleasant →</span>
+        </div>
+        <div className="text-center text-xs text-slate-400 mt-0.5 font-medium">↓ Low Energy</div>
       </div>
       {activeQ ? (
         <div className="rounded-2xl px-5 py-4 text-center border" style={{ background: activeQ.bg, borderColor: activeQ.border }}>
@@ -496,7 +536,7 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
     dopamineMenuItems, addDopamineMenuItem, removeDopamineMenuItem,
     rewardLadder, addRewardLadderItem, removeRewardLadderItem,
     attentionAnchors, addAttentionAnchor, removeAttentionAnchor,
-    timeAnchorsData, addTimeAnchor, removeTimeAnchor,
+    timeAnchorsData, addTimeAnchor, removeTimeAnchor, addHabitToAnchor, removeHabitFromAnchor, updateTimeAnchor,
     mvscList, addMVSCItem, removeMVSCItem, toggleMVSCToday,
     habitStacks, addHabitStack, removeHabitStack,
     boundaryScripts, addBoundaryScript, removeBoundaryScript,
@@ -508,11 +548,13 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
     energyRestorers, addEnergyRestorer, removeEnergyRestorer,
     arfidAccommodations, addArfidAccommodation, removeArfidAccommodation,
     savedNDMeals, toggleSavedNDMeal,
+    weeklyReviewAnswers, setWeeklyReviewAnswer,
     focusRitual, setFocusRitual,
     sensoryDiet, setSensoryDiet,
     easyFoodList, setEasyFoodList,
     eatingRoutine, setEatingRoutine,
     personalBurnoutSigns, addPersonalBurnoutSign, removePersonalBurnoutSign,
+    checkInReminders, updateCheckInReminder, addReminderTime, removeReminderTime, setReminderPermissionState,
   } = useAppStore();
 
   const fav = isFavorite(tool.id);
@@ -524,6 +566,7 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
   const [timerSeconds, setTimerSeconds] = useState(defaultSeconds);
   const [running, setRunning] = useState(false);
   const [timerDone, setTimerDone] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
 
   // ── Brain dump state ──────────────────────
   const [brainDumpText, setBrainDumpText] = useState("");
@@ -541,14 +584,19 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
   const [bdWith, setBdWith] = useState("");
 
   // ── time-blocking: session blocks ─────────
-  const [blocks, setBlocks] = useState<Array<{ id: string; time: string; task: string; color: string }>>([]);
+  const [blocks, setBlocks] = useState<Array<{ id: string; time: string; duration: string; task: string; color: string }>>([]);
   const [blkTime, setBlkTime] = useState("");
+  const [blkDuration, setBlkDuration] = useState("");
   const [blkTask, setBlkTask] = useState("");
   const [blkColor, setBlkColor] = useState("blue");
 
   // ── time-anchors: add form ────────────────
   const [taLabel, setTaLabel] = useState("");
   const [taTime, setTaTime] = useState("");
+  const [taHabitInputs, setTaHabitInputs] = useState<Record<string, string>>({});
+  const [taEditId, setTaEditId] = useState<string | null>(null);
+  const [taEditLabel, setTaEditLabel] = useState("");
+  const [taEditTime, setTaEditTime] = useState("");
 
   // ── task-breakdown: dynamic steps ─────────
   const [tbMain, setTbMain] = useState("");
@@ -669,6 +717,9 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
   // ── thirst-hunger-cues: session cue checkboxes ────────
   const [thirstCues, setThirstCues] = useState<Set<string>>(new Set());
   const [hungerCues, setHungerCues] = useState<Set<string>>(new Set());
+  // ── thirst-hunger-cues: reminder setup panel ──────────
+  const [thReminderOpen, setThReminderOpen] = useState(false);
+  const [thNewTime, setThNewTime] = useState("10:00");
 
   // ─────────────────────────────────────────
   // EFFECTS
@@ -686,12 +737,17 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
     if (!running) return;
     const id = setInterval(() => {
       setTimerSeconds((prev) => {
-        if (prev <= 1) { setRunning(false); setTimerDone(true); return 0; }
+        if (prev <= 1) {
+          setRunning(false);
+          setTimerDone(true);
+          if (soundEnabled) playCompletionAlert();
+          return 0;
+        }
         return prev - 1;
       });
     }, 1000);
     return () => clearInterval(id);
-  }, [running]);
+  }, [running, soundEnabled]);
 
   // Auto-start timer for chore-hack (2-minute reset)
   useEffect(() => {
@@ -714,24 +770,24 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
     if (!ppRunning) return;
     const id = setInterval(() => {
       setPpSec((s) => {
-        if (s <= 1) { setPpRunning(false); setPpDone(true); return 0; }
+        if (s <= 1) { setPpRunning(false); setPpDone(true); if (soundEnabled) playCompletionAlert(); return 0; }
         return s - 1;
       });
     }, 1000);
     return () => clearInterval(id);
-  }, [ppRunning]);
+  }, [ppRunning, soundEnabled]);
 
   // Urge-surfing timer
   useEffect(() => {
     if (!usRunning) return;
     const id = setInterval(() => {
       setUsSec((s) => {
-        if (s <= 1) { setUsRunning(false); setUsDone(true); return 0; }
+        if (s <= 1) { setUsRunning(false); setUsDone(true); if (soundEnabled) playCompletionAlert(); return 0; }
         return s - 1;
       });
     }, 1000);
     return () => clearInterval(id);
-  }, [usRunning]);
+  }, [usRunning, soundEnabled]);
 
   // ─────────────────────────────────────────
   // HELPERS
@@ -843,14 +899,11 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
   ];
 
   // Easy food categories with starter suggestions
-  const EASY_FOOD_CATS = [
-    { key: "no-cook", label: "No-cook options",
-      suggestions: ["Cheese and crackers", "Yogurt", "Fresh fruit", "Deli meat", "Cereal with milk", "Nut butter on bread", "Hummus and veg", "Granola bar"] },
-    { key: "five-minute", label: "5-minute meals",
-      suggestions: ["Scrambled eggs", "Instant noodles", "Toast with toppings", "Microwaved beans", "Frozen meal", "Tinned soup", "Microwave rice with anything"] },
-    { key: "comfort", label: "Comfort foods",
-      suggestions: ["Mac and cheese", "Toast with butter", "Soup", "Plain pasta", "Rice with soy sauce", "Bowl of cereal", "Grilled cheese"] },
+  const EASY_FOOD_CATS: { key: string; label: string; suggestions: string[] }[] = [
     { key: "safe", label: "My safe foods", suggestions: [] },
+    { key: "always-stocked", label: "Always keep stocked", suggestions: [] },
+    { key: "no-cook", label: "No-cook reliables", suggestions: [] },
+    { key: "comfort", label: "Comfort foods", suggestions: [] },
   ];
 
   // Thirst and hunger cue lists for thirst-hunger-cues tool
@@ -919,7 +972,7 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
               INTERACTIVE PANELS BY TOOL ID
               ══════════════════════════════════ */}
 
-          {/* ── time-timer: working-on label ── */}
+          {/* ── time-timer: working-on label + sound toggle ── */}
           {tool.id === "time-timer" && (
             <div className="space-y-2">
               <p className="text-sm font-semibold text-slate-700">Working on:</p>
@@ -934,6 +987,15 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
                   <p className="text-sm text-sage-700 font-medium">Working on: {workingOn}</p>
                 </div>
               )}
+              <button
+                onClick={() => setSoundEnabled((v) => !v)}
+                className={cn("flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-medium border transition-all",
+                  soundEnabled ? "bg-sage-50 border-sage-200 text-sage-700" : "bg-slate-50 border-slate-200 text-slate-400"
+                )}
+              >
+                <span>{soundEnabled ? "🔔" : "🔕"}</span>
+                {soundEnabled ? "Sound & vibration on" : "Sound & vibration off"}
+              </button>
             </div>
           )}
 
@@ -969,19 +1031,88 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
               {timeAnchorsData.length === 0 ? (
                 <p className="text-xs text-slate-400 text-center py-2">No anchors yet. Add one above.</p>
               ) : (
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   {timeAnchorsData
                     .slice()
                     .sort((a, b) => a.time.localeCompare(b.time))
                     .map((anchor) => (
-                      <div key={anchor.id} className="flex items-center justify-between bg-cream-50 border border-slate-100 rounded-xl px-3 py-2.5">
-                        <div>
-                          <span className="text-sm font-medium text-slate-700">{anchor.label}</span>
-                          <span className="text-xs text-slate-400 ml-2">{anchor.time}</span>
+                      <div key={anchor.id} className="bg-cream-50 border border-slate-100 rounded-xl px-3 py-2.5 space-y-2">
+                        {taEditId === anchor.id ? (
+                          <div className="flex gap-2">
+                            <input
+                              className="flex-1 border border-slate-200 rounded-xl px-3 py-1.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sage-400"
+                              value={taEditLabel}
+                              onChange={(e) => setTaEditLabel(e.target.value)}
+                            />
+                            <input
+                              type="time"
+                              className="border border-slate-200 rounded-xl px-2 py-1.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sage-400"
+                              value={taEditTime}
+                              onChange={(e) => setTaEditTime(e.target.value)}
+                            />
+                            <button
+                              onClick={() => {
+                                if (taEditLabel.trim() && taEditTime) {
+                                  updateTimeAnchor(anchor.id, { label: taEditLabel.trim(), time: taEditTime });
+                                }
+                                setTaEditId(null);
+                              }}
+                              className="bg-sage-600 text-white px-3 py-1.5 rounded-xl text-xs font-medium hover:bg-sage-700"
+                            >Save</button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium text-slate-700">{anchor.label}</span>
+                              <span className="text-xs text-slate-400">{anchor.time}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => { setTaEditId(anchor.id); setTaEditLabel(anchor.label); setTaEditTime(anchor.time); }}
+                                className="text-xs text-slate-400 hover:text-sage-600 transition-colors"
+                              >Edit</button>
+                              <button onClick={() => removeTimeAnchor(anchor.id)}>
+                                <Trash2 size={13} className="text-slate-300 hover:text-rose-400 transition-colors" />
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                        {/* Habits for this anchor */}
+                        <div className="pl-2 border-l-2 border-sage-100 space-y-1.5">
+                          {(anchor.habits ?? []).length > 0 && (
+                            <div className="space-y-1">
+                              {(anchor.habits ?? []).map((habit, hi) => (
+                                <div key={hi} className="flex items-center justify-between">
+                                  <span className="text-xs text-slate-600">→ {habit}</span>
+                                  <button onClick={() => removeHabitFromAnchor(anchor.id, habit)}>
+                                    <Trash2 size={11} className="text-slate-300 hover:text-rose-400 transition-colors" />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          <div className="flex gap-1.5">
+                            <input
+                              className="flex-1 border border-slate-200 rounded-lg px-2 py-1 text-xs text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-sage-400"
+                              placeholder="Add habit (e.g. After lunch → take meds)"
+                              value={taHabitInputs[anchor.id] ?? ""}
+                              onChange={(e) => setTaHabitInputs((prev) => ({ ...prev, [anchor.id]: e.target.value }))}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" && (taHabitInputs[anchor.id] ?? "").trim()) {
+                                  addHabitToAnchor(anchor.id, taHabitInputs[anchor.id].trim());
+                                  setTaHabitInputs((prev) => ({ ...prev, [anchor.id]: "" }));
+                                }
+                              }}
+                            />
+                            <button
+                              onClick={() => {
+                                const val = (taHabitInputs[anchor.id] ?? "").trim();
+                                if (val) { addHabitToAnchor(anchor.id, val); setTaHabitInputs((prev) => ({ ...prev, [anchor.id]: "" })); }
+                              }}
+                              className="bg-sage-100 text-sage-700 px-2 py-1 rounded-lg text-xs font-medium hover:bg-sage-200 transition-all"
+                            ><Plus size={12} /></button>
+                          </div>
                         </div>
-                        <button onClick={() => removeTimeAnchor(anchor.id)}>
-                          <Trash2 size={13} className="text-slate-300 hover:text-rose-400 transition-colors" />
-                        </button>
                       </div>
                     ))}
                 </div>
@@ -1001,6 +1132,12 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
                   onChange={(e) => setBlkTime(e.target.value)}
                 />
                 <input
+                  className="w-20 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-400"
+                  placeholder="e.g. 30m"
+                  value={blkDuration}
+                  onChange={(e) => setBlkDuration(e.target.value)}
+                />
+                <input
                   className="flex-1 min-w-0 border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-400"
                   placeholder="What is this block for?"
                   value={blkTask}
@@ -1018,8 +1155,8 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
                 <button
                   onClick={() => {
                     if (blkTask.trim()) {
-                      setBlocks((b) => [...b, { id: Math.random().toString(36).slice(2), time: blkTime, task: blkTask.trim(), color: blkColor }]);
-                      setBlkTask(""); setBlkTime("");
+                      setBlocks((b) => [...b, { id: Math.random().toString(36).slice(2), time: blkTime, duration: blkDuration.trim(), task: blkTask.trim(), color: blkColor }]);
+                      setBlkTask(""); setBlkTime(""); setBlkDuration("");
                     }
                   }}
                   className="bg-sage-600 text-white px-3 py-2 rounded-xl text-sm font-medium hover:bg-sage-700 transition-all"
@@ -1036,8 +1173,9 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
                     .sort((a, b) => a.time.localeCompare(b.time))
                     .map((blk) => (
                       <div key={blk.id} className={cn("flex items-center justify-between px-3 py-2.5 rounded-xl border", BLOCK_COLORS[blk.color])}>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           {blk.time && <span className="text-xs font-mono font-medium opacity-70">{blk.time}</span>}
+                          {blk.duration && <span className="text-xs font-medium opacity-60 bg-white/60 px-1.5 py-0.5 rounded-full">{blk.duration}</span>}
                           <span className="text-sm font-medium">{blk.task}</span>
                           <span className="text-xs opacity-60">{BLOCK_LABELS[blk.color]}</span>
                         </div>
@@ -1357,9 +1495,30 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
                       {tbSteps.map((step, i) => (
                         <div
                           key={step.id}
-                          className={cn("flex items-start gap-3 p-3 rounded-xl border transition-all",
+                          className={cn("flex items-start gap-2 p-3 rounded-xl border transition-all",
                             step.done ? "bg-sage-50 border-sage-100" : "bg-cream-50 border-slate-100")}
                         >
+                          {/* Reorder buttons */}
+                          <div className="flex flex-col gap-0.5 shrink-0 mt-0.5">
+                            <button
+                              onClick={() => {
+                                if (i === 0) return;
+                                setTbSteps((s) => { const next = [...s]; [next[i - 1], next[i]] = [next[i], next[i - 1]]; return next; });
+                              }}
+                              disabled={i === 0}
+                              className="text-slate-300 hover:text-slate-500 disabled:opacity-20 leading-none"
+                              title="Move up"
+                            >▲</button>
+                            <button
+                              onClick={() => {
+                                if (i === tbSteps.length - 1) return;
+                                setTbSteps((s) => { const next = [...s]; [next[i], next[i + 1]] = [next[i + 1], next[i]]; return next; });
+                              }}
+                              disabled={i === tbSteps.length - 1}
+                              className="text-slate-300 hover:text-slate-500 disabled:opacity-20 leading-none"
+                              title="Move down"
+                            >▼</button>
+                          </div>
                           <button
                             onClick={() => setTbSteps((s) => s.map((x) => x.id === step.id ? { ...x, done: !x.done } : x))}
                             className={cn("mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0",
@@ -1382,24 +1541,37 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
             </div>
           )}
 
-          {/* ── weekly-review: structured textarea form ── */}
-          {tool.id === "weekly-review" && tool.content.steps && (
-            <div className="space-y-4">
-              <p className="text-sm font-semibold text-slate-700">This week's review</p>
-              {tool.content.steps.map((question, i) => (
-                <div key={i} className="space-y-1.5">
-                  <p className="text-sm text-slate-700">{question}</p>
-                  <textarea
-                    className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-300 resize-none leading-relaxed"
-                    rows={3}
-                    placeholder="Your reflection..."
-                    value={wrAnswers[i] ?? ""}
-                    onChange={(e) => setWrAnswers((prev) => ({ ...prev, [i]: e.target.value }))}
-                  />
+          {/* ── weekly-review: structured textarea form (persisted by week) ── */}
+          {tool.id === "weekly-review" && tool.content.steps && (() => {
+            const now = new Date();
+            const jan1 = new Date(now.getFullYear(), 0, 1);
+            const weekNum = Math.ceil(((now.getTime() - jan1.getTime()) / 86400000 + jan1.getDay() + 1) / 7);
+            const weekKey = `${now.getFullYear()}-W${weekNum.toString().padStart(2, "0")}`;
+            const savedAnswers = weeklyReviewAnswers[weekKey] ?? {};
+            return (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold text-slate-700">This week's review</p>
+                  <span className="text-xs text-slate-400">{weekKey} · auto-saved</span>
                 </div>
-              ))}
-            </div>
-          )}
+                {tool.content.steps!.map((question, i) => (
+                  <div key={i} className="space-y-1.5">
+                    <p className="text-sm text-slate-700">{question}</p>
+                    <textarea
+                      className="w-full border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-300 resize-none leading-relaxed"
+                      rows={3}
+                      placeholder="Your reflection..."
+                      value={savedAnswers[i] ?? wrAnswers[i] ?? ""}
+                      onChange={(e) => {
+                        setWrAnswers((prev) => ({ ...prev, [i]: e.target.value }));
+                        setWeeklyReviewAnswer(weekKey, i, e.target.value);
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
 
           {/* ── pause-practice: 90s breathing timer ── */}
           {tool.id === "pause-practice" && (
@@ -2639,6 +2811,99 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
                   </p>
                 )}
               </div>
+
+              {/* Reminder setup */}
+              <div className="bg-cream-50 rounded-2xl border border-slate-100 overflow-hidden">
+                <button
+                  onClick={() => setThReminderOpen(v => !v)}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-left"
+                >
+                  <Bell size={15} className={checkInReminders.thirstHunger?.enabled ? "text-sage-600" : "text-slate-400"} />
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-slate-700">Reminders</p>
+                    <p className="text-xs text-slate-400">
+                      {checkInReminders.thirstHunger?.enabled
+                        ? `${checkInReminders.thirstHunger.times.length} reminder${checkInReminders.thirstHunger.times.length !== 1 ? "s" : ""} set`
+                        : "Get nudged to check in"}
+                    </p>
+                  </div>
+                  <span className="text-xs text-slate-400">{thReminderOpen ? "▲" : "▼"}</span>
+                </button>
+
+                {thReminderOpen && (
+                  <div className="px-4 pb-4 space-y-3 border-t border-slate-100 pt-3">
+                    {/* Permission prompt */}
+                    {checkInReminders.permissionState !== "granted" && (
+                      <div className="bg-sage-50 border border-sage-100 rounded-xl px-3 py-2.5 flex items-center justify-between gap-3">
+                        <p className="text-xs text-slate-600 flex-1">
+                          {checkInReminders.permissionState === "denied"
+                            ? "Notifications blocked — enable in your device settings."
+                            : "Allow notifications to get reminders when the app is in the background."}
+                        </p>
+                        {checkInReminders.permissionState !== "denied" && (
+                          <button
+                            onClick={async () => {
+                              if (typeof Notification === "undefined") return;
+                              const result = await Notification.requestPermission();
+                              setReminderPermissionState(result as "granted" | "denied" | "default");
+                            }}
+                            className="text-xs font-semibold text-sage-700 underline shrink-0"
+                          >
+                            Allow
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Enable toggle */}
+                    <div className="flex items-center gap-3">
+                      <p className="text-sm font-semibold text-slate-700 flex-1">Remind me to check in</p>
+                      <button
+                        onClick={() => updateCheckInReminder("thirstHunger", { enabled: !checkInReminders.thirstHunger?.enabled })}
+                        className={cn("w-10 h-6 rounded-full transition-all relative shrink-0", checkInReminders.thirstHunger?.enabled ? "bg-sage-500" : "bg-slate-200")}
+                      >
+                        <span className={cn("absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all", checkInReminders.thirstHunger?.enabled ? "left-[18px]" : "left-0.5")} />
+                      </button>
+                    </div>
+
+                    {/* Time slots */}
+                    {checkInReminders.thirstHunger?.enabled && (
+                      <div className="space-y-2">
+                        <p className="text-xs text-slate-500">Reminder times</p>
+                        {(checkInReminders.thirstHunger?.times ?? []).map((t) => (
+                          <div key={t} className="flex items-center gap-2">
+                            <input
+                              type="time"
+                              value={t}
+                              onChange={(e) => { removeReminderTime("thirstHunger", t); addReminderTime("thirstHunger", e.target.value); }}
+                              className="text-xs font-semibold text-sage-700 bg-white border border-sage-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-sage-400"
+                            />
+                            {(checkInReminders.thirstHunger?.times.length ?? 0) > 1 && (
+                              <button onClick={() => removeReminderTime("thirstHunger", t)} className="text-slate-300 hover:text-rose-400 transition-colors">
+                                <X size={14} />
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                        <div className="flex items-center gap-2 pt-1">
+                          <input
+                            type="time"
+                            value={thNewTime}
+                            onChange={(e) => setThNewTime(e.target.value)}
+                            className="text-xs font-semibold text-sage-700 bg-white border border-sage-300 rounded-lg px-2 py-1.5 focus:outline-none focus:border-sage-400"
+                          />
+                          <button
+                            onClick={() => { addReminderTime("thirstHunger", thNewTime); setThNewTime("10:00"); }}
+                            className="text-xs font-semibold text-sage-600 bg-sage-50 border border-sage-200 rounded-lg px-2.5 py-1.5 hover:bg-sage-100 transition-all"
+                          >
+                            + Add
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
@@ -2966,8 +3231,8 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
           {tool.id === "easy-food" && (
             <div className="space-y-4">
               <div>
-                <p className="text-sm font-semibold text-slate-700">My Easy Food List</p>
-                <p className="text-xs text-slate-500 mt-0.5">Tap to add foods that work for you. Add your own in any category.</p>
+                <p className="text-sm font-semibold text-slate-700">My Safe Foods List</p>
+                <p className="text-xs text-slate-500 mt-0.5">Add your personal foods — the ones you'll reliably eat no matter what. No suggestions, just yours.</p>
               </div>
               {EASY_FOOD_CATS.map(({ key, label, suggestions }) => {
                 const selected = easyFoodList[key] ?? [];
@@ -2993,10 +3258,13 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
                           );
                         })}
                         {customItems.map((item) => (
-                          <span key={item} className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-full font-medium border bg-stone-100 text-stone-600 border-stone-200">
+                          <button
+                            key={item}
+                            onClick={() => toggleEasyFoodItem(key, item)}
+                            className="text-xs px-3 py-1.5 rounded-full font-medium border transition-all bg-sage-600 text-white border-sage-600"
+                          >
                             {item}
-                            <button onClick={() => toggleEasyFoodItem(key, item)} className="hover:opacity-60"><X size={10} /></button>
-                          </span>
+                          </button>
                         ))}
                       </div>
                     )}
@@ -3006,10 +3274,13 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
                     {suggestions.length === 0 && customItems.length > 0 && (
                       <div className="flex flex-wrap gap-2">
                         {customItems.map((item) => (
-                          <span key={item} className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-full font-medium border bg-stone-100 text-stone-600 border-stone-200">
+                          <button
+                            key={item}
+                            onClick={() => toggleEasyFoodItem(key, item)}
+                            className="text-xs px-3 py-1.5 rounded-full font-medium border transition-all bg-sage-600 text-white border-sage-600"
+                          >
                             {item}
-                            <button onClick={() => toggleEasyFoodItem(key, item)} className="hover:opacity-60"><X size={10} /></button>
-                          </span>
+                          </button>
                         ))}
                       </div>
                     )}

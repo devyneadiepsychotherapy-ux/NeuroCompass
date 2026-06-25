@@ -109,6 +109,7 @@ export interface CheckInReminders {
   mood: CheckInReminderEntry;
   body: CheckInReminderEntry;
   full: CheckInReminderEntry;
+  thirstHunger: CheckInReminderEntry;
   permissionState: "default" | "granted" | "denied";
 }
 
@@ -186,6 +187,7 @@ export interface TimeAnchorItem {
   id: string;
   label: string;
   time: string;
+  habits?: string[];
 }
 
 export interface MVSCItem {
@@ -308,4 +310,19 @@ export interface EnergyItem {
   label: string;
   intensity: "low" | "medium" | "high";
   value?: number; // 1–10 numeric energy cost/gain
+}
+
+export interface MindNode {
+  id: string;
+  text: string;
+  children: MindNode[];
+  color: string;
+}
+
+export interface SavedMindMap {
+  id: string;
+  name: string;
+  tree: MindNode;
+  colorIdx: number;
+  savedAt: string;
 }

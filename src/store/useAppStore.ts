@@ -119,6 +119,9 @@ interface AppState {
   timeAnchorsData: TimeAnchorItem[];
   addTimeAnchor: (label: string, time: string) => void;
   removeTimeAnchor: (id: string) => void;
+  addHabitToAnchor: (anchorId: string, habit: string) => void;
+  removeHabitFromAnchor: (anchorId: string, habit: string) => void;
+  updateTimeAnchor: (anchorId: string, updates: Partial<Pick<TimeAnchorItem, "label" | "time">>) => void;
 
   mvscList: MVSCItem[];
   addMVSCItem: (text: string) => void;
@@ -154,6 +157,10 @@ interface AppState {
   // ND-friendly meals: saved/bookmarked meal names
   savedNDMeals: string[];
   toggleSavedNDMeal: (meal: string) => void;
+
+  // Weekly review answers (keyed by ISO week string e.g. "2024-W12")
+  weeklyReviewAnswers: Record<string, Record<number, string>>;
+  setWeeklyReviewAnswer: (week: string, index: number, value: string) => void;
 
   // Focus ritual
   focusRitual: string;
@@ -269,6 +276,11 @@ interface AppState {
   toggleMonthlyGoalItem: (monthKey: string, id: string) => void;
   deleteMonthlyGoalItem: (monthKey: string, id: string) => void;
 
+  // Saved mind maps
+  savedMindMaps: import("@/types").SavedMindMap[];
+  saveMindMap: (name: string, tree: import("@/types").MindNode, colorIdx: number) => void;
+  deleteSavedMindMap: (id: string) => void;
+
   // Toolbox view mode
   toolboxViewMode: 'grid' | 'list';
   setToolboxViewMode: (mode: 'grid' | 'list') => void;
@@ -352,6 +364,7 @@ export const useAppStore = create<AppState>()(
       energyLog: [],
       arfidAccommodations: [],
       savedNDMeals: [],
+      weeklyReviewAnswers: {},
       focusRitual: "",
       sensoryDiet: {},
       easyFoodList: {},
@@ -375,6 +388,7 @@ export const useAppStore = create<AppState>()(
         mood: { enabled: false, times: ["09:00"], lastNotifiedDates: {} },
         body: { enabled: false, times: ["12:00"], lastNotifiedDates: {} },
         full: { enabled: false, times: ["20:00"], lastNotifiedDates: {} },
+        thirstHunger: { enabled: false, times: ["10:00", "14:00", "18:00"], lastNotifiedDates: {} },
         permissionState: "default",
       },
       okayMode: false,
@@ -670,10 +684,28 @@ export const useAppStore = create<AppState>()(
 
       addTimeAnchor: (label, time) =>
         set((s) => ({
-          timeAnchorsData: [...s.timeAnchorsData, { id: generateId(), label, time }],
+          timeAnchorsData: [...s.timeAnchorsData, { id: generateId(), label, time, habits: [] }],
         })),
       removeTimeAnchor: (id) =>
         set((s) => ({ timeAnchorsData: s.timeAnchorsData.filter((a) => a.id !== id) })),
+      addHabitToAnchor: (anchorId, habit) =>
+        set((s) => ({
+          timeAnchorsData: s.timeAnchorsData.map((a) =>
+            a.id === anchorId ? { ...a, habits: [...(a.habits ?? []), habit] } : a
+          ),
+        })),
+      removeHabitFromAnchor: (anchorId, habit) =>
+        set((s) => ({
+          timeAnchorsData: s.timeAnchorsData.map((a) =>
+            a.id === anchorId ? { ...a, habits: (a.habits ?? []).filter((h) => h !== habit) } : a
+          ),
+        })),
+      updateTimeAnchor: (anchorId, updates) =>
+        set((s) => ({
+          timeAnchorsData: s.timeAnchorsData.map((a) =>
+            a.id === anchorId ? { ...a, ...updates } : a
+          ),
+        })),
 
       addMVSCItem: (text) =>
         set((s) => ({
@@ -775,6 +807,14 @@ export const useAppStore = create<AppState>()(
           savedNDMeals: s.savedNDMeals.includes(meal)
             ? s.savedNDMeals.filter((m) => m !== meal)
             : [...s.savedNDMeals, meal],
+        })),
+
+      setWeeklyReviewAnswer: (week, index, value) =>
+        set((s) => ({
+          weeklyReviewAnswers: {
+            ...s.weeklyReviewAnswers,
+            [week]: { ...(s.weeklyReviewAnswers[week] ?? {}), [index]: value },
+          },
         })),
 
       setFocusRitual: (ritual) => set({ focusRitual: ritual }),
@@ -1074,6 +1114,16 @@ export const useAppStore = create<AppState>()(
         },
       })),
 
+      savedMindMaps: [],
+      saveMindMap: (name, tree, colorIdx) =>
+        set(s => ({
+          savedMindMaps: [
+            ...s.savedMindMaps,
+            { id: Math.random().toString(36).slice(2), name, tree, colorIdx, savedAt: new Date().toISOString() },
+          ],
+        })),
+      deleteSavedMindMap: (id) => set(s => ({ savedMindMaps: s.savedMindMaps.filter(m => m.id !== id) })),
+
       toolboxViewMode: 'list',
       setToolboxViewMode: (mode) => set({ toolboxViewMode: mode }),
 
@@ -1088,7 +1138,7 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: "neurocompass-store",
-      version: 3,
+      version: 4,
       storage:
         typeof window !== "undefined"
           ? createJSONStorage(() => localStorage)
@@ -1141,6 +1191,13 @@ export const useAppStore = create<AppState>()(
                 delete entry.lastNotifiedDate;
               }
             }
+          }
+        }
+        if (version < 4) {
+          // Add thirstHunger reminder entry if missing
+          const reminders = state.checkInReminders as Record<string, unknown> | undefined;
+          if (reminders && !reminders.thirstHunger) {
+            reminders.thirstHunger = { enabled: false, times: ["10:00", "14:00", "18:00"], lastNotifiedDates: {} };
           }
         }
         return state;

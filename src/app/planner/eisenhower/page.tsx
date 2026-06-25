@@ -1,9 +1,9 @@
 "use client";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { generateId } from "@/lib/utils";
+import { generateId, getTodayKey } from "@/lib/utils";
 import Link from "next/link";
-import { ArrowLeft, Plus, X, Heart } from "lucide-react";
+import { ArrowLeft, Plus, X, Heart, CheckSquare, Calendar } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 
 type Quadrant = "do" | "schedule" | "delegate" | "eliminate";
@@ -58,14 +58,18 @@ const QUADRANTS: { key: Quadrant; label: string; subtitle: string; emoji: string
 ];
 
 export default function EisenhowerPage() {
-  const { toggleFavorite, isFavorite } = useAppStore();
+  const { toggleFavorite, isFavorite, addTask: storeAddTask, addAppointment } = useAppStore();
   const favorite = isFavorite("eisenhower-matrix");
   const [tasks, setTasks] = useState<MatrixTask[]>([]);
   const [inputText, setInputText] = useState("");
   const [targetQuadrant, setTargetQuadrant] = useState<Quadrant>("do");
   const [showInput, setShowInput] = useState(false);
+  const [addedToday, setAddedToday] = useState<Set<string>>(new Set());
+  const [schedulePickerId, setSchedulePickerId] = useState<string | null>(null);
+  const [scheduleDateInput, setScheduleDateInput] = useState("");
+  const [scheduledIds, setScheduledIds] = useState<Set<string>>(new Set());
 
-  const addTask = () => {
+  const addMatrixTask = () => {
     if (!inputText.trim()) return;
     setTasks(prev => [...prev, { id: generateId(), title: inputText.trim(), quadrant: targetQuadrant }]);
     setInputText("");
@@ -74,6 +78,19 @@ export default function EisenhowerPage() {
 
   const removeTask = (id: string) => setTasks(prev => prev.filter(t => t.id !== id));
   const moveTask = (id: string, quadrant: Quadrant) => setTasks(prev => prev.map(t => t.id === id ? { ...t, quadrant } : t));
+
+  const handleAddToToday = (task: MatrixTask) => {
+    storeAddTask({ title: task.title, priority: "high", status: "todo", xpReward: 10, isRecurring: false, dueDate: getTodayKey(), tags: [] });
+    setAddedToday(prev => new Set(prev).add(task.id));
+  };
+
+  const handleSchedule = (task: MatrixTask) => {
+    if (!scheduleDateInput) return;
+    addAppointment({ date: scheduleDateInput, startTime: "", title: task.title, type: "activity" });
+    setScheduledIds(prev => new Set(prev).add(task.id));
+    setSchedulePickerId(null);
+    setScheduleDateInput("");
+  };
 
   return (
     <div className="px-4 pt-12 pb-8 space-y-5">
@@ -115,7 +132,7 @@ export default function EisenhowerPage() {
             placeholder="What's the task?"
             value={inputText}
             onChange={e => setInputText(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && addTask()}
+            onKeyDown={e => e.key === "Enter" && addMatrixTask()}
           />
           <div>
             <p className="text-xs font-semibold text-slate-500 mb-2 uppercase tracking-wide">Which quadrant?</p>
@@ -137,7 +154,7 @@ export default function EisenhowerPage() {
           </div>
           <div className="flex gap-2">
             <button onClick={() => setShowInput(false)} className="flex-1 border border-slate-200 text-slate-600 rounded-xl py-2.5 font-medium hover:bg-slate-50">Cancel</button>
-            <button onClick={addTask} disabled={!inputText.trim()} className="flex-1 bg-sage-600 text-white rounded-xl py-2.5 font-semibold disabled:bg-slate-200 disabled:text-slate-400 hover:bg-sage-700">Add</button>
+            <button onClick={addMatrixTask} disabled={!inputText.trim()} className="flex-1 bg-sage-600 text-white rounded-xl py-2.5 font-semibold disabled:bg-slate-200 disabled:text-slate-400 hover:bg-sage-700">Add</button>
           </div>
         </div>
       )}
@@ -157,13 +174,62 @@ export default function EisenhowerPage() {
                   <p className="text-xs text-slate-400 italic py-2">{q.description}</p>
                 )}
                 {qTasks.map(task => (
-                  <div key={task.id} className="bg-cream-50 rounded-xl px-3 py-2 shadow-sm border border-white flex items-start gap-2">
-                    <p className="text-xs text-slate-700 flex-1 leading-snug">{task.title}</p>
-                    <div className="flex flex-col gap-0.5 shrink-0">
-                      <button onClick={() => removeTask(task.id)} className="text-slate-300 hover:text-red-400 transition-colors">
+                  <div key={task.id} className="bg-cream-50 rounded-xl px-3 py-2 shadow-sm border border-white space-y-1.5">
+                    <div className="flex items-start gap-2">
+                      <p className="text-xs text-slate-700 flex-1 leading-snug">{task.title}</p>
+                      <button onClick={() => removeTask(task.id)} className="text-slate-300 hover:text-red-400 transition-colors shrink-0">
                         <X size={12} />
                       </button>
                     </div>
+                    {q.key === "do" && (
+                      <button
+                        onClick={() => handleAddToToday(task)}
+                        disabled={addedToday.has(task.id)}
+                        className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50 disabled:cursor-default transition-colors w-full"
+                      >
+                        <CheckSquare size={11} />
+                        {addedToday.has(task.id) ? "Added to today ✓" : "Add to today's tasks"}
+                      </button>
+                    )}
+                    {q.key === "schedule" && (
+                      <div className="space-y-1">
+                        {scheduledIds.has(task.id) ? (
+                          <span className="flex items-center gap-1 text-xs text-stone-500 px-1">
+                            <Calendar size={11} /> Scheduled ✓
+                          </span>
+                        ) : schedulePickerId === task.id ? (
+                          <div className="flex gap-1">
+                            <input
+                              type="date"
+                              className="flex-1 text-xs border border-stone-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-sage-400"
+                              value={scheduleDateInput}
+                              onChange={e => setScheduleDateInput(e.target.value)}
+                            />
+                            <button
+                              onClick={() => handleSchedule(task)}
+                              disabled={!scheduleDateInput}
+                              className="text-xs px-2 py-1 rounded-lg bg-sage-600 text-white disabled:opacity-40"
+                            >
+                              Save
+                            </button>
+                            <button
+                              onClick={() => { setSchedulePickerId(null); setScheduleDateInput(""); }}
+                              className="text-xs px-2 py-1 rounded-lg border border-stone-200 text-slate-500"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setSchedulePickerId(task.id)}
+                            className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200 transition-colors w-full"
+                          >
+                            <Calendar size={11} />
+                            Schedule in planner
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

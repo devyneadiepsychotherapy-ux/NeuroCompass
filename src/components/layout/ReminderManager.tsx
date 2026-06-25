@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import { getTodayKey } from "@/lib/utils";
 import { Heart, Scan, ClipboardList, X, Flame } from "lucide-react";
 
-type ReminderType = "mood" | "body" | "full";
+type ReminderType = "mood" | "body" | "full" | "thirstHunger";
 
 const REMINDER_CONFIG: Record<ReminderType, { label: string; body: string; href: string; Icon: React.ElementType }> = {
   mood: {
@@ -29,6 +29,12 @@ const REMINDER_CONFIG: Record<ReminderType, { label: string; body: string; href:
     label: "Full Check-In",
     body: "Your full daily check-in is ready when you are 🌟",
     href: "/mood",
+    Icon: ClipboardList,
+  },
+  thirstHunger: {
+    label: "Thirst & Hunger Check-In",
+    body: "Have you had water and food recently? 💧🍎",
+    href: "/tools",
     Icon: ClipboardList,
   },
 };
@@ -53,7 +59,7 @@ export default function ReminderManager() {
     const today = getTodayKey();
     const due: ReminderType[] = [];
 
-    (["mood", "body", "full"] as ReminderType[]).forEach((type) => {
+    (["mood", "body", "full", "thirstHunger"] as ReminderType[]).forEach((type) => {
       const r = checkInReminders[type];
       if (!r.enabled) return;
       const hasSlotDue = r.times.some(

@@ -39,7 +39,7 @@ export const TOOLS: Tool[] = [
   // TIME MANAGEMENT
   {
     id: "time-timer",
-    title: "Time Timer",
+    title: "Timer",
     description: "Visual countdown to make time feel real and concrete",
     category: "time",
     icon: "Timer",
@@ -138,7 +138,7 @@ export const TOOLS: Tool[] = [
         "Break it into the FIRST physical action only (open the document, not 'write the report')",
         "Set a 2-minute timer and commit to starting, not finishing",
         "Reduce friction: have everything you need within reach first",
-        "If still stuck: do a 'body warm-up',stand up, shake hands, drink water",
+        "If still stuck: do a 'body warm-up', stand up, shake hands, drink water",
       ],
       tips: [
         "The brain needs a runway. Give it permission to stop after 2 minutes.",
@@ -242,7 +242,7 @@ export const TOOLS: Tool[] = [
         { label: "Starter dose (5/3)", description: "5 min work, 3 min break, for very hard tasks or low-spoon days" },
         { label: "Classic (25/5)", description: "Standard Pomodoro, good for moderate focus days" },
         { label: "Flow state (52/17)", description: "Longer focus block, longer break, for hyperfocus mode" },
-        { label: "Ultradian (90/20)", description: "Match your brain's natural rhythm,90 min work, 20 min real rest" },
+        { label: "Ultradian (90/20)", description: "Match your brain's natural rhythm, 90 min work, 20 min real rest" },
       ],
       tips: [
         "If you're in flow, ignore the timer and keep going",
@@ -684,26 +684,13 @@ export const TOOLS: Tool[] = [
   },
   {
     id: "easy-food",
-    title: "Easy Food Protocol",
-    description: "ND-friendly food strategies for low-spoon days",
+    title: "My Safe Foods List",
+    description: "Your personal list of always-stocked, always-safe foods — no decisions required",
     category: "eating",
     icon: "Utensils",
-    type: "info",
+    type: "interactive",
     content: {
-      intro: "Food prep is hard when executive function is low. These strategies reduce the barrier.",
-      steps: [
-        "Keep 'always foods' stocked: foods you'll always eat regardless of state",
-        "Prep ingredients, not full meals, washed veg, cooked grain, boiled eggs last days",
-        "Batch cook one thing when energy is high",
-        "Accept convenience food, nutrition matters more than freshness or cooking",
-        "Pair textures strategically if you have texture sensitivities",
-      ],
-      variants: [
-        { label: "Zero-energy foods", description: "No cooking needed: cheese, crackers, fruit, yogurt, deli meat, cereal, nut butter" },
-        { label: "Microwave meals", description: "Frozen meals, microwaved eggs, instant oatmeal, all valid nutrition sources" },
-        { label: "Batch cooking wins", description: "Rice cooker rice, hard-boiled eggs x6, roasted veg sheet pan, mix and match all week" },
-      ],
-      affirmation: "Feeding yourself is an act of self-care regardless of what or how."
+      intro: "These are YOUR foods — the ones you'll reliably eat regardless of energy, mood, or sensory state. No recipes, no decisions. Just foods you know work for you.",
     }
   },
   {
@@ -732,7 +719,7 @@ export const TOOLS: Tool[] = [
   {
     id: "meal-planner",
     title: "Meal Planner",
-    description: "Weekly meal grid with easy-food ideas and a shopping list",
+    description: "Weekly meal grid and a shopping list",
     category: "eating",
     icon: "ShoppingCart",
     type: "interactive",
@@ -1177,9 +1164,9 @@ export const TOOLS: Tool[] = [
       intro: "Music with a strong beat bypasses the thinking brain and directly activates the nervous system, ideal for freeze states.",
       steps: [
         "Build 3 playlists in advance (not when frozen, planning ahead is key):",
-        "Playlist 1,Spark (5 songs): upbeat, energizing, familiar favourites",
-        "Playlist 2,Build (10 songs): moderate pace, increasingly energizing",
-        "Playlist 3,Flow (work music): instrumental, steady beat, no lyrics",
+        "Playlist 1, Spark (5 songs): upbeat, energizing, familiar favourites",
+        "Playlist 2, Build (10 songs): moderate pace, increasingly energizing",
+        "Playlist 3, Flow (work music): instrumental, steady beat, no lyrics",
         "When frozen: start with Spark, commit to just one song",
         "Move your body to it even slightly, nod, tap feet, hum",
         "Transition to Build, then Flow once momentum builds",

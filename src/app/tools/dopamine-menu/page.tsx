@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import { useAppStore } from "@/store/useAppStore";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, ArrowLeft } from "lucide-react";
 
 const DM_CATS = ["Appetizers", "Main courses", "Desserts", "Sides"];
 
@@ -26,11 +27,20 @@ export default function DopamineMenuPage() {
 
   return (
     <div className="px-4 pt-12 pb-8 space-y-5">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800">Dopamine Menu</h1>
-        <p className="text-sm text-slate-500 mt-1">
-          Build your personal go-to list for motivation boosts
-        </p>
+      <div className="flex items-center gap-3">
+        <Link
+          href="/tools"
+          className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-sage-100 transition-colors shrink-0"
+          aria-label="Back to tools"
+        >
+          <ArrowLeft size={20} className="text-slate-600" />
+        </Link>
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800">Dopamine Menu</h1>
+          <p className="text-sm text-slate-500 mt-0.5">
+            Build your personal go-to list for motivation boosts
+          </p>
+        </div>
       </div>
 
       <div className="bg-gradient-to-br from-stone-100 to-sage-50 rounded-2xl p-4 border border-stone-200">
