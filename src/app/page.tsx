@@ -509,7 +509,7 @@ export default function HomePage() {
         <StreakCelebrationModal streak={streak} onDismiss={() => setShowStreakCelebration(false)} />
       )}
 
-      {/* Greeting header — flush with nav, breathing room inside */}
+      {/* Greeting header : flush with nav, breathing room inside */}
       <div className="-mx-4 px-4 pt-3 pb-5 relative overflow-hidden" style={{ background: "linear-gradient(to bottom, var(--background) 0%, transparent 100%)" }}>
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">

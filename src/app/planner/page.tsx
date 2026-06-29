@@ -126,7 +126,7 @@ function taskMatchesView(task: Task, view: PlannerView): boolean {
   return task.showOn.includes(view);
 }
 
-/** Recurring tasks reset on their cadence — daily resets daily, weekly resets per calendar week, monthly per calendar month.
+/** Recurring tasks reset on their cadence : daily resets daily, weekly resets per calendar week, monthly per calendar month.
  *  Pass asOfDate (YYYY-MM-DD) to evaluate "done" relative to a specific day instead of today. */
 function isTaskDone(task: Task, asOfDate?: string): boolean {
   if (task.status !== "done") return false;
@@ -345,7 +345,7 @@ function WeekView({ date, onDayClick }: { date: Date; onDayClick?: (d: Date) => 
               {/* Content */}
               <div className="flex-1 min-w-0 pt-0.5">
                 {!hasAnything && (
-                  <span className="text-xs text-slate-400">—</span>
+                  <span className="text-xs text-slate-300">-</span>
                 )}
 
                 <div className="space-y-0.5">
@@ -810,7 +810,7 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
     const rect = gridRef.current?.getBoundingClientRect();
     if (!rect) return;
     // getBoundingClientRect() is already viewport-relative (scroll-adjusted)
-    // so we do NOT add scrollTop — that would double-count it
+    // so we do NOT add scrollTop : that would double-count it
     const relY = touch.clientY - rect.top;
     const rawMins = gridStartHour * 60 + (relY / PX_PER_HOUR) * 60;
     const snapped = Math.round(rawMins / 30) * 30;
@@ -830,7 +830,7 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
     setPressGhost(null);
   };
 
-  // Time grid range — start at exact hour of first appt, end 30min after last
+  // Time grid range : start at exact hour of first appt, end 30min after last
   const gridStartHour = timedAppts.length
     ? Math.max(0, Math.floor(toMinutes(timedAppts[0].startTime) / 60))
     : 8;
@@ -923,7 +923,7 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
             );
           })()}
 
-          {/* Appointments — absolutely positioned on grid */}
+          {/* Appointments : absolutely positioned on grid */}
           {timedAppts.map((appt) => {
             const apptStart = toMinutes(appt.startTime);
             const durationMins = appt.endTime ? calcDurationMins(appt.startTime, appt.endTime) : 60;
@@ -1087,7 +1087,7 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
             </div>
           </div>
         </div>
-          {/* Sticky footer — always visible */}
+          {/* Sticky footer : always visible */}
           <div className="flex gap-2 px-4 pb-4 pt-2 border-t border-slate-100 shrink-0">
             <button
               onClick={handleAdd}
@@ -1342,7 +1342,7 @@ function AppointmentRow({
         </div>
 
       </div>
-        {/* Sticky footer — always visible */}
+        {/* Sticky footer : always visible */}
         <div className="flex gap-2 px-4 pb-4 pt-2 border-t border-slate-100 shrink-0">
           <button
             onClick={handleSave}

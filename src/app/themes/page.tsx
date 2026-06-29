@@ -5,7 +5,7 @@ import { THEMES, Theme, ThemeId } from "@/lib/themes";
 import { ArrowLeft, Check, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-/** Abstract colour swatch — feels modern, not like a fake old website */
+/** Abstract colour swatch : feels modern, not like a fake old website */
 function ThemePreview({ theme }: { theme: Theme }) {
   const [c1, c2, c3] = theme.preview;
   return (
@@ -13,12 +13,12 @@ function ThemePreview({ theme }: { theme: Theme }) {
       className="w-full h-28 relative overflow-hidden"
       style={{ background: `linear-gradient(145deg, ${theme.background} 0%, ${c1}55 100%)` }}
     >
-      {/* Large primary blob — top right */}
+      {/* Large primary blob : top right */}
       <div
         className="absolute -right-12 -top-12 w-40 h-40 rounded-full"
         style={{ background: c2, opacity: 0.5 }}
       />
-      {/* Secondary blob — bottom left */}
+      {/* Secondary blob : bottom left */}
       <div
         className="absolute -left-6 -bottom-6 w-24 h-24 rounded-full"
         style={{ background: c3, opacity: 0.35 }}
@@ -100,7 +100,7 @@ export default function ThemesPage() {
                 )}
               </div>
 
-              {/* Info footer — rendered in that theme's own card colour */}
+              {/* Info footer : rendered in that theme's own card colour */}
               <div
                 className="flex items-center justify-between px-3.5 py-2.5 gap-3"
                 style={{ background: theme.card }}

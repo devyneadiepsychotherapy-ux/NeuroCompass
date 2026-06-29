@@ -186,7 +186,7 @@ function PlantSVG({ progress }: { progress: number }) {
         <g>
           {/* Main curved stem */}
           <path d="M 100 244 C 100 230 102 210 101 190 C 100 172 100 158 100 140" stroke="url(#stemGrad)" strokeWidth="5" fill="none" strokeLinecap="round" />
-          {/* Leaves — alternating, with veins */}
+          {/* Leaves : alternating, with veins */}
           <path d="M 101 232 C 82 226 66 214 62 200 C 64 194 73 198 82 207 C 89 214 97 226 101 232 Z" fill="url(#leafGrad1)" />
           <path d="M 101 232 C 84 220 70 206 62 200" stroke="#2d6a1f" strokeWidth="1.2" fill="none" opacity="0.5" />
           <path d="M 100 232 C 119 226 135 214 139 200 C 137 194 128 198 119 207 C 112 214 103 226 100 232 Z" fill="url(#leafGrad1)" />
@@ -197,7 +197,7 @@ function PlantSVG({ progress }: { progress: number }) {
           <path d="M 100 208 C 115 198 127 186 133 181" stroke="#3a6b28" strokeWidth="1" fill="none" opacity="0.5" />
           <path d="M 101 182 C 88 177 78 168 76 158 C 78 153 85 156 91 163 C 96 168 99 177 101 182 Z" fill="url(#leafGrad3)" />
           <path d="M 100 182 C 113 177 123 168 125 158 C 123 153 116 156 110 163 C 105 168 101 177 100 182 Z" fill="url(#leafGrad3)" />
-          {/* Flower — 8 petals */}
+          {/* Flower : 8 petals */}
           {[0, 45, 90, 135, 180, 225, 270, 315].map((deg, i) => {
             const rad = (deg * Math.PI) / 180;
             const px = 100 + 17 * Math.cos(rad);

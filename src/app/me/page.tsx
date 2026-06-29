@@ -28,7 +28,7 @@ const ND_STRENGTHS: Record<string, string[]> = {
 };
 
 // ---------------------------------------------------------------------------
-// ND Strengths card  — clickable, links to /strengths
+// ND Strengths card  : clickable, links to /strengths
 // ---------------------------------------------------------------------------
 
 function NDStrengthsCard({
@@ -69,7 +69,7 @@ function NDStrengthsCard({
 }
 
 // ---------------------------------------------------------------------------
-// My Toolbox card  (soft lavender) — 3-col grid, grid/list toggle
+// My Toolbox card  (soft lavender) : 3-col grid, grid/list toggle
 // ---------------------------------------------------------------------------
 
 function MyToolboxCard({ favorites }: { favorites: ToolFavorite[] }) {

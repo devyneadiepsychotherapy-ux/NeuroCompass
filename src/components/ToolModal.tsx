@@ -442,15 +442,15 @@ function FeelingsThermometerTool() {
             </clipPath>
           </defs>
 
-          {/* Glass tube — empty background */}
+          {/* Glass tube : empty background */}
           <rect x="27" y={TUBE_TOP} width="18" height={TUBE_H} rx="9"
             fill="#F0F0F0" stroke="#D0D0D0" strokeWidth="1.5" />
 
-          {/* Bulb — empty background */}
+          {/* Bulb : empty background */}
           <circle cx="36" cy={BULB_CY} r={BULB_R}
             fill="#E4E4E4" stroke="#D0D0D0" strokeWidth="1.5" />
 
-          {/* Mercury fill — clipped to tube+bulb shape */}
+          {/* Mercury fill : clipped to tube+bulb shape */}
           <g clipPath="url(#therm-clip)">
             <rect
               x="20" y={mercuryTop}
@@ -2837,7 +2837,7 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
                       <div className="bg-sage-50 border border-sage-100 rounded-xl px-3 py-2.5 flex items-center justify-between gap-3">
                         <p className="text-xs text-slate-600 flex-1">
                           {checkInReminders.permissionState === "denied"
-                            ? "Notifications blocked — enable in your device settings."
+                            ? "Notifications blocked . Enable in your device settings."
                             : "Allow notifications to get reminders when the app is in the background."}
                         </p>
                         {checkInReminders.permissionState !== "denied" && (
@@ -3232,7 +3232,7 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
             <div className="space-y-4">
               <div>
                 <p className="text-sm font-semibold text-slate-700">My Safe Foods List</p>
-                <p className="text-xs text-slate-500 mt-0.5">Add your personal foods — the ones you'll reliably eat no matter what. No suggestions, just yours.</p>
+                <p className="text-xs text-slate-500 mt-0.5">Add your personal foods: the ones you'll reliably eat no matter what. No suggestions, just yours.</p>
               </div>
               {EASY_FOOD_CATS.map(({ key, label, suggestions }) => {
                 const selected = easyFoodList[key] ?? [];

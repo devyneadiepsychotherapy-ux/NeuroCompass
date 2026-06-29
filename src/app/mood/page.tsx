@@ -65,7 +65,7 @@ const emotions: Record<string, { x: PleasantnessLevel; y: EnergyLevel }> = {
   "Sensory overload": { x: 1, y: 3 },
 };
 
-const bodyAreas = ["Head", "Neck", "Shoulders", "Chest", "Stomach", "Hands", "Legs", "Back", "Jaw", "Eyes", "Face"];
+const bodyAreas = ["Head", "Neck", "Shoulders", "Chest", "Stomach", "Hands", "Hips", "Legs", "Back", "Jaw", "Eyes", "Face"];
 const bodyNotePrompts = [
   "Heart racing?", "Tight chest?", "Heavy limbs?", "Tingly?", "Tense jaw?",
   "Stomach tight?", "Shaky?", "Foggy?", "Numb?", "Restless?"
@@ -134,9 +134,9 @@ function PastCheckIns({ entries }: { entries: MoodEntry[] }) {
         {displayed.map((entry) => {
           const isOpen = expanded === entry.id;
           return (
-            <div key={entry.id} className="bg-cream-50 rounded-2xl border border-slate-100 overflow-hidden relative">
+            <div key={entry.id} className="bg-cream-50 rounded-2xl border border-slate-100 overflow-hidden relative transition-colors hover:border-slate-200">
               <button
-                className="w-full flex items-center gap-3 px-4 py-3 text-left cursor-pointer"
+                className="w-full flex items-center gap-3 px-4 py-3 text-left cursor-pointer hover:bg-slate-50 active:bg-slate-100 transition-colors"
                 style={{ WebkitTapHighlightColor: "transparent" }}
                 onClick={() => setExpanded(isOpen ? null : entry.id)}
               >
@@ -272,7 +272,7 @@ function CheckInReminderSettings() {
             <div className="bg-sage-50 border border-sage-100 rounded-xl px-3 py-2.5 flex items-center justify-between gap-3">
               <p className="text-xs text-slate-600 flex-1">
                 {checkInReminders.permissionState === "denied"
-                  ? "Notifications blocked — enable in device settings."
+                  ? "Notifications blocked. Enable in device settings."
                   : "Allow notifications to get reminders when the app is closed."}
               </p>
               {checkInReminders.permissionState !== "denied" && (
@@ -525,22 +525,8 @@ export default function MoodPage() {
             </div>
           )}
         </div>
-        <div className="w-full space-y-2">
-          <p className="text-sm font-bold text-slate-700">Recent entries</p>
-          {recentEntries.map((entry) => (
-            <div key={entry.id} className="bg-cream-50 rounded-xl p-3 border border-slate-100 flex items-center gap-3">
-              <div className={cn("w-3 h-3 rounded-full shrink-0", entry.pleasantness >= 4 ? "bg-emerald-400" : entry.pleasantness >= 3 ? "bg-stone-400" : "bg-rose-400")} />
-              <div>
-                <p className="text-sm font-medium text-slate-700">
-                  {PLEASANT_LABELS[entry.pleasantness - 1]}
-                  {entry.emotions?.length > 0 && ` · ${entry.emotions.slice(0, 2).join(", ")}`}
-                </p>
-                <p className="text-xs text-slate-400">
-                  {new Date(entry.timestamp).toLocaleDateString("en-CA", { weekday: "short", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-                </p>
-              </div>
-            </div>
-          ))}
+        <div className="w-full">
+          <PastCheckIns entries={moodEntries.slice(0, 5)} />
         </div>
         <button
           onClick={resetAll}
@@ -584,7 +570,7 @@ export default function MoodPage() {
       {/* Flow selector */}
       {step === "flow" && (
         <div className="space-y-3">
-          {/* Full check-in — featured/primary */}
+          {/* Full check-in : featured/primary */}
           <button
             onClick={() => startFlow("both")}
             className="w-full text-left rounded-2xl p-5 transition-all active:scale-[0.98]"
@@ -593,7 +579,7 @@ export default function MoodPage() {
             <p className="text-base font-bold text-slate-800">Full check-in</p>
             <p className="text-sm text-slate-500 mt-0.5">Emotions, body scan, and notes</p>
           </button>
-          {/* Quick options — smaller, side by side */}
+          {/* Quick options : smaller, side by side */}
           <div className="grid grid-cols-2 gap-3">
             <button
               onClick={() => startFlow("mood")}
@@ -615,10 +601,10 @@ export default function MoodPage() {
         </div>
       )}
 
-      {/* Reminder settings — collapsible, only on flow step */}
+      {/* Reminder settings : collapsible, only on flow step */}
       {step === "flow" && <CheckInReminderSettings />}
 
-      {/* Past check-ins — always visible on flow step */}
+      {/* Past check-ins : always visible on flow step */}
       {step === "flow" && moodEntries.length > 0 && (
         <PastCheckIns entries={moodEntries} />
       )}

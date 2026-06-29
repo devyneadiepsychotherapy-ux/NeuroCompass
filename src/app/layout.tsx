@@ -51,7 +51,7 @@ export default function RootLayout({
     <html lang="en" style={{ colorScheme: "light" }} className={`${nunito.variable} ${playfair.variable}`}>
       <head>
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-        {/* Register service worker as early as possible — before React hydration */}
+        {/* Register service worker as early as possible : before React hydration */}
         <script
           dangerouslySetInnerHTML={{
             __html: `

@@ -267,7 +267,10 @@ function ToolsPageInner() {
   };
 
   const filtered = TOOLS.filter((t) => {
-    const matchCat = !activeCategory || t.category === activeCategory;
+    const matchCat = !activeCategory ||
+      (activeCategory === "psychoeducation"
+        ? t.tags?.includes("psychoeducation")
+        : t.category === activeCategory);
     const matchSearch = !search || t.title.toLowerCase().includes(search.toLowerCase()) || t.description.toLowerCase().includes(search.toLowerCase());
     return matchCat && matchSearch;
   });

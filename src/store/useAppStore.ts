@@ -262,7 +262,7 @@ interface AppState {
   userAvatar: string;
   completeOnboarding: (name: string, avatar: string) => void;
 
-  // Hydration flag — true once persist middleware has finished rehydrating from localStorage
+  // Hydration flag : true once persist middleware has finished rehydrating from localStorage
   _hasHydrated: boolean;
   setHasHydrated: (v: boolean) => void;
 
@@ -878,7 +878,7 @@ export const useAppStore = create<AppState>()(
       setShowFreezeSaved: (v) => set({ showFreezeSaved: v }),
 
       checkAndUpdateStreak: () => {
-        // Day rolls over at 5am — opening at 11pm still counts as "today"
+        // Day rolls over at 5am : opening at 11pm still counts as "today"
         const getEffectiveDate = () => {
           const now = new Date();
           const effective = new Date(now.getTime() + (now.getHours() < 5 ? -86400000 : 0));
@@ -923,7 +923,7 @@ export const useAppStore = create<AppState>()(
         }
       },
 
-      // Alias for addXp — routes through the real level-up logic
+      // Alias for addXp : routes through the real level-up logic
       addXP: (amount) => get().addXp(amount),
 
       userLists: [],
@@ -1171,7 +1171,7 @@ export const useAppStore = create<AppState>()(
         }
         if (version < 2) {
           // topPriorities (flat array) replaced by topPrioritiesByDate (date-keyed map).
-          // Drop old flat data — each day now starts fresh automatically.
+          // Drop old flat data : each day now starts fresh automatically.
           delete state.topPriorities;
           if (!state.topPrioritiesByDate) {
             state.topPrioritiesByDate = {};

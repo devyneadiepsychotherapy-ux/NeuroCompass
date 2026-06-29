@@ -1,6 +1,6 @@
 "use client";
 /**
- * ReminderManager — fires check-in and streak reminder notifications when the app
+ * ReminderManager : fires check-in and streak reminder notifications when the app
  * is opened or brought back to the foreground, if the set time has passed and we
  * haven't already notified today.
  */
@@ -151,7 +151,7 @@ export default function ReminderManager() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-xs font-bold text-slate-800">Keep your streak going!</p>
-            <p className="text-xs text-slate-500 mt-0.5">{streak}-day streak — open the app to keep it alive</p>
+            <p className="text-xs text-slate-500 mt-0.5">{streak}-day streak. Open the app to keep it alive.</p>
           </div>
           <button
             onClick={() => { setShowStreakBanner(false); router.push("/"); }}

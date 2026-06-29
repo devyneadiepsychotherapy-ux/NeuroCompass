@@ -7,6 +7,7 @@ export interface Tool {
   type: "quick" | "guided" | "info" | "interactive";
   content: ToolContent;
   linkTo?: string; // if set, card navigates to this page instead of opening modal
+  tags?: string[];
 }
 
 export interface ToolContent {
@@ -33,6 +34,7 @@ export const TOOL_CATEGORIES = [
   { id: "burnout", label: "Burnout Prevention", icon: "Battery", color: "bg-[#f0ddd8] text-[#9a5040]" },
   { id: "interoception", label: "Interoception", icon: "Activity", color: "bg-[#e4e0ec] text-[#5a5088]" },
   { id: "emotion", label: "Emotion Regulation", icon: "Heart", color: "bg-[#f0e4e0] text-[#8a5850]" },
+  { id: "psychoeducation", label: "Psychoeducation", icon: "BookOpen", color: "bg-[#e0e8f0] text-[#3a5878]" },
 ];
 
 export const TOOLS: Tool[] = [
@@ -62,6 +64,7 @@ export const TOOLS: Tool[] = [
     category: "time",
     icon: "Anchor",
     type: "info",
+    tags: ["psychoeducation"],
     content: {
       intro: "Instead of scheduling by clock time, anchor tasks to events you already do.",
       steps: [
@@ -84,6 +87,7 @@ export const TOOLS: Tool[] = [
     category: "time",
     icon: "LayoutGrid",
     type: "info",
+    tags: ["psychoeducation"],
     content: {
       intro: "Traditional time blocking fails ND brains. This version gives structure without rigidity.",
       steps: [
@@ -279,6 +283,7 @@ export const TOOLS: Tool[] = [
     category: "attention",
     icon: "Anchor",
     type: "info",
+    tags: ["psychoeducation"],
     content: {
       intro: "When you drift (and you will), you need something external to bring you back.",
       steps: [
@@ -480,6 +485,7 @@ export const TOOLS: Tool[] = [
     category: "sensory",
     icon: "Search",
     type: "guided",
+    tags: ["psychoeducation"],
     content: {
       intro: "Your environment profoundly affects your nervous system. Audit it intentionally.",
       prompts: [
@@ -530,6 +536,7 @@ export const TOOLS: Tool[] = [
     category: "sensory",
     icon: "Leaf",
     type: "info",
+    tags: ["psychoeducation"],
     content: {
       intro: "A 'sensory diet' is a planned schedule of sensory activities to keep your nervous system regulated throughout the day.",
       variants: [
@@ -583,6 +590,7 @@ export const TOOLS: Tool[] = [
     category: "selfcare",
     icon: "Sparkles",
     type: "info",
+    tags: ["psychoeducation"],
     content: {
       intro: "The secret to not drowning in chores: many tiny actions, not big cleaning sessions.",
       timerMinutes: 2,
@@ -666,6 +674,7 @@ export const TOOLS: Tool[] = [
     category: "eating",
     icon: "Thermometer",
     type: "guided",
+    tags: ["psychoeducation"],
     content: {
       intro: "Many ND people struggle to notice hunger until they're ravenous, or don't feel it at all. This is an interoception challenge, not a willpower issue.",
       steps: [
@@ -685,12 +694,12 @@ export const TOOLS: Tool[] = [
   {
     id: "easy-food",
     title: "My Safe Foods List",
-    description: "Your personal list of always-stocked, always-safe foods — no decisions required",
+    description: "Your personal list of always-stocked, always-safe foods. No decisions required.",
     category: "eating",
     icon: "Utensils",
     type: "interactive",
     content: {
-      intro: "These are YOUR foods — the ones you'll reliably eat regardless of energy, mood, or sensory state. No recipes, no decisions. Just foods you know work for you.",
+      intro: "These are YOUR foods: the ones you'll reliably eat regardless of energy, mood, or sensory state. No recipes, no decisions. Just foods you know work for you.",
     }
   },
   {
@@ -733,6 +742,7 @@ export const TOOLS: Tool[] = [
     category: "eating",
     icon: "UtensilsCrossed",
     type: "interactive",
+    tags: ["psychoeducation"],
     content: {
       intro: "ARFID (Avoidant/Restrictive Food Intake Disorder) and picky eating are real neurological experiences, not preference or stubbornness. Your relationship with food makes complete sense given how your nervous system works.",
     }
@@ -781,6 +791,7 @@ export const TOOLS: Tool[] = [
     category: "perfectionism",
     icon: "Shield",
     type: "info",
+    tags: ["psychoeducation"],
     content: {
       intro: "Rejection Sensitive Dysphoria (RSD) is common in ADHD and autism. The fear of criticism or failure can drive perfectionism as a protection strategy.",
       steps: [
@@ -806,6 +817,7 @@ export const TOOLS: Tool[] = [
     category: "people",
     icon: "MessageCircle",
     type: "info",
+    tags: ["psychoeducation"],
     content: {
       intro: "For people pleasers, having pre-planned scripts reduces the in-the-moment panic of saying no.",
       steps: [
@@ -830,6 +842,7 @@ export const TOOLS: Tool[] = [
     category: "people",
     icon: "Users",
     type: "info",
+    tags: ["psychoeducation"],
     content: {
       intro: "The 'fawn' response (fight/flight/freeze/fawn) is a survival strategy, automatically prioritizing others to avoid conflict or rejection.",
       steps: [
@@ -874,6 +887,7 @@ export const TOOLS: Tool[] = [
     category: "burnout",
     icon: "AlertTriangle",
     type: "info",
+    tags: ["psychoeducation"],
     content: {
       intro: "ND burnout is real, often severe, and preventable if caught early. It's different from regular tiredness.",
       steps: [
@@ -946,6 +960,7 @@ export const TOOLS: Tool[] = [
     category: "burnout",
     icon: "Eye",
     type: "info",
+    tags: ["psychoeducation"],
     content: {
       intro: "Masking (camouflaging ND traits to appear neurotypical) has a significant neurological and emotional cost, especially over time.",
       steps: [
@@ -971,6 +986,7 @@ export const TOOLS: Tool[] = [
     category: "interoception",
     icon: "Activity",
     type: "info",
+    tags: ["psychoeducation"],
     content: {
       intro: "Interoception is the sense of your body's internal states, hunger, thirst, temperature, pain, emotion, heartbeat. Many ND people have differences in interoception.",
       steps: [
@@ -993,6 +1009,7 @@ export const TOOLS: Tool[] = [
     category: "interoception",
     icon: "Crosshair",
     type: "guided",
+    tags: ["psychoeducation"],
     content: {
       intro: "This body scan is designed for ND brains, short, non-judgmental, and curiosity-focused.",
       steps: [
@@ -1019,6 +1036,7 @@ export const TOOLS: Tool[] = [
     category: "interoception",
     icon: "Droplets",
     type: "guided",
+    tags: ["psychoeducation"],
     content: {
       intro: "Many ND people don't reliably notice thirst until dehydrated or hunger until ravenous. This tool helps you identify YOUR personal signals.",
       prompts: [
@@ -1044,6 +1062,7 @@ export const TOOLS: Tool[] = [
     category: "emotion",
     icon: "Target",
     type: "guided",
+    tags: ["psychoeducation"],
     content: {
       intro: "Naming emotions precisely reduces their intensity. The emotion wheel helps you move from vague feelings ('bad', 'fine') to specific words ('frustrated', 'disappointed', 'overwhelmed').",
       steps: [
@@ -1074,6 +1093,7 @@ export const TOOLS: Tool[] = [
     category: "emotion",
     icon: "LayoutGrid",
     type: "info",
+    tags: ["psychoeducation"],
     content: {
       intro: "From Russ Harris's ACT work: emotions can be mapped on two axes -energy (high/low) and valence (pleasant/unpleasant). This helps you respond to emotions instead of reacting.",
       variants: [
@@ -1160,6 +1180,7 @@ export const TOOLS: Tool[] = [
     category: "motivation",
     icon: "Music",
     type: "info",
+    tags: ["psychoeducation"],
     content: {
       intro: "Music with a strong beat bypasses the thinking brain and directly activates the nervous system, ideal for freeze states.",
       steps: [
