@@ -258,16 +258,14 @@ function RewardCard({
 // Purchased reward row
 // ---------------------------------------------------------------------------
 
-function PurchasedRow({ reward }: { reward: ShopReward }) {
-  const [used, setUsed] = useState(false);
-
+function PurchasedRow({ reward, used, onToggle }: { reward: ShopReward; used: boolean; onToggle: () => void }) {
   return (
     <div className={cn(
       "bg-stone-50 border border-stone-200 rounded-2xl px-4 py-3 flex items-center gap-3 transition-all",
       used && "opacity-60"
     )}>
       <button
-        onClick={() => setUsed(!used)}
+        onClick={onToggle}
         className={cn(
           "w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
           used ? "bg-sage-500 border-sage-500" : "border-stone-300 hover:border-sage-400"
@@ -389,8 +387,9 @@ function AddRewardForm({ onAdd }: { onAdd: (r: Omit<ShopReward, "id">) => void }
 
 export default function ShopPage() {
   const {
-    coins, shopRewards, purchasedRewards, streakFreezes,
+    coins, shopRewards, purchasedRewards, usedPurchasedIndices, streakFreezes,
     purchaseReward, addShopReward, updateShopReward, deleteShopReward,
+    togglePurchasedRewardUsed,
     okayMode, setOkayMode,
   } = useAppStore();
   const [tab, setTab] = useState<"shop" | "mine">("shop");
@@ -402,7 +401,9 @@ export default function ShopPage() {
   const displayFreezes = mounted ? streakFreezes : 0;
   const displayRewards = mounted ? shopRewards : [];
   const purchased = mounted
-    ? (purchasedRewards.map((id) => shopRewards.find((r) => r.id === id)).filter(Boolean) as ShopReward[])
+    ? purchasedRewards
+        .map((id, idx) => ({ reward: shopRewards.find((r) => r.id === id), idx }))
+        .filter((x): x is { reward: ShopReward; idx: number } => x.reward !== undefined)
     : [];
 
   return (
@@ -531,8 +532,13 @@ export default function ShopPage() {
               <p className="text-xs text-slate-400 mt-1">Redeem something from the shop to see it here.</p>
             </div>
           ) : (
-            purchased.map((reward, i) => (
-              <PurchasedRow key={`${reward.id}-${i}`} reward={reward} />
+            purchased.map(({ reward, idx }) => (
+              <PurchasedRow
+                key={`${reward.id}-${idx}`}
+                reward={reward}
+                used={usedPurchasedIndices.includes(idx)}
+                onToggle={() => togglePurchasedRewardUsed(idx)}
+              />
             ))
           )}
         </div>

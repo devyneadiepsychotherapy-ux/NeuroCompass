@@ -189,10 +189,12 @@ interface AppState {
   spendCoins: (amount: number) => boolean;
   shopRewards: ShopReward[];
   purchasedRewards: string[];
+  usedPurchasedIndices: number[];
   addShopReward: (reward: Omit<ShopReward, "id">) => void;
   updateShopReward: (id: string, updates: Partial<Omit<ShopReward, "id">>) => void;
   deleteShopReward: (id: string) => void;
   purchaseReward: (id: string) => boolean;
+  togglePurchasedRewardUsed: (index: number) => void;
   streakFreezes: number;
   addStreakFreeze: () => void;
   useStreakFreeze: () => void;
@@ -373,6 +375,7 @@ export const useAppStore = create<AppState>()(
       coins: 0,
       shopRewards: defaultShopRewards,
       purchasedRewards: [],
+      usedPurchasedIndices: [],
       streakFreezes: 0,
       showStreakCelebration: false,
       showFreezeSaved: false,
@@ -866,6 +869,13 @@ export const useAppStore = create<AppState>()(
         set((s) => ({ purchasedRewards: [...s.purchasedRewards, id] }));
         return true;
       },
+
+      togglePurchasedRewardUsed: (index) =>
+        set((s) => ({
+          usedPurchasedIndices: s.usedPurchasedIndices.includes(index)
+            ? s.usedPurchasedIndices.filter((i) => i !== index)
+            : [...s.usedPurchasedIndices, index],
+        })),
 
       addStreakFreeze: () =>
         set((s) => ({ streakFreezes: s.streakFreezes + 1 })),
