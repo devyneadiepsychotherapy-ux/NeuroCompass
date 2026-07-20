@@ -2272,10 +2272,10 @@ function MealPlanSection({ selectedDate }: { selectedDate: Date }) {
 }
 
 // ---------------------------------------------------------------------------
-// Day view medication check-in
+// Day view medication quick-check strip
 // ---------------------------------------------------------------------------
 
-function DayMedicationSection({ selectedDate }: { selectedDate: Date }) {
+function MedQuickStrip({ selectedDate }: { selectedDate: Date }) {
   const { medicationReminders, medicationTakenDates, toggleMedicationTaken } = useAppStore();
   if (medicationReminders.length === 0) return null;
 
@@ -2283,74 +2283,39 @@ function DayMedicationSection({ selectedDate }: { selectedDate: Date }) {
   const taken = medicationTakenDates[dateStr] ?? [];
 
   return (
-    <div className="space-y-2">
+    <div className="flex flex-wrap gap-x-4 gap-y-1.5 px-1 py-1">
       {medicationReminders.map((med) => {
         const isBoth = med.schedule === "both";
-        const isMorning = !med.schedule || med.schedule === "morning";
         const isEvening = med.schedule === "evening";
+        const slots: ("morning" | "evening")[] = isBoth
+          ? ["morning", "evening"]
+          : isEvening
+          ? ["evening"]
+          : ["morning"];
 
-        if (isBoth) {
-          return (
-            <div key={med.id}>
-              <p className="text-xs font-semibold text-slate-500 mb-1">{med.name}</p>
-              <div className="flex gap-2">
-                {(["morning", "evening"] as const).map((slot) => {
-                  const k = `${med.id}-${slot}`;
-                  const checked = taken.includes(k);
-                  return (
-                    <button
-                      key={slot}
-                      onClick={() => toggleMedicationTaken(med.id, dateStr, slot)}
-                      className={cn(
-                        "flex-1 flex items-center gap-2 rounded-xl px-3 py-2 border text-left transition-all",
-                        checked ? "bg-sage-50 border-sage-200" : "bg-white border-slate-200 hover:border-sage-300"
-                      )}
-                    >
-                      <div className={cn(
-                        "w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0",
-                        checked ? "bg-sage-500 border-sage-500" : "border-slate-300"
-                      )}>
-                        {checked && <Check size={8} className="text-white" strokeWidth={3} />}
-                      </div>
-                      {slot === "morning"
-                        ? <Sun size={11} className="text-amber-400" />
-                        : <Moon size={11} className="text-indigo-400" />}
-                      <span className={cn("text-xs font-medium capitalize flex-1", checked ? "line-through text-slate-400" : "text-slate-600")}>
-                        {slot}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        }
-
-        const checked = taken.includes(med.id);
         return (
-          <button
-            key={med.id}
-            onClick={() => toggleMedicationTaken(med.id, dateStr)}
-            className={cn(
-              "w-full flex items-center gap-3 rounded-xl px-3 py-2 text-left border transition-all",
-              checked ? "bg-sage-50 border-sage-200" : "bg-white border-slate-200 hover:border-sage-300"
-            )}
-          >
-            <div className={cn(
-              "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0",
-              checked ? "bg-sage-500 border-sage-500" : "border-slate-300"
-            )}>
-              {checked && <Check size={10} className="text-white" strokeWidth={3} />}
-            </div>
-            {isEvening
-              ? <Moon size={12} className="text-indigo-400 shrink-0" />
-              : isMorning
-              ? <Sun size={12} className="text-amber-400 shrink-0" />
-              : null}
-            <span className={cn("text-sm flex-1", checked ? "line-through text-slate-400" : "text-slate-700 font-medium")}>
-              {med.name}
-            </span>
-          </button>
+          <div key={med.id} className="flex items-center gap-1.5">
+            <span className="text-xs text-slate-500 font-medium">{med.name}</span>
+            {slots.map((slot) => {
+              const k = isBoth ? `${med.id}-${slot}` : med.id;
+              const checked = taken.includes(k);
+              const slotArg = isBoth ? slot : undefined;
+              return (
+                <button
+                  key={slot}
+                  onClick={() => toggleMedicationTaken(med.id, dateStr, slotArg)}
+                  className={cn(
+                    "flex items-center gap-0.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full border transition-all",
+                    checked
+                      ? "bg-sage-500 border-sage-500 text-white"
+                      : "bg-white border-slate-200 text-slate-400 hover:border-sage-300"
+                  )}
+                >
+                  {slot === "morning" ? "AM" : "PM"}
+                </button>
+              );
+            })}
+          </div>
         );
       })}
     </div>
@@ -3213,7 +3178,7 @@ function TasksSection({
 // ---------------------------------------------------------------------------
 
 export default function PlannerPage() {
-  const { sectionVisibility, toggleSection, streak, tasks, updateTask, completeTask, medicationReminders } = useAppStore();
+  const { sectionVisibility, toggleSection, streak, tasks, updateTask, completeTask } = useAppStore();
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -3281,6 +3246,7 @@ export default function PlannerPage() {
       {activeView === "day" && (
         <>
           {mounted && <DayProgressBar selectedDate={selectedDate} />}
+          {mounted && <MedQuickStrip selectedDate={selectedDate} />}
 
           {/* Hidden section chips */}
           {hiddenSections.length > 0 && (
@@ -3317,17 +3283,6 @@ export default function PlannerPage() {
               card
             >
               <ScheduleSection selectedDate={selectedDate} />
-            </Section>
-          )}
-
-          {/* Medication check-in (only shown when meds are configured) */}
-          {mounted && medicationReminders.length > 0 && (
-            <Section
-              id="medications"
-              icon={<Pill size={16} />}
-              title="Medications"
-            >
-              <DayMedicationSection selectedDate={selectedDate} />
             </Section>
           )}
 
