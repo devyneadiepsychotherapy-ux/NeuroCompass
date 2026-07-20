@@ -100,6 +100,14 @@ function getMonthKey(date: Date): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 }
 
+function getWeekOfMonth(date: Date): 1 | 2 | 3 | 4 {
+  // Find Monday of the week containing date
+  const d = new Date(date);
+  const day = d.getDay();
+  d.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
+  return Math.min(4, Math.ceil(d.getDate() / 7)) as 1 | 2 | 3 | 4;
+}
+
 function formatDateLabel(date: Date, view: PlannerView): string {
   if (view === "day") {
     return date.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
@@ -540,7 +548,7 @@ function FocusList({
 // Recurring to-do list (weekly / monthly)
 // ---------------------------------------------------------------------------
 
-function RecurringTodosList({ recurType }: { recurType: "weekly" | "monthly" }) {
+function RecurringTodosList({ recurType, asOfDate }: { recurType: "weekly" | "monthly"; asOfDate?: string }) {
   const { tasks, addTask, updateTask, completeTask, deleteTask } = useAppStore();
   const [input, setInput] = useState("");
   const [repeat, setRepeat] = useState(true);
@@ -548,10 +556,10 @@ function RecurringTodosList({ recurType }: { recurType: "weekly" | "monthly" }) 
   const recurTasks = tasks.filter((t) => t.isRecurring && t.recurType === recurType);
 
   const handleToggle = (task: Task) => {
-    if (isTaskDone(task)) {
+    if (isTaskDone(task, asOfDate)) {
       updateTask(task.id, { status: "todo", completedAt: undefined });
     } else {
-      completeTask(task.id);
+      completeTask(task.id, asOfDate);
     }
   };
 
@@ -577,30 +585,51 @@ function RecurringTodosList({ recurType }: { recurType: "weekly" | "monthly" }) 
         <p className="text-sm text-slate-400 italic">Nothing added yet.</p>
       )}
       {recurTasks.map((task) => {
-        const done = isTaskDone(task);
+        const done = isTaskDone(task, asOfDate);
         return (
-          <div key={task.id} className="flex items-center gap-3 group">
-            <button
-              onClick={() => handleToggle(task)}
-              className={cn(
-                "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
-                done ? "bg-sage-500 border-sage-500" : "border-slate-300 hover:border-sage-500"
+          <div key={task.id} className="space-y-1 group">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => handleToggle(task)}
+                className={cn(
+                  "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
+                  done ? "bg-sage-500 border-sage-500" : "border-slate-300 hover:border-sage-500"
+                )}
+              >
+                {done && <Check size={10} className="text-white" />}
+              </button>
+              <span className={cn("text-sm flex-1", done ? "line-through text-slate-400" : "text-slate-700")}>
+                {task.title}
+              </span>
+              {task.isRecurring && (
+                <Repeat size={11} className="text-sage-400 shrink-0 opacity-60" />
               )}
-            >
-              {done && <Check size={10} className="text-white" />}
-            </button>
-            <span className={cn("text-sm flex-1", done ? "line-through text-slate-400" : "text-slate-700")}>
-              {task.title}
-            </span>
-            {task.isRecurring && (
-              <Repeat size={11} className="text-sage-400 shrink-0 opacity-60" />
+              <button
+                onClick={() => deleteTask(task.id)}
+                className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 transition-all"
+              >
+                <Trash2 size={13} />
+              </button>
+            </div>
+            {recurType === "monthly" && (
+              <div className="flex items-center gap-1 pl-8">
+                <span className="text-[10px] text-slate-400 mr-0.5">Week:</span>
+                {([1, 2, 3, 4] as const).map((w) => (
+                  <button
+                    key={w}
+                    onClick={() => updateTask(task.id, { weekOfMonth: task.weekOfMonth === w ? undefined : w })}
+                    className={cn(
+                      "text-[10px] px-1.5 py-0.5 rounded font-semibold transition-all",
+                      task.weekOfMonth === w
+                        ? "bg-sage-500 text-white"
+                        : "bg-slate-100 text-slate-400 hover:bg-slate-200"
+                    )}
+                  >
+                    W{w}
+                  </button>
+                ))}
+              </div>
             )}
-            <button
-              onClick={() => deleteTask(task.id)}
-              className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 transition-all"
-            >
-              <Trash2 size={13} />
-            </button>
           </div>
         );
       })}
@@ -2854,7 +2883,7 @@ function TasksSection({
 // ---------------------------------------------------------------------------
 
 export default function PlannerPage() {
-  const { sectionVisibility, toggleSection, streak } = useAppStore();
+  const { sectionVisibility, toggleSection, streak, tasks, updateTask, completeTask } = useAppStore();
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -3044,8 +3073,48 @@ export default function PlannerPage() {
             </div>
             <div className="pt-6 pb-1">
               <h2 className="font-[family-name:var(--font-fraunces)] italic text-sm text-slate-600 mb-3">Weekly To-Do&apos;s</h2>
-              <RecurringTodosList recurType="weekly" />
+              <RecurringTodosList recurType="weekly" asOfDate={dateKey(selectedDate)} />
             </div>
+            {(() => {
+              const weekNum = getWeekOfMonth(selectedDate);
+              const monthlyThisWeek = tasks.filter(
+                (t) => t.isRecurring && t.recurType === "monthly" && t.weekOfMonth === weekNum
+              );
+              if (monthlyThisWeek.length === 0) return null;
+              return (
+                <div className="pt-6 pb-1">
+                  <h2 className="font-[family-name:var(--font-fraunces)] italic text-sm text-slate-600 mb-1">Monthly To-Do&apos;s (Week {weekNum})</h2>
+                  <div className="space-y-2">
+                    {monthlyThisWeek.map((task) => {
+                      const done = isTaskDone(task, dateKey(selectedDate));
+                      return (
+                        <div key={task.id} className="flex items-center gap-3">
+                          <button
+                            onClick={() => {
+                              if (done) {
+                                updateTask(task.id, { status: "todo", completedAt: undefined });
+                              } else {
+                                completeTask(task.id, dateKey(selectedDate));
+                              }
+                            }}
+                            className={cn(
+                              "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
+                              done ? "bg-sage-500 border-sage-500" : "border-slate-300 hover:border-sage-500"
+                            )}
+                          >
+                            {done && <Check size={10} className="text-white" />}
+                          </button>
+                          <span className={cn("text-sm flex-1", done ? "line-through text-slate-400" : "text-slate-700")}>
+                            {task.title}
+                          </span>
+                          <Repeat size={11} className="text-sage-400 shrink-0 opacity-60" />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         );
       })()}
@@ -3069,7 +3138,7 @@ export default function PlannerPage() {
             </div>
             <div className="pt-6 pb-1">
               <h2 className="font-[family-name:var(--font-fraunces)] italic text-sm text-slate-600 mb-3">Monthly To-Do&apos;s</h2>
-              <RecurringTodosList recurType="monthly" />
+              <RecurringTodosList recurType="monthly" asOfDate={dateKey(selectedDate)} />
             </div>
           </div>
         );

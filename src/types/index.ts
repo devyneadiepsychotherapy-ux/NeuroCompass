@@ -28,6 +28,7 @@ export interface Task {
   endTime?: string;   // "HH:MM" e.g. "11:30"
   reminderMinsBefore?: number; // 0 = at time, undefined = no reminder
   carryOver?: boolean; // if true, task reappears on days after its dueDate
+  weekOfMonth?: 1 | 2 | 3 | 4; // monthly recurring tasks: pin to a specific week (Mon-Sun boundaries)
 }
 
 export interface ShopReward {
