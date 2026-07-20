@@ -152,6 +152,15 @@ export interface HomeVisibility {
   medicationWidget: boolean;
 }
 
+export interface MeVisibility {
+  energyWidget: boolean;
+  medication: boolean;
+  strengths: boolean;
+  toolbox: boolean;
+  sensoryProfile: boolean;
+  quickLinks: boolean;
+}
+
 export interface FocusSession {
   isActive: boolean;
   durationSeconds: number;

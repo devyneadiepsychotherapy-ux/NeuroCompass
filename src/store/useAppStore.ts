@@ -36,6 +36,7 @@ import {
   CheckInReminders,
   MedicationReminder,
   HomeVisibility,
+  MeVisibility,
 } from "@/types";
 import { generateId, levelFromXp, getTodayKey, localDateKey } from "@/lib/utils";
 import { ThemeId, THEMES } from "@/lib/themes";
@@ -220,6 +221,10 @@ interface AppState {
   // Home page customisation
   homeVisibility: HomeVisibility;
   toggleHomeSection: (section: keyof HomeVisibility) => void;
+
+  // Me page customisation
+  meVisibility: MeVisibility;
+  toggleMeSection: (section: keyof MeVisibility) => void;
 
   // Daily streak & simple XP
   streak: number;
@@ -407,6 +412,14 @@ export const useAppStore = create<AppState>()(
         support: true,
         energyWidget: true,
         medicationWidget: true,
+      },
+      meVisibility: {
+        energyWidget: true,
+        medication: true,
+        strengths: true,
+        toolbox: true,
+        sensoryProfile: true,
+        quickLinks: true,
       },
       streakFreezes: 0,
       showStreakCelebration: false,
@@ -939,6 +952,11 @@ export const useAppStore = create<AppState>()(
           homeVisibility: { ...s.homeVisibility, [section]: !s.homeVisibility[section] },
         })),
 
+      toggleMeSection: (section) =>
+        set((s) => ({
+          meVisibility: { ...s.meVisibility, [section]: !s.meVisibility[section] },
+        })),
+
       addStreakFreeze: () =>
         set((s) => ({ streakFreezes: s.streakFreezes + 1 })),
 
@@ -1210,7 +1228,7 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: "neurocompass-store",
-      version: 4,
+      version: 5,
       storage:
         typeof window !== "undefined"
           ? createJSONStorage(() => localStorage)
@@ -1270,6 +1288,18 @@ export const useAppStore = create<AppState>()(
           const reminders = state.checkInReminders as Record<string, unknown> | undefined;
           if (reminders && !reminders.thirstHunger) {
             reminders.thirstHunger = { enabled: false, times: ["10:00", "14:00", "18:00"], lastNotifiedDates: {} };
+          }
+        }
+        if (version < 5) {
+          if (!state.meVisibility) {
+            state.meVisibility = {
+              energyWidget: true,
+              medication: true,
+              strengths: true,
+              toolbox: true,
+              sensoryProfile: true,
+              quickLinks: true,
+            };
           }
         }
         return state;

@@ -4,12 +4,12 @@ import Link from "next/link";
 import {
   Brain, Leaf, Zap, Shield, Sparkles, ListChecks, Plus,
   Trash2, Check, ChevronDown, ChevronUp, X, ChevronRight,
-  Heart, Pill,
+  Pill, SlidersHorizontal,
   LayoutGrid, LayoutList,
 } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 import { cn, xpForLevel, getTodayKey } from "@/lib/utils";
-import { SpecialInterest, UserList, ToolFavorite } from "@/types";
+import { SpecialInterest, UserList, ToolFavorite, MeVisibility } from "@/types";
 import { TOOLS } from "@/lib/tools-data";
 import { ICON_MAP } from "@/lib/icon-map";
 import { getAvatarOption } from "@/app/onboarding/page";
@@ -631,16 +631,81 @@ function MyListsCard() {
 }
 
 // ---------------------------------------------------------------------------
+// Me page customise panel
+// ---------------------------------------------------------------------------
+
+const ME_SECTIONS: { key: keyof MeVisibility; label: string; desc: string }[] = [
+  { key: "energyWidget",  label: "Energy tracker",      desc: "Quick-log your energy level today"        },
+  { key: "medication",    label: "Medication checkoff",  desc: "Daily medication tracking card"           },
+  { key: "strengths",     label: "ND Strengths",         desc: "Your neurodivergent strength highlights"  },
+  { key: "toolbox",       label: "My Toolbox",           desc: "Favourited tools shortcut list"           },
+  { key: "sensoryProfile",label: "Sensory Profile",      desc: "Triggers and soothers summary"            },
+  { key: "quickLinks",    label: "Quick Links",          desc: "Special interests and My Lists cards"     },
+];
+
+function MeCustomizePanel({
+  visibility,
+  onToggle,
+  onClose,
+}: {
+  visibility: MeVisibility;
+  onToggle: (section: keyof MeVisibility) => void;
+  onClose: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col justify-end" onClick={onClose}>
+      <div
+        className="bg-cream-50 rounded-t-3xl shadow-2xl px-4 pt-4 pb-10 space-y-4 max-h-[80vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between">
+          <p className="text-base font-bold text-slate-800">Customise My Profile</p>
+          <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-slate-600 transition-colors">
+            <X size={18} />
+          </button>
+        </div>
+        <p className="text-xs text-slate-400">Show or hide sections on your profile page.</p>
+        <div className="space-y-1">
+          {ME_SECTIONS.map(({ key, label, desc }) => (
+            <button
+              key={key}
+              onClick={() => onToggle(key)}
+              className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-slate-50 transition-colors text-left"
+            >
+              <div className={cn(
+                "w-11 h-6 rounded-full relative transition-colors shrink-0",
+                visibility[key] ? "bg-sage-500" : "bg-slate-200"
+              )}>
+                <span className={cn(
+                  "absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all",
+                  visibility[key] ? "left-[22px]" : "left-0.5"
+                )} />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-slate-700">{label}</p>
+                <p className="text-xs text-slate-400">{desc}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Me page
 // ---------------------------------------------------------------------------
 
 export default function MePage() {
   const { profile, sensoryProfile, favorites, userName, userAvatar,
     medicationReminders, medicationTakenDates, toggleMedicationTaken, medicationShowOnMe,
-    moodEntries, addMoodEntry, addXP } =
+    moodEntries, addMoodEntry, addXP,
+    meVisibility, toggleMeSection } =
     useAppStore();
   const avatarInfo = getAvatarOption(userAvatar);
   const [mounted, setMounted] = useState(false);
+  const [showCustomize, setShowCustomize] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -658,6 +723,14 @@ export default function MePage() {
 
   return (
     <div className="px-4 pt-0 pb-24 space-y-4">
+      {mounted && showCustomize && (
+        <MeCustomizePanel
+          visibility={meVisibility}
+          onToggle={toggleMeSection}
+          onClose={() => setShowCustomize(false)}
+        />
+      )}
+
       {/* Header */}
       <div className="pt-3 pb-2">
         <div className="flex items-start justify-between gap-3">
@@ -674,23 +747,34 @@ export default function MePage() {
               <p className="text-sm text-slate-500 mt-0.5">Level {profile.level}</p>
             </div>
           </div>
-          {mounted && (
-            <div className="flex flex-col items-end gap-1 shrink-0 pt-1">
-              <span className="text-xs font-semibold text-slate-500">{profile.totalXp} XP</span>
-              <div className="w-20 h-1.5 rounded-full bg-slate-200 overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-sage-500 transition-all"
-                  style={{ width: `${((profile.totalXp % xpForLevel(profile.level)) / xpForLevel(profile.level)) * 100}%` }}
-                />
+          <div className="flex items-center gap-2 shrink-0 pt-1">
+            {mounted && (
+              <button
+                onClick={() => setShowCustomize(true)}
+                className="p-1.5 text-slate-400 hover:text-slate-600 transition-colors"
+                aria-label="Customise profile page"
+              >
+                <SlidersHorizontal size={18} />
+              </button>
+            )}
+            {mounted && (
+              <div className="flex flex-col items-end gap-1">
+                <span className="text-xs font-semibold text-slate-500">{profile.totalXp} XP</span>
+                <div className="w-20 h-1.5 rounded-full bg-slate-200 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-sage-500 transition-all"
+                    style={{ width: `${((profile.totalXp % xpForLevel(profile.level)) / xpForLevel(profile.level)) * 100}%` }}
+                  />
+                </div>
+                <span className="text-[10px] text-slate-400">to level {profile.level + 1}</span>
               </div>
-              <span className="text-[10px] text-slate-400">to level {profile.level + 1}</span>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
       {/* Energy quick-log */}
-      {mounted && (() => {
+      {mounted && meVisibility.energyWidget && (() => {
         const ENERGY_LEVELS: { label: string; value: 2 | 3 | 4; emoji: string; activeBg: string }[] = [
           { label: "Low",    value: 2, emoji: "🔋", activeBg: "bg-rose-50 border-rose-300"   },
           { label: "Medium", value: 3, emoji: "⚡", activeBg: "bg-stone-100 border-stone-300" },
@@ -728,7 +812,7 @@ export default function MePage() {
       })()}
 
       {/* Medication checkoff */}
-      {mounted && medicationShowOnMe && medicationReminders.length > 0 && (
+      {mounted && meVisibility.medication && medicationShowOnMe && medicationReminders.length > 0 && (
         <div className="bg-cream-50 rounded-2xl border border-slate-200 shadow-sm p-4 space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -769,12 +853,13 @@ export default function MePage() {
       )}
 
       {/* ND Strengths */}
-      {mounted ? (
+      {mounted && meVisibility.strengths && (
         <NDStrengthsCard
           ndIdentities={profile.ndIdentities}
           strengths={profile.strengths}
         />
-      ) : (
+      )}
+      {!mounted && (
         <div
           className="bg-cream-50 rounded-2xl border h-28 animate-pulse"
           style={{ borderColor: "#D0DCCB" }}
@@ -782,9 +867,8 @@ export default function MePage() {
       )}
 
       {/* My Toolbox */}
-      {mounted ? (
-        <MyToolboxCard favorites={favorites} />
-      ) : (
+      {mounted && meVisibility.toolbox && <MyToolboxCard favorites={favorites} />}
+      {!mounted && (
         <div
           className="bg-cream-50 rounded-2xl border h-20 animate-pulse"
           style={{ borderColor: "#DDD9F0" }}
@@ -792,12 +876,13 @@ export default function MePage() {
       )}
 
       {/* Sensory Profile Summary */}
-      {mounted ? (
+      {mounted && meVisibility.sensoryProfile && (
         <SensoryProfileSummaryCard
           triggers={sensoryProfile.triggers}
           soothers={sensoryProfile.soothers}
         />
-      ) : (
+      )}
+      {!mounted && (
         <div
           className="bg-cream-50 rounded-2xl border h-24 animate-pulse"
           style={{ borderColor: "#C8D8C6" }}
@@ -805,7 +890,7 @@ export default function MePage() {
       )}
 
       {/* My Lists + Special Interests (2-col link buttons) */}
-      {mounted ? (
+      {mounted && meVisibility.quickLinks && (
         <div className="grid grid-cols-2 gap-3">
           {/* Special Interests link card */}
           <Link
@@ -833,7 +918,8 @@ export default function MePage() {
             <ChevronRight size={14} className="text-slate-300 shrink-0" />
           </Link>
         </div>
-      ) : (
+      )}
+      {!mounted && (
         <div className="grid grid-cols-2 gap-3">
           <div
             className="bg-cream-50 rounded-2xl border h-16 animate-pulse"
