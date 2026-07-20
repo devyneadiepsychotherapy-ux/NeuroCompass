@@ -747,8 +747,9 @@ function scheduleNotification(title: string, fireAt: Date) {
 // ---------------------------------------------------------------------------
 
 function DayProgressBar({ selectedDate }: { selectedDate: Date }) {
-  const { appointments } = useAppStore();
+  const { appointments, dayEndTime, setDayEndTime } = useAppStore();
   const [now, setNow] = useState(() => new Date());
+  const [editingEndTime, setEditingEndTime] = useState(false);
 
   useEffect(() => {
     const id = setInterval(() => setNow(new Date()), 60_000);
@@ -758,14 +759,25 @@ function DayProgressBar({ selectedDate }: { selectedDate: Date }) {
   const todayKey = getTodayKey();
   if (dateKey(selectedDate) !== todayKey) return null;
 
-  // 6 AM – 11 PM window
-  const DAY_START = 6 * 60;
-  const DAY_END = 23 * 60;
-  const DAY_TOTAL = DAY_END - DAY_START;
+  const DAY_START = 6 * 60; // 6 AM
+  const [endH, endM] = dayEndTime.split(":").map(Number);
+  const DAY_END = endH * 60 + endM;
+  const DAY_TOTAL = Math.max(1, DAY_END - DAY_START);
 
   const nowMins = now.getHours() * 60 + now.getMinutes();
   const clampedMins = Math.max(DAY_START, Math.min(DAY_END, nowMins));
   const pct = Math.round(((clampedMins - DAY_START) / DAY_TOTAL) * 100);
+
+  // Remaining time until end of day
+  const remainingMins = Math.max(0, DAY_END - nowMins);
+  const remainingLabel = (() => {
+    if (remainingMins <= 0) return "Day done";
+    const hrs = Math.floor(remainingMins / 60);
+    const mins = remainingMins % 60;
+    if (hrs === 0) return `${mins}m left in your day`;
+    if (mins === 0) return `${hrs}h left in your day`;
+    return `${hrs}h ${mins}m left in your day`;
+  })();
 
   const timeLabel = now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
 
@@ -803,11 +815,38 @@ function DayProgressBar({ selectedDate }: { selectedDate: Date }) {
 
       {/* Labels row */}
       <div className="flex items-center justify-between gap-2">
-        <p className="text-[11px] text-slate-400 shrink-0">
-          <span className="font-semibold text-slate-500">{timeLabel}</span>
-          {" · "}
-          {pct}% of day
-        </p>
+        <div className="flex items-center gap-1.5 shrink-0 min-w-0">
+          <p className="text-[11px] text-slate-400">
+            <span className="font-semibold text-slate-500">{timeLabel}</span>
+            {" · "}
+            {remainingLabel}
+          </p>
+          {/* End-of-day tap-to-edit */}
+          {editingEndTime ? (
+            <input
+              type="time"
+              defaultValue={dayEndTime}
+              className="text-[11px] text-sage-700 font-semibold bg-white border border-sage-300 rounded-lg px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-sage-400"
+              autoFocus
+              onBlur={(e) => { setDayEndTime(e.target.value || "22:00"); setEditingEndTime(false); }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") { setDayEndTime((e.target as HTMLInputElement).value || "22:00"); setEditingEndTime(false); }
+                if (e.key === "Escape") setEditingEndTime(false);
+              }}
+            />
+          ) : (
+            <button
+              onClick={() => setEditingEndTime(true)}
+              className="text-[10px] text-slate-300 hover:text-sage-500 transition-colors"
+              title="Set end of day time"
+            >
+              ends {dayEndTime.split(":").map((p, i) => {
+                if (i === 0) { const h = parseInt(p); return `${h > 12 ? h - 12 : h || 12}`; }
+                return `:${p} ${parseInt(dayEndTime.split(":")[0]) >= 12 ? "PM" : "AM"}`;
+              }).join("")}
+            </button>
+          )}
+        </div>
         {nextAppt && countdownLabel && (
           <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full px-2 py-0.5 min-w-0">
             <Clock size={9} className="text-slate-400 shrink-0" />

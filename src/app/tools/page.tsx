@@ -11,6 +11,7 @@ import { ToolModal } from "@/components/ToolModal";
 
 // Map category id to a soft background color for the icon container
 const CATEGORY_ICON_BG: Record<string, string> = {
+  daily:         "bg-[#e4eee8]",
   time:          "bg-[#ede8e0]",
   motivation:    "bg-[#f0e8d0]",
   attention:     "bg-[#dde4ec]",
@@ -28,6 +29,7 @@ const CATEGORY_ICON_BG: Record<string, string> = {
 
 // Left-border accent color per category
 const CATEGORY_BORDER_ACCENT: Record<string, string> = {
+  daily:         "border-l-[#7aaa88]",
   time:          "border-l-[#c4bbb0]",
   motivation:    "border-l-[#c8a870]",
   attention:     "border-l-[#9ab0c8]",

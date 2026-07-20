@@ -314,6 +314,10 @@ interface AppState {
   toolboxViewMode: 'grid' | 'list';
   setToolboxViewMode: (mode: 'grid' | 'list') => void;
 
+  // Day progress bar end-of-day time
+  dayEndTime: string; // "HH:MM" 24-hour, default "22:00"
+  setDayEndTime: (t: string) => void;
+
   // Theme & notification
   activeTheme: ThemeId;
   setActiveTheme: (id: ThemeId) => void;
@@ -1226,6 +1230,8 @@ export const useAppStore = create<AppState>()(
 
       toolboxViewMode: 'list',
       setToolboxViewMode: (mode) => set({ toolboxViewMode: mode }),
+      dayEndTime: "22:00",
+      setDayEndTime: (t) => set({ dayEndTime: t }),
 
       activeTheme: 'default',
       setActiveTheme: (id) => set({ activeTheme: id }),
@@ -1238,7 +1244,7 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: "neurocompass-store",
-      version: 6,
+      version: 7,
       storage:
         typeof window !== "undefined"
           ? createJSONStorage(() => localStorage)
@@ -1315,6 +1321,11 @@ export const useAppStore = create<AppState>()(
         if (version < 6) {
           if (!state.dailyEnergyLogs) {
             state.dailyEnergyLogs = {};
+          }
+        }
+        if (version < 7) {
+          if (!state.dayEndTime) {
+            state.dayEndTime = "22:00";
           }
         }
         return state;

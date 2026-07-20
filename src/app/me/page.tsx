@@ -767,6 +767,19 @@ export default function MePage() {
       </div>
 
       {/* Medication checkoff */}
+      {mounted && meVisibility.medication && medicationShowOnMe && medicationReminders.length === 0 && (
+        <Link
+          href="/tools/medication-reminder"
+          className="flex items-center gap-3 bg-cream-50 rounded-2xl border border-dashed border-slate-200 p-4 hover:border-sage-300 transition-colors"
+        >
+          <Pill size={16} className="text-slate-300 shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-slate-500">Set up medication reminders</p>
+            <p className="text-xs text-slate-400">Track daily meds and earn XP for taking them</p>
+          </div>
+          <ChevronRight size={14} className="text-slate-300 shrink-0" />
+        </Link>
+      )}
       {mounted && meVisibility.medication && medicationShowOnMe && medicationReminders.length > 0 && (
         <div className="bg-cream-50 rounded-2xl border border-slate-200 shadow-sm p-4 space-y-2">
           <div className="flex items-center justify-between">
