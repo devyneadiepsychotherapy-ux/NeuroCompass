@@ -700,7 +700,7 @@ function MeCustomizePanel({
 export default function MePage() {
   const { profile, sensoryProfile, favorites, userName, userAvatar,
     medicationReminders, medicationTakenDates, toggleMedicationTaken, medicationShowOnMe,
-    moodEntries, addMoodEntry, addXP,
+    addXP, dailyEnergyLogs, logDailyEnergy,
     meVisibility, toggleMeSection } =
     useAppStore();
   const avatarInfo = getAvatarOption(userAvatar);
@@ -713,11 +713,10 @@ export default function MePage() {
 
   const today = getTodayKey();
   const takenToday = medicationTakenDates[today] ?? [];
-  const todayEnergyEntry = moodEntries.find((e) => e.timestamp.startsWith(today));
-  const todayEnergy = todayEnergyEntry?.energy;
+  const todayEnergy = dailyEnergyLogs[today];
 
   const handleEnergyLog = (value: 2 | 3 | 4) => {
-    addMoodEntry({ energy: value, pleasantness: 3, emotions: [] });
+    logDailyEnergy(today, value);
     addXP(2);
   };
 
@@ -781,8 +780,11 @@ export default function MePage() {
           { label: "High",   value: 4, emoji: "✨", activeBg: "bg-sage-50 border-sage-300"   },
         ];
         return (
-          <div className="bg-cream-50 rounded-2xl border border-slate-100 shadow-sm p-4 space-y-3">
-            <p className="text-sm font-semibold text-slate-700">How&apos;s your energy today?</p>
+          <div className="bg-cream-50 rounded-2xl border border-slate-100 shadow-sm p-4 space-y-2">
+            <div>
+              <p className="text-sm font-semibold text-slate-700">Energy Level</p>
+              <p className="text-xs text-slate-400 mt-0.5">How is your physical and mental energy right now?</p>
+            </div>
             <div className="grid grid-cols-3 gap-2">
               {ENERGY_LEVELS.map(({ label, value, emoji, activeBg }) => {
                 const active = (todayEnergy as number | undefined) === value;
@@ -803,9 +805,7 @@ export default function MePage() {
               })}
             </div>
             {todayEnergy && (
-              <p className="text-xs text-slate-400 text-center">
-                Logged today · <Link href="/mood" className="text-sage-600 font-medium">view history</Link>
-              </p>
+              <p className="text-xs text-slate-400 text-center">Logged for today</p>
             )}
           </div>
         );

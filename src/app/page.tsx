@@ -454,8 +454,11 @@ const ENERGY_LEVELS = [
 
 function EnergyWidget({ todayEnergy, onLog }: { todayEnergy?: number; onLog: (v: 2 | 3 | 4) => void }) {
   return (
-    <div className="bg-white/70 border border-slate-200 rounded-2xl p-4 space-y-3">
-      <p className="text-sm font-semibold text-slate-700">How&apos;s your energy today?</p>
+    <div className="bg-white/70 border border-slate-200 rounded-2xl p-4 space-y-2">
+      <div>
+        <p className="text-sm font-semibold text-slate-700">Energy Level</p>
+        <p className="text-xs text-slate-400 mt-0.5">How is your physical and mental energy right now?</p>
+      </div>
       <div className="grid grid-cols-3 gap-2">
         {ENERGY_LEVELS.map(({ label, value, emoji, activeBg }) => {
           const active = todayEnergy === value;
@@ -476,9 +479,7 @@ function EnergyWidget({ todayEnergy, onLog }: { todayEnergy?: number; onLog: (v:
         })}
       </div>
       {todayEnergy && (
-        <p className="text-xs text-slate-400 text-center">
-          Logged · <span className="text-sage-600 font-medium">shows in check-in history</span>
-        </p>
+        <p className="text-xs text-slate-400 text-center">Logged for today</p>
       )}
     </div>
   );
@@ -554,7 +555,7 @@ export default function HomePage() {
     showFreezeSaved, setShowFreezeSaved,
     streakFreezes,
     _hasHydrated,
-    moodEntries, addMoodEntry, addXP,
+    addXP, dailyEnergyLogs, logDailyEnergy,
     homeVisibility, toggleHomeSection,
     medicationReminders, medicationTakenDates, toggleMedicationTaken, medicationShowOnHome,
   } = useAppStore();
@@ -585,11 +586,10 @@ export default function HomePage() {
   };
 
   const today = getTodayKey();
-  const todayEnergyEntry = moodEntries.find((e) => e.timestamp.startsWith(today));
-  const todayEnergy = todayEnergyEntry?.energy;
+  const todayEnergy = dailyEnergyLogs[today];
 
   const handleEnergyLog = (value: 2 | 3 | 4) => {
-    addMoodEntry({ energy: value, pleasantness: 3, emotions: [] });
+    logDailyEnergy(today, value);
     addXP(2);
   };
 

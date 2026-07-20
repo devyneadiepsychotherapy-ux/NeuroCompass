@@ -226,6 +226,10 @@ interface AppState {
   meVisibility: MeVisibility;
   toggleMeSection: (section: keyof MeVisibility) => void;
 
+  // Standalone daily energy log (separate from mood check-in entries)
+  dailyEnergyLogs: Record<string, 2 | 3 | 4>; // "YYYY-MM-DD" -> energy level
+  logDailyEnergy: (date: string, level: 2 | 3 | 4) => void;
+
   // Daily streak & simple XP
   streak: number;
   lastOpenedDate: string;
@@ -421,6 +425,7 @@ export const useAppStore = create<AppState>()(
         sensoryProfile: true,
         quickLinks: true,
       },
+      dailyEnergyLogs: {},
       streakFreezes: 0,
       showStreakCelebration: false,
       showFreezeSaved: false,
@@ -959,6 +964,9 @@ export const useAppStore = create<AppState>()(
           meVisibility: { ...s.meVisibility, [section]: !s.meVisibility[section] },
         })),
 
+      logDailyEnergy: (date, level) =>
+        set((s) => ({ dailyEnergyLogs: { ...s.dailyEnergyLogs, [date]: level } })),
+
       addStreakFreeze: () =>
         set((s) => ({ streakFreezes: s.streakFreezes + 1 })),
 
@@ -1230,7 +1238,7 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: "neurocompass-store",
-      version: 5,
+      version: 6,
       storage:
         typeof window !== "undefined"
           ? createJSONStorage(() => localStorage)
@@ -1302,6 +1310,11 @@ export const useAppStore = create<AppState>()(
               sensoryProfile: true,
               quickLinks: true,
             };
+          }
+        }
+        if (version < 6) {
+          if (!state.dailyEnergyLogs) {
+            state.dailyEnergyLogs = {};
           }
         }
         return state;

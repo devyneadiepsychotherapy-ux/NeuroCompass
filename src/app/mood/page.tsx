@@ -620,8 +620,8 @@ export default function MoodPage() {
       {step === "energy" && (
         <div className="space-y-6">
           <div>
-            <h2 className="text-lg font-bold text-slate-800 mb-1">How&apos;s your energy?</h2>
-            <p className="text-sm text-slate-500">A quick read on your capacity right now.</p>
+            <h2 className="text-lg font-bold text-slate-800 mb-1">Energy Level</h2>
+            <p className="text-sm text-slate-500">How is your physical and mental energy right now?</p>
           </div>
           <div className="grid grid-cols-3 gap-3">
             {CAPACITY_OPTIONS.map(({ label, energyValue, color, bg }) => {
@@ -661,7 +661,7 @@ export default function MoodPage() {
         <div className="space-y-5">
           {/* Energy */}
           <div>
-            <p className="text-sm font-semibold text-slate-700 mb-3">Energy level right now</p>
+            <p className="text-sm font-semibold text-slate-700 mb-3">Energy Level</p>
             <div className="flex gap-2 flex-wrap">
               {ENERGY_OPTIONS.map((opt) => {
                 const Icon = opt.icon;
