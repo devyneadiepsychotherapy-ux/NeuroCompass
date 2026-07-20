@@ -4,7 +4,7 @@ import { useAppStore } from "@/store/useAppStore";
 import { MedicationReminder } from "@/types";
 import { cn } from "@/lib/utils";
 import { Pill, Plus, Trash2, Check, Edit2, ArrowLeft, Sun, Moon, Minus } from "lucide-react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { getTodayKey } from "@/lib/utils";
 
 type Schedule = "morning" | "evening" | "both";
@@ -318,6 +318,7 @@ export default function MedicationReminderPage() {
     setMedicationShowOnHome,
   } = useAppStore();
 
+  const router = useRouter();
   const today = getTodayKey();
   const takenToday = medicationTakenDates[today] ?? [];
 
@@ -329,9 +330,9 @@ export default function MedicationReminderPage() {
   return (
     <div className="px-4 pt-0 pb-24 space-y-5">
       <div className="pt-3 pb-2 flex items-center gap-3">
-        <Link href="/tools" className="p-2 -ml-2 text-slate-400 hover:text-slate-600 transition-colors">
+        <button onClick={() => router.back()} className="p-2 -ml-2 text-slate-400 hover:text-slate-600 transition-colors">
           <ArrowLeft size={20} />
-        </Link>
+        </button>
         <div>
           <h1 className="text-2xl font-bold text-slate-800 leading-tight" style={{ fontFamily: "var(--font-fraunces)" }}>
             Medication Reminder

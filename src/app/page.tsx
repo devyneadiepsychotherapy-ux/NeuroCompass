@@ -700,11 +700,6 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Energy quick-log */}
-      {homeVisibility.energyWidget && (
-        <EnergyWidget todayEnergy={todayEnergy} onLog={handleEnergyLog} />
-      )}
-
       {/* Medication checkoff */}
       {homeVisibility.medicationWidget && medicationShowOnHome && medicationReminders.length === 0 && (
         <Link
@@ -789,6 +784,11 @@ export default function HomePage() {
             })}
           </div>
         </div>
+      )}
+
+      {/* Energy quick-log */}
+      {homeVisibility.energyWidget && (
+        <EnergyWidget todayEnergy={todayEnergy} onLog={handleEnergyLog} />
       )}
 
       {/* Feeling Frozen */}

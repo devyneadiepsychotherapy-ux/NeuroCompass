@@ -1,19 +1,17 @@
 "use client";
-import { useState, Suspense } from "react";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, Plus, X, ChevronRight, Trash2, Check, Heart, Eye, Music, Crosshair, Wind, Utensils, RefreshCw, Activity, Thermometer, ShoppingCart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/store/useAppStore";
 import type { LucideIcon } from "lucide-react";
 
-function BackLink() {
-  const searchParams = useSearchParams();
-  const backHref = searchParams.get("from") === "me" ? "/me" : "/tools";
+function BackButton() {
+  const router = useRouter();
   return (
-    <Link href={backHref} className="p-2 rounded-xl hover:bg-slate-100">
+    <button onClick={() => router.back()} className="p-2 rounded-xl hover:bg-slate-100">
       <ArrowLeft size={20} className="text-slate-500" />
-    </Link>
+    </button>
   );
 }
 
@@ -246,9 +244,7 @@ export default function SensorySoothingKitPage() {
     return (
       <div className="px-4 pt-12 pb-8 space-y-5">
         <div className="flex items-center gap-3">
-          <Suspense fallback={<Link href="/tools" className="p-2 rounded-xl hover:bg-slate-100"><ArrowLeft size={20} className="text-slate-500" /></Link>}>
-            <BackLink />
-          </Suspense>
+          <BackButton />
           <div className="flex-1">
             <h1 className="text-xl font-bold text-slate-800">Sensory Soothing Kit</h1>
             <p className="text-sm text-slate-500">Your personalised regulation toolkit</p>
@@ -304,9 +300,7 @@ export default function SensorySoothingKitPage() {
     return (
       <div className="px-4 pt-12 pb-8 space-y-5">
         <div className="flex items-center gap-3">
-          <Suspense fallback={<Link href="/tools" className="p-2 rounded-xl hover:bg-slate-100"><ArrowLeft size={20} className="text-slate-500" /></Link>}>
-            <BackLink />
-          </Suspense>
+          <BackButton />
           <div className="flex-1">
             <h1 className="text-xl font-bold text-slate-800">Sensory Soothing Kit</h1>
             <p className="text-sm text-slate-500">Step 1 of 4</p>

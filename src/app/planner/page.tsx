@@ -862,9 +862,35 @@ function DayProgressBar({ selectedDate }: { selectedDate: Date }) {
   );
 }
 
+// Tracks the visual viewport height so bottom-sheet portals stay above the
+// keyboard when it appears on mobile (iOS Safari uses the layout viewport for
+// `fixed` positioning, not the visual viewport, so vh doesn't shrink).
+function useVisualViewport() {
+  const [vv, setVv] = useState({ height: 0, top: 0 });
+  useEffect(() => {
+    const update = () => {
+      const viewport = window.visualViewport;
+      if (viewport) {
+        setVv({ height: viewport.height, top: viewport.offsetTop });
+      } else {
+        setVv({ height: window.innerHeight, top: 0 });
+      }
+    };
+    update();
+    window.visualViewport?.addEventListener("resize", update);
+    window.visualViewport?.addEventListener("scroll", update);
+    return () => {
+      window.visualViewport?.removeEventListener("resize", update);
+      window.visualViewport?.removeEventListener("scroll", update);
+    };
+  }, []);
+  return vv;
+}
+
 function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
   const { appointments, addAppointment, deleteAppointment, updateAppointment } = useAppStore();
   const [showForm, setShowForm] = useState(false);
+  const { height: vvHeight, top: vvTop } = useVisualViewport();
   const [allDay, setAllDay] = useState(false);
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("10:00");
@@ -874,19 +900,12 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
   const [reminderMins, setReminderMins] = useState<number | undefined>(undefined);
   const [color, setColor] = useState(DEFAULT_APPT_COLOR);
 
-  // Lock body scroll when any overlay is open
+  // Prevent background scroll while modal is open without locking the body
+  // (position:fixed breaks visual viewport tracking and keyboard insets on iOS).
   useEffect(() => {
     if (showForm) {
-      const y = window.scrollY;
-      document.body.style.position = "fixed";
-      document.body.style.top = `-${y}px`;
-      document.body.style.width = "100%";
-      return () => {
-        document.body.style.position = "";
-        document.body.style.top = "";
-        document.body.style.width = "";
-        window.scrollTo(0, y);
-      };
+      document.body.style.overflow = "hidden";
+      return () => { document.body.style.overflow = ""; };
     }
   }, [showForm]);
 
@@ -1098,8 +1117,16 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
       )}
 
       {showForm && createPortal(
-        <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/30 px-4 pb-6" onClick={() => setShowForm(false)}>
-        <div className="bg-cream-50 border border-slate-200 rounded-2xl w-full max-w-lg max-h-[82vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed left-0 right-0 z-[200] flex items-end justify-center bg-black/30 px-4 pb-6"
+          style={vvHeight ? { top: vvTop, height: vvHeight } : { inset: 0 }}
+          onClick={() => setShowForm(false)}
+        >
+        <div
+          className="bg-cream-50 border border-slate-200 rounded-2xl w-full max-w-lg flex flex-col"
+          style={{ maxHeight: vvHeight ? vvHeight * 0.88 : "82dvh" }}
+          onClick={(e) => e.stopPropagation()}
+        >
         <div className="overflow-y-auto overscroll-contain p-4 space-y-3 flex-1">
           {/* Title */}
           <input
@@ -1291,20 +1318,12 @@ function AppointmentRow({
   );
   const [editReminderMins, setEditReminderMins] = useState<number | undefined>(appt.reminderMinsBefore);
   const [editColor, setEditColor] = useState(appt.color ?? DEFAULT_APPT_COLOR);
+  const { height: vvHeight, top: vvTop } = useVisualViewport();
 
-  // Lock body scroll when edit overlay is open
   useEffect(() => {
     if (showEdit) {
-      const y = window.scrollY;
-      document.body.style.position = "fixed";
-      document.body.style.top = `-${y}px`;
-      document.body.style.width = "100%";
-      return () => {
-        document.body.style.position = "";
-        document.body.style.top = "";
-        document.body.style.width = "";
-        window.scrollTo(0, y);
-      };
+      document.body.style.overflow = "hidden";
+      return () => { document.body.style.overflow = ""; };
     }
   }, [showEdit]);
 
@@ -1357,8 +1376,16 @@ function AppointmentRow({
     : appt.startTime ? formatTimeStr(appt.startTime) : "All day";
 
   const editOverlay = showEdit && createPortal(
-      <div className="fixed inset-0 z-[200] flex items-end justify-center bg-black/30 px-4 pb-6" onClick={() => setShowEdit(false)}>
-      <div className="bg-cream-50 border border-slate-200 rounded-2xl w-full max-w-lg max-h-[82vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="fixed left-0 right-0 z-[200] flex items-end justify-center bg-black/30 px-4 pb-6"
+        style={vvHeight ? { top: vvTop, height: vvHeight } : { inset: 0 }}
+        onClick={() => setShowEdit(false)}
+      >
+      <div
+        className="bg-cream-50 border border-slate-200 rounded-2xl w-full max-w-lg flex flex-col"
+        style={{ maxHeight: vvHeight ? vvHeight * 0.88 : "82dvh" }}
+        onClick={(e) => e.stopPropagation()}
+      >
       <div className="overflow-y-auto overscroll-contain p-4 space-y-3 flex-1">
         <input
           className="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-sage-400"

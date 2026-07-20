@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAppStore } from "@/store/useAppStore";
 import { Plus, Trash2, ArrowLeft } from "lucide-react";
 
@@ -14,6 +14,7 @@ const DM_SUGGESTIONS: Record<string, string[]> = {
 };
 
 export default function DopamineMenuPage() {
+  const router = useRouter();
   const { dopamineMenuItems, addDopamineMenuItem, removeDopamineMenuItem } = useAppStore();
   const [dmCat, setDmCat] = useState(DM_CATS[0]);
   const [dmText, setDmText] = useState("");
@@ -28,13 +29,13 @@ export default function DopamineMenuPage() {
   return (
     <div className="px-4 pt-12 pb-8 space-y-5">
       <div className="flex items-center gap-3">
-        <Link
-          href="/tools"
+        <button
+          onClick={() => router.back()}
           className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-sage-100 transition-colors shrink-0"
-          aria-label="Back to tools"
+          aria-label="Back"
         >
           <ArrowLeft size={20} className="text-slate-600" />
-        </Link>
+        </button>
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Dopamine Menu</h1>
           <p className="text-sm text-slate-500 mt-0.5">
