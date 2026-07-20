@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { generateId, getTodayKey } from "@/lib/utils";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, Plus, X, Heart, CheckSquare, Calendar } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 
@@ -58,6 +58,7 @@ const QUADRANTS: { key: Quadrant; label: string; subtitle: string; emoji: string
 ];
 
 export default function EisenhowerPage() {
+  const router = useRouter();
   const { toggleFavorite, isFavorite, addTask: storeAddTask, addAppointment } = useAppStore();
   const favorite = isFavorite("eisenhower-matrix");
   const [tasks, setTasks] = useState<MatrixTask[]>([]);
@@ -95,9 +96,9 @@ export default function EisenhowerPage() {
   return (
     <div className="px-4 pt-12 pb-8 space-y-5">
       <div className="flex items-center gap-3">
-        <Link href="/tools" className="p-2 rounded-xl hover:bg-slate-100">
+        <button onClick={() => router.back()} className="p-2 rounded-xl hover:bg-slate-100">
           <ArrowLeft size={20} className="text-slate-500" />
-        </Link>
+        </button>
         <div className="flex-1">
           <h1 className="text-2xl font-bold text-slate-800">Eisenhower Matrix</h1>
           <p className="text-sm text-slate-500">Prioritize by urgency × importance</p>

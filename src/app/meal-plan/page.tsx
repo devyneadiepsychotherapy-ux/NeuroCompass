@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Plus, X, ShoppingCart, ChevronDown, ChevronUp, ArrowLeft, Heart } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
@@ -34,6 +34,7 @@ const SHOP_CATEGORIES = [
 ];
 
 export default function MealPlanPage() {
+  const router = useRouter();
   const { toggleFavorite, isFavorite } = useAppStore();
   const favorite = isFavorite("meal-planner");
   const [plan, setPlan] = useState<MealPlan>({});
@@ -143,9 +144,9 @@ export default function MealPlanPage() {
   return (
     <div className="px-4 pt-12 pb-8 space-y-5">
       <div className="flex items-center gap-3">
-        <Link href="/tools" className="p-2 rounded-xl hover:bg-slate-100">
+        <button onClick={() => router.back()} className="p-2 rounded-xl hover:bg-slate-100">
           <ArrowLeft size={20} className="text-slate-500" />
-        </Link>
+        </button>
         <div className="flex-1">
           <h1 className="text-2xl font-bold text-slate-800">Meal Planner</h1>
           <p className="text-sm text-slate-500">{filledCount} meal{filledCount !== 1 ? "s" : ""} planned this week</p>

@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { generateId } from "@/lib/utils";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, Plus, X, ChevronDown, ChevronRight, Heart, Save, Trash2, FolderOpen } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 import type { MindNode } from "@/types";
@@ -176,6 +176,7 @@ const TEMPLATES = [
 const EMPTY_TREE: MindNode = { id: "root", text: "Central idea", children: [], color: "" };
 
 export default function MindMapPage() {
+  const router = useRouter();
   const { toggleFavorite, isFavorite, savedMindMaps, saveMindMap, deleteSavedMindMap } = useAppStore();
   const favorite = isFavorite("mind-map");
   const [colorIdx, setColorIdx] = useState(0);
@@ -249,9 +250,9 @@ export default function MindMapPage() {
   return (
     <div className="px-4 pt-12 pb-8 space-y-5">
       <div className="flex items-center gap-3">
-        <Link href="/tools" className="p-2 rounded-xl hover:bg-slate-100">
+        <button onClick={() => router.back()} className="p-2 rounded-xl hover:bg-slate-100">
           <ArrowLeft size={20} className="text-slate-500" />
-        </Link>
+        </button>
         <div className="flex-1">
           <h1 className="text-2xl font-bold text-slate-800">Mind Map</h1>
           <p className="text-sm text-slate-500">Visual thinking for ND brains</p>

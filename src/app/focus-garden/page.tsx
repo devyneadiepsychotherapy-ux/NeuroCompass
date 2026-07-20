@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, Heart } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 import { cn } from "@/lib/utils";
@@ -351,6 +351,7 @@ function playCompletionAlert() {
 }
 
 export default function FocusGardenPage() {
+  const router = useRouter();
   const {
     focusSession,
     startFocusSession,
@@ -451,13 +452,13 @@ export default function FocusGardenPage() {
 
       {/* Header */}
       <div className="flex items-center px-4 pt-12 pb-2">
-        <Link
-          href="/tools"
+        <button
+          onClick={() => router.back()}
           className="flex items-center justify-center w-9 h-9 rounded-full hover:bg-sage-100 transition-colors"
-          aria-label="Back to tools"
+          aria-label="Go back"
         >
           <ArrowLeft size={20} className="text-slate-600" />
-        </Link>
+        </button>
         <h1 className="text-base font-semibold text-slate-700 ml-3 flex-1">The Focus Garden</h1>
         <button
           onClick={() => toggleFavorite("focus-garden")}
