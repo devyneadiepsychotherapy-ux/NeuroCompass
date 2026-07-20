@@ -508,16 +508,18 @@ function CustomizePanel({ visibility, onToggle, onClose }: {
   return (
     <div className="fixed inset-0 z-50 flex items-end" onClick={onClose}>
       <div
-        className="w-full max-w-sm mx-auto bg-white rounded-t-3xl shadow-2xl border border-slate-200 pb-8"
+        className="w-full max-w-sm mx-auto bg-white rounded-t-3xl shadow-2xl border border-slate-200 flex flex-col max-h-[calc(100dvh-80px)]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-slate-100">
+        {/* Sticky header */}
+        <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-slate-100 shrink-0">
           <p className="text-base font-bold text-slate-800">Customise Home</p>
           <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-slate-600 transition-colors">
             <X size={18} />
           </button>
         </div>
-        <div className="px-5 pt-3 space-y-1">
+        {/* Scrollable content — pb-24 clears the bottom nav */}
+        <div className="overflow-y-auto px-5 pt-3 pb-24 space-y-1">
           {HOME_SECTIONS.map(({ key, label, desc }) => (
             <button
               key={key}

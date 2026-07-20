@@ -654,38 +654,42 @@ function MeCustomizePanel({
   return (
     <div className="fixed inset-0 z-50 flex flex-col justify-end" onClick={onClose}>
       <div
-        className="bg-cream-50 rounded-t-3xl shadow-2xl px-4 pt-4 pb-10 space-y-4 max-h-[80vh] overflow-y-auto"
+        className="bg-cream-50 rounded-t-3xl shadow-2xl flex flex-col max-h-[calc(100dvh-80px)]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between">
+        {/* Sticky header */}
+        <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-slate-100 shrink-0">
           <p className="text-base font-bold text-slate-800">Customise My Profile</p>
           <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-slate-600 transition-colors">
             <X size={18} />
           </button>
         </div>
-        <p className="text-xs text-slate-400">Show or hide sections on your profile page.</p>
-        <div className="space-y-1">
-          {ME_SECTIONS.map(({ key, label, desc }) => (
-            <button
-              key={key}
-              onClick={() => onToggle(key)}
-              className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-slate-50 transition-colors text-left"
-            >
-              <div className={cn(
-                "w-11 h-6 rounded-full relative transition-colors shrink-0",
-                visibility[key] ? "bg-sage-500" : "bg-slate-200"
-              )}>
-                <span className={cn(
-                  "absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all",
-                  visibility[key] ? "left-[22px]" : "left-0.5"
-                )} />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-slate-700">{label}</p>
-                <p className="text-xs text-slate-400">{desc}</p>
-              </div>
-            </button>
-          ))}
+        {/* Scrollable content — pb-24 clears the bottom nav */}
+        <div className="overflow-y-auto px-4 pt-3 pb-24 space-y-3">
+          <p className="text-xs text-slate-400">Show or hide sections on your profile page.</p>
+          <div className="space-y-1">
+            {ME_SECTIONS.map(({ key, label, desc }) => (
+              <button
+                key={key}
+                onClick={() => onToggle(key)}
+                className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-slate-50 transition-colors text-left"
+              >
+                <div className={cn(
+                  "w-11 h-6 rounded-full relative transition-colors shrink-0",
+                  visibility[key] ? "bg-sage-500" : "bg-slate-200"
+                )}>
+                  <span className={cn(
+                    "absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all",
+                    visibility[key] ? "left-[22px]" : "left-0.5"
+                  )} />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-slate-700">{label}</p>
+                  <p className="text-xs text-slate-400">{desc}</p>
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>
