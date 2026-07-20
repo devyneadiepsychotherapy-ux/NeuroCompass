@@ -635,7 +635,6 @@ function MyListsCard() {
 // ---------------------------------------------------------------------------
 
 const ME_SECTIONS: { key: keyof MeVisibility; label: string; desc: string }[] = [
-  { key: "energyWidget",  label: "Energy tracker",      desc: "Quick-log your energy level today"        },
   { key: "medication",    label: "Medication checkoff",  desc: "Daily medication tracking card"           },
   { key: "strengths",     label: "ND Strengths",         desc: "Your neurodivergent strength highlights"  },
   { key: "toolbox",       label: "My Toolbox",           desc: "Favourited tools shortcut list"           },
@@ -700,7 +699,6 @@ function MeCustomizePanel({
 export default function MePage() {
   const { profile, sensoryProfile, favorites, userName, userAvatar,
     medicationReminders, medicationTakenDates, toggleMedicationTaken, medicationShowOnMe,
-    addXP, dailyEnergyLogs, logDailyEnergy,
     meVisibility, toggleMeSection } =
     useAppStore();
   const avatarInfo = getAvatarOption(userAvatar);
@@ -713,12 +711,6 @@ export default function MePage() {
 
   const today = getTodayKey();
   const takenToday = medicationTakenDates[today] ?? [];
-  const todayEnergy = dailyEnergyLogs[today];
-
-  const handleEnergyLog = (value: 2 | 3 | 4) => {
-    logDailyEnergy(today, value);
-    addXP(2);
-  };
 
   return (
     <div className="px-4 pt-0 pb-24 space-y-4">
@@ -771,45 +763,6 @@ export default function MePage() {
           </div>
         </div>
       </div>
-
-      {/* Energy quick-log */}
-      {mounted && meVisibility.energyWidget && (() => {
-        const ENERGY_LEVELS: { label: string; value: 2 | 3 | 4; emoji: string; activeBg: string }[] = [
-          { label: "Low",    value: 2, emoji: "🔋", activeBg: "bg-rose-50 border-rose-300"   },
-          { label: "Medium", value: 3, emoji: "⚡", activeBg: "bg-stone-100 border-stone-300" },
-          { label: "High",   value: 4, emoji: "✨", activeBg: "bg-sage-50 border-sage-300"   },
-        ];
-        return (
-          <div className="bg-cream-50 rounded-2xl border border-slate-100 shadow-sm p-4 space-y-2">
-            <div>
-              <p className="text-sm font-semibold text-slate-700">Energy Level</p>
-              <p className="text-xs text-slate-400 mt-0.5">How is your physical and mental energy right now?</p>
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              {ENERGY_LEVELS.map(({ label, value, emoji, activeBg }) => {
-                const active = (todayEnergy as number | undefined) === value;
-                return (
-                  <button
-                    key={value}
-                    onClick={() => handleEnergyLog(value)}
-                    className={cn(
-                      "flex flex-col items-center gap-1.5 py-3 rounded-xl border-2 text-xs font-semibold transition-all active:scale-[0.96]",
-                      active ? activeBg : "bg-white border-slate-200 text-slate-500 hover:border-slate-300"
-                    )}
-                  >
-                    <span className="text-xl">{emoji}</span>
-                    {label}
-                    {active && <Check size={10} className="text-current" />}
-                  </button>
-                );
-              })}
-            </div>
-            {todayEnergy && (
-              <p className="text-xs text-slate-400 text-center">Logged for today</p>
-            )}
-          </div>
-        );
-      })()}
 
       {/* Medication checkoff */}
       {mounted && meVisibility.medication && medicationShowOnMe && medicationReminders.length > 0 && (

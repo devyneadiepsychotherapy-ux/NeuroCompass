@@ -683,6 +683,14 @@ export default function HomePage() {
         />
       )}
 
+      {/* Quote */}
+      {homeVisibility.quote && (
+        <div className="rounded-2xl px-4 py-3.5 border-l-4 border-sage-300" style={{ background: "linear-gradient(135deg, var(--color-sage-50) 0%, var(--color-sage-100) 100%)" }}>
+          <p className="text-xs font-semibold text-sage-600 mb-1">Today&apos;s thought</p>
+          <p className="text-sm text-slate-600 italic leading-relaxed">&ldquo;{todayQuote}&rdquo;</p>
+        </div>
+      )}
+
       {/* Energy quick-log */}
       {homeVisibility.energyWidget && (
         <EnergyWidget todayEnergy={todayEnergy} onLog={handleEnergyLog} />
@@ -758,14 +766,6 @@ export default function HomePage() {
               );
             })}
           </div>
-        </div>
-      )}
-
-      {/* Quote */}
-      {homeVisibility.quote && (
-        <div className="rounded-2xl px-4 py-3.5 border-l-4 border-sage-300" style={{ background: "linear-gradient(135deg, var(--color-sage-50) 0%, var(--color-sage-100) 100%)" }}>
-          <p className="text-xs font-semibold text-sage-600 mb-1">Today&apos;s thought</p>
-          <p className="text-sm text-slate-600 italic leading-relaxed">&ldquo;{todayQuote}&rdquo;</p>
         </div>
       )}
 
