@@ -742,17 +742,8 @@ export default function MePage() {
               <p className="text-sm text-slate-500 mt-0.5">Level {profile.level}</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 shrink-0 pt-1">
-            {mounted && (
-              <button
-                onClick={() => setShowCustomize(true)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 transition-colors"
-                aria-label="Customise profile page"
-              >
-                <SlidersHorizontal size={18} />
-              </button>
-            )}
-            {mounted && (
+          {mounted && (
+            <div className="flex items-center gap-2 shrink-0 pt-1">
               <div className="flex flex-col items-end gap-1">
                 <span className="text-xs font-semibold text-slate-500">{profile.totalXp} XP</span>
                 <div className="w-20 h-1.5 rounded-full bg-slate-200 overflow-hidden">
@@ -763,8 +754,15 @@ export default function MePage() {
                 </div>
                 <span className="text-[10px] text-slate-400">to level {profile.level + 1}</span>
               </div>
-            )}
-          </div>
+              <button
+                onClick={() => setShowCustomize(true)}
+                className="p-1.5 text-slate-300 hover:text-slate-500 transition-colors"
+                aria-label="Customise profile page"
+              >
+                <SlidersHorizontal size={16} />
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
