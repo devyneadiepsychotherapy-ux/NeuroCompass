@@ -30,6 +30,7 @@ export interface Task {
   carryOver?: boolean; // if true, task reappears on days after its dueDate
   weekOfMonth?: 1 | 2 | 3 | 4; // monthly recurring tasks: pin to a specific week (Mon-Sun boundaries)
   weekOverrides?: Record<string, 1 | 2 | 3 | 4>; // "YYYY-MM" -> per-month week override
+  monthlyCarryOver?: boolean; // if true, task shows in next week when incomplete
 }
 
 export interface ShopReward {

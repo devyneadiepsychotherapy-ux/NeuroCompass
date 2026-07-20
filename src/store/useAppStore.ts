@@ -301,9 +301,11 @@ interface AppState {
   addWeeklyFocusItem: (weekKey: string, text: string) => void;
   toggleWeeklyFocusItem: (weekKey: string, id: string) => void;
   deleteWeeklyFocusItem: (weekKey: string, id: string) => void;
+  updateWeeklyFocusItem: (weekKey: string, id: string, text: string) => void;
   addMonthlyGoalItem: (monthKey: string, text: string) => void;
   toggleMonthlyGoalItem: (monthKey: string, id: string) => void;
   deleteMonthlyGoalItem: (monthKey: string, id: string) => void;
+  updateMonthlyGoalItem: (monthKey: string, id: string, text: string) => void;
 
   // Saved mind maps
   savedMindMaps: import("@/types").SavedMindMap[];
@@ -1214,6 +1216,12 @@ export const useAppStore = create<AppState>()(
           [weekKey]: (s.weeklyFocus[weekKey] ?? []).filter((i) => i.id !== id),
         },
       })),
+      updateWeeklyFocusItem: (weekKey, id, text) => set((s) => ({
+        weeklyFocus: {
+          ...s.weeklyFocus,
+          [weekKey]: (s.weeklyFocus[weekKey] ?? []).map((i) => i.id === id ? { ...i, text } : i),
+        },
+      })),
 
       monthlyGoals: {},
       addMonthlyGoalItem: (monthKey, text) => set((s) => ({
@@ -1232,6 +1240,12 @@ export const useAppStore = create<AppState>()(
         monthlyGoals: {
           ...s.monthlyGoals,
           [monthKey]: (s.monthlyGoals[monthKey] ?? []).filter((i) => i.id !== id),
+        },
+      })),
+      updateMonthlyGoalItem: (monthKey, id, text) => set((s) => ({
+        monthlyGoals: {
+          ...s.monthlyGoals,
+          [monthKey]: (s.monthlyGoals[monthKey] ?? []).map((i) => i.id === id ? { ...i, text } : i),
         },
       })),
 

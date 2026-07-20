@@ -10,6 +10,7 @@ import {
   Plus, Check, Trash2, Star, Clock, ChevronDown, ChevronUp, X, Repeat,
   Eye, EyeOff, Flame, CalendarClock, Target, ListTodo, Activity, Coins,
   ChevronLeft, ChevronRight, Calendar, CalendarDays, Pencil, UtensilsCrossed,
+  Pill, Sun, Moon,
 } from "lucide-react";
 
 // ---------------------------------------------------------------------------
@@ -485,10 +486,12 @@ function FocusList({
   monthKey,
 }: { weekKey?: string; monthKey?: string }) {
   const {
-    weeklyFocus, addWeeklyFocusItem, toggleWeeklyFocusItem, deleteWeeklyFocusItem,
-    monthlyGoals, addMonthlyGoalItem, toggleMonthlyGoalItem, deleteMonthlyGoalItem,
+    weeklyFocus, addWeeklyFocusItem, toggleWeeklyFocusItem, deleteWeeklyFocusItem, updateWeeklyFocusItem,
+    monthlyGoals, addMonthlyGoalItem, toggleMonthlyGoalItem, deleteMonthlyGoalItem, updateMonthlyGoalItem,
   } = useAppStore();
   const [input, setInput] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState("");
 
   const key = weekKey ?? monthKey ?? "";
   const isWeekly = !!weekKey;
@@ -496,12 +499,26 @@ function FocusList({
   const addItem = isWeekly ? addWeeklyFocusItem : addMonthlyGoalItem;
   const toggleItem = isWeekly ? toggleWeeklyFocusItem : toggleMonthlyGoalItem;
   const deleteItem = isWeekly ? deleteWeeklyFocusItem : deleteMonthlyGoalItem;
+  const updateItem = isWeekly ? updateWeeklyFocusItem : updateMonthlyGoalItem;
 
   const handleAdd = () => {
     const t = input.trim();
     if (!t) return;
     addItem(key, t);
     setInput("");
+  };
+
+  const startEdit = (item: { id: string; text: string }) => {
+    setEditingId(item.id);
+    setEditText(item.text);
+  };
+
+  const commitEdit = () => {
+    if (editingId && editText.trim()) {
+      updateItem(key, editingId, editText.trim());
+    }
+    setEditingId(null);
+    setEditText("");
   };
 
   return (
@@ -520,12 +537,30 @@ function FocusList({
           >
             {item.done && <Check size={10} className="text-white" />}
           </button>
-          <span className={cn("text-sm flex-1", item.done ? "line-through text-slate-400" : "text-slate-700")}>
-            {item.text}
-          </span>
-          <button onClick={() => deleteItem(key, item.id)} className="opacity-40 hover:opacity-100 text-slate-400 hover:text-red-500 transition-all">
-            <Trash2 size={13} />
-          </button>
+          {editingId === item.id ? (
+            <input
+              autoFocus
+              value={editText}
+              onChange={(e) => setEditText(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") commitEdit(); if (e.key === "Escape") { setEditingId(null); } }}
+              onBlur={commitEdit}
+              className="flex-1 text-sm bg-white rounded-lg px-2 py-0.5 outline-none border border-sage-300 text-slate-700"
+            />
+          ) : (
+            <span className={cn("text-sm flex-1", item.done ? "line-through text-slate-400" : "text-slate-700")}>
+              {item.text}
+            </span>
+          )}
+          {editingId !== item.id && (
+            <>
+              <button onClick={() => startEdit(item)} className="opacity-40 hover:opacity-100 text-slate-400 hover:text-sage-600 transition-all">
+                <Pencil size={12} />
+              </button>
+              <button onClick={() => deleteItem(key, item.id)} className="opacity-40 hover:opacity-100 text-slate-400 hover:text-red-500 transition-all">
+                <Trash2 size={13} />
+              </button>
+            </>
+          )}
         </div>
       ))}
       <div className="flex items-center gap-2 pt-1">
@@ -555,11 +590,13 @@ function RecurringTodosList({
 }: {
   recurType: "weekly" | "monthly";
   asOfDate?: string;
-  monthKey?: string; // "YYYY-MM" — when provided, W1-W4 writes per-month overrides
+  monthKey?: string;
 }) {
   const { tasks, addTask, updateTask, completeTask, deleteTask } = useAppStore();
   const [input, setInput] = useState("");
   const [repeat, setRepeat] = useState(true);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState("");
 
   const recurTasks = tasks.filter((t) => t.isRecurring && t.recurType === recurType);
 
@@ -587,20 +624,21 @@ function RecurringTodosList({
     setInput("");
   };
 
-  // Effective week for a monthly task: per-month override takes precedence over global default.
+  const startEdit = (task: Task) => { setEditingId(task.id); setEditText(task.title); };
+  const commitEdit = (id: string) => {
+    if (editText.trim()) updateTask(id, { title: editText.trim() });
+    setEditingId(null);
+    setEditText("");
+  };
+
   const effectiveWeek = (task: Task): 1 | 2 | 3 | 4 | undefined =>
     (monthKey ? task.weekOverrides?.[monthKey] : undefined) ?? task.weekOfMonth;
 
-  // Update the per-month override (or global if no monthKey context).
   const setWeekPill = (task: Task, w: 1 | 2 | 3 | 4) => {
     const current = effectiveWeek(task);
     if (monthKey) {
       const overrides = { ...(task.weekOverrides ?? {}) };
-      if (current === w) {
-        delete overrides[monthKey];
-      } else {
-        overrides[monthKey] = w;
-      }
+      if (current === w) { delete overrides[monthKey]; } else { overrides[monthKey] = w; }
       updateTask(task.id, { weekOverrides: overrides });
     } else {
       updateTask(task.id, { weekOfMonth: current === w ? undefined : w });
@@ -616,8 +654,9 @@ function RecurringTodosList({
         const done = isTaskDone(task, asOfDate);
         const ew = effectiveWeek(task);
         const hasMonthOverride = monthKey && task.weekOverrides?.[monthKey] !== undefined;
+        const isEditing = editingId === task.id;
         return (
-          <div key={task.id} className="space-y-1 group">
+          <div key={task.id} className="space-y-1">
             <div className="flex items-center gap-3">
               <button
                 onClick={() => handleToggle(task)}
@@ -628,24 +667,35 @@ function RecurringTodosList({
               >
                 {done && <Check size={10} className="text-white" />}
               </button>
-              <span className={cn("text-sm flex-1", done ? "line-through text-slate-400" : "text-slate-700")}>
-                {task.title}
-              </span>
-              {task.isRecurring && (
-                <Repeat size={11} className="text-sage-400 shrink-0 opacity-60" />
-              )}
-              <button
-                onClick={() => deleteTask(task.id)}
-                className="opacity-40 hover:opacity-100 text-slate-400 hover:text-red-500 transition-all"
-              >
-                <Trash2 size={13} />
-              </button>
-            </div>
-            {recurType === "monthly" && (
-              <div className="flex items-center gap-1 pl-8">
-                <span className="text-[10px] text-slate-400 mr-0.5">
-                  {monthKey ? "This month:" : "Week:"}
+              {isEditing ? (
+                <input
+                  autoFocus
+                  value={editText}
+                  onChange={(e) => setEditText(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") commitEdit(task.id); if (e.key === "Escape") setEditingId(null); }}
+                  onBlur={() => commitEdit(task.id)}
+                  className="flex-1 text-sm bg-white rounded-lg px-2 py-0.5 outline-none border border-sage-300 text-slate-700"
+                />
+              ) : (
+                <span className={cn("text-sm flex-1", done ? "line-through text-slate-400" : "text-slate-700")}>
+                  {task.title}
                 </span>
+              )}
+              {!isEditing && (
+                <>
+                  {task.isRecurring && <Repeat size={11} className="text-sage-400 shrink-0 opacity-60" />}
+                  <button onClick={() => startEdit(task)} className="opacity-40 hover:opacity-100 text-slate-400 hover:text-sage-600 transition-all">
+                    <Pencil size={12} />
+                  </button>
+                  <button onClick={() => deleteTask(task.id)} className="opacity-40 hover:opacity-100 text-slate-400 hover:text-red-500 transition-all">
+                    <Trash2 size={13} />
+                  </button>
+                </>
+              )}
+            </div>
+            {recurType === "monthly" && !isEditing && (
+              <div className="flex items-center flex-wrap gap-1 pl-8">
+                <span className="text-[10px] text-slate-400 mr-0.5">{monthKey ? "This month:" : "Week:"}</span>
                 {([1, 2, 3, 4] as const).map((w) => (
                   <button
                     key={w}
@@ -653,18 +703,28 @@ function RecurringTodosList({
                     className={cn(
                       "text-[10px] px-1.5 py-0.5 rounded font-semibold transition-all",
                       ew === w
-                        ? hasMonthOverride
-                          ? "bg-amber-500 text-white"   // amber = per-month override active
-                          : "bg-sage-500 text-white"    // sage = global default
+                        ? hasMonthOverride ? "bg-amber-500 text-white" : "bg-sage-500 text-white"
                         : "bg-slate-100 text-slate-400 hover:bg-slate-200"
                     )}
                   >
                     W{w}
                   </button>
                 ))}
-                {hasMonthOverride && (
-                  <span className="text-[9px] text-amber-600 ml-0.5">this month</span>
-                )}
+                {hasMonthOverride && <span className="text-[9px] text-amber-600 ml-0.5">this month</span>}
+                {/* Carryover opt-in toggle */}
+                <button
+                  onClick={() => updateTask(task.id, { monthlyCarryOver: !task.monthlyCarryOver })}
+                  className={cn(
+                    "ml-2 flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full border font-medium transition-all",
+                    task.monthlyCarryOver
+                      ? "border-sage-400 bg-sage-50 text-sage-700"
+                      : "border-slate-200 bg-transparent text-slate-400 hover:border-slate-300"
+                  )}
+                  title="Carry over if incomplete"
+                >
+                  <Repeat size={9} />
+                  carry over
+                </button>
               </div>
             )}
           </div>
@@ -687,9 +747,7 @@ function RecurringTodosList({
           onClick={() => setRepeat(!repeat)}
           className={cn(
             "flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-all",
-            repeat
-              ? "border-sage-300 bg-sage-50 text-sage-600"
-              : "border-slate-200 bg-white/40 text-slate-400"
+            repeat ? "border-sage-300 bg-sage-50 text-sage-600" : "border-slate-200 bg-white/40 text-slate-400"
           )}
         >
           <Repeat size={11} />
@@ -719,7 +777,7 @@ function Section({
   icon: React.ReactNode;
   title: string;
   visible?: boolean;
-  onToggle: () => void;
+  onToggle?: () => void;
   children: React.ReactNode;
   action?: React.ReactNode;
   tint?: string;
@@ -732,13 +790,15 @@ function Section({
         <h2 className="font-[family-name:var(--font-fraunces)] italic text-sm text-slate-500">{title}</h2>
         <div className="flex items-center gap-2">
           {action}
-          <button
-            onClick={onToggle}
-            className="p-1.5 rounded-lg text-slate-500 hover:text-slate-700 transition-all"
-            aria-label={`Hide ${title}`}
-          >
-            <EyeOff size={15} />
-          </button>
+          {onToggle && (
+            <button
+              onClick={onToggle}
+              className="p-1.5 rounded-lg text-slate-500 hover:text-slate-700 transition-all"
+              aria-label={`Hide ${title}`}
+            >
+              <EyeOff size={15} />
+            </button>
+          )}
         </div>
       </div>
       {card ? (
@@ -2212,6 +2272,92 @@ function MealPlanSection({ selectedDate }: { selectedDate: Date }) {
 }
 
 // ---------------------------------------------------------------------------
+// Day view medication check-in
+// ---------------------------------------------------------------------------
+
+function DayMedicationSection({ selectedDate }: { selectedDate: Date }) {
+  const { medicationReminders, medicationTakenDates, toggleMedicationTaken } = useAppStore();
+  if (medicationReminders.length === 0) return null;
+
+  const dateStr = dateKey(selectedDate);
+  const taken = medicationTakenDates[dateStr] ?? [];
+
+  return (
+    <div className="space-y-2">
+      {medicationReminders.map((med) => {
+        const isBoth = med.schedule === "both";
+        const isMorning = !med.schedule || med.schedule === "morning";
+        const isEvening = med.schedule === "evening";
+
+        if (isBoth) {
+          return (
+            <div key={med.id}>
+              <p className="text-xs font-semibold text-slate-500 mb-1">{med.name}</p>
+              <div className="flex gap-2">
+                {(["morning", "evening"] as const).map((slot) => {
+                  const k = `${med.id}-${slot}`;
+                  const checked = taken.includes(k);
+                  return (
+                    <button
+                      key={slot}
+                      onClick={() => toggleMedicationTaken(med.id, dateStr, slot)}
+                      className={cn(
+                        "flex-1 flex items-center gap-2 rounded-xl px-3 py-2 border text-left transition-all",
+                        checked ? "bg-sage-50 border-sage-200" : "bg-white border-slate-200 hover:border-sage-300"
+                      )}
+                    >
+                      <div className={cn(
+                        "w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0",
+                        checked ? "bg-sage-500 border-sage-500" : "border-slate-300"
+                      )}>
+                        {checked && <Check size={8} className="text-white" strokeWidth={3} />}
+                      </div>
+                      {slot === "morning"
+                        ? <Sun size={11} className="text-amber-400" />
+                        : <Moon size={11} className="text-indigo-400" />}
+                      <span className={cn("text-xs font-medium capitalize flex-1", checked ? "line-through text-slate-400" : "text-slate-600")}>
+                        {slot}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        }
+
+        const checked = taken.includes(med.id);
+        return (
+          <button
+            key={med.id}
+            onClick={() => toggleMedicationTaken(med.id, dateStr)}
+            className={cn(
+              "w-full flex items-center gap-3 rounded-xl px-3 py-2 text-left border transition-all",
+              checked ? "bg-sage-50 border-sage-200" : "bg-white border-slate-200 hover:border-sage-300"
+            )}
+          >
+            <div className={cn(
+              "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0",
+              checked ? "bg-sage-500 border-sage-500" : "border-slate-300"
+            )}>
+              {checked && <Check size={10} className="text-white" strokeWidth={3} />}
+            </div>
+            {isEvening
+              ? <Moon size={12} className="text-indigo-400 shrink-0" />
+              : isMorning
+              ? <Sun size={12} className="text-amber-400 shrink-0" />
+              : null}
+            <span className={cn("text-sm flex-1", checked ? "line-through text-slate-400" : "text-slate-700 font-medium")}>
+              {med.name}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Add Schedule Item Modal
 // ---------------------------------------------------------------------------
 
@@ -3067,7 +3213,7 @@ function TasksSection({
 // ---------------------------------------------------------------------------
 
 export default function PlannerPage() {
-  const { sectionVisibility, toggleSection, streak, tasks, updateTask, completeTask } = useAppStore();
+  const { sectionVisibility, toggleSection, streak, tasks, updateTask, completeTask, medicationReminders } = useAppStore();
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -3174,6 +3320,17 @@ export default function PlannerPage() {
             </Section>
           )}
 
+          {/* Medication check-in (only shown when meds are configured) */}
+          {mounted && medicationReminders.length > 0 && (
+            <Section
+              id="medications"
+              icon={<Pill size={16} />}
+              title="Medications"
+            >
+              <DayMedicationSection selectedDate={selectedDate} />
+            </Section>
+          )}
+
           {/* Top 3 Priorities */}
           {(!mounted || sectionVisibility.top3) && (
             <Section
@@ -3274,10 +3431,11 @@ export default function PlannerPage() {
                 (t) => t.isRecurring && t.recurType === "monthly" && effWeek(t) === weekNum
               );
 
-              // Carryover: monthly tasks assigned to weekNum-1 that are still undone.
-              // Only carries over one week — if still undone in the following week it stays but doesn't cascade.
+              // Carryover: monthly tasks that opted in via the "carry over" toggle,
+              // were assigned to weekNum-1, and are still undone. One-week carry only.
               const carriedOver = weekNum > 1 ? tasks.filter(
                 (t) => t.isRecurring && t.recurType === "monthly" &&
+                        t.monthlyCarryOver === true &&
                         effWeek(t) === (weekNum - 1) &&
                         !isTaskDone(t, asOf)
               ) : [];
