@@ -318,6 +318,11 @@ interface AppState {
   dayEndTime: string; // "HH:MM" 24-hour, default "22:00"
   setDayEndTime: (t: string) => void;
 
+  // Journal
+  journalEntries: import("@/types").JournalEntry[];
+  addJournalEntry: (content: string) => void;
+  deleteJournalEntry: (id: string) => void;
+
   // Theme & notification
   activeTheme: ThemeId;
   setActiveTheme: (id: ThemeId) => void;
@@ -430,6 +435,7 @@ export const useAppStore = create<AppState>()(
         quickLinks: true,
       },
       dailyEnergyLogs: {},
+      journalEntries: [],
       streakFreezes: 0,
       showStreakCelebration: false,
       showFreezeSaved: false,
@@ -971,6 +977,17 @@ export const useAppStore = create<AppState>()(
       logDailyEnergy: (date, level) =>
         set((s) => ({ dailyEnergyLogs: { ...s.dailyEnergyLogs, [date]: level } })),
 
+      addJournalEntry: (content) =>
+        set((s) => ({
+          journalEntries: [
+            { id: generateId(), timestamp: new Date().toISOString(), content },
+            ...s.journalEntries,
+          ],
+        })),
+
+      deleteJournalEntry: (id) =>
+        set((s) => ({ journalEntries: s.journalEntries.filter((e) => e.id !== id) })),
+
       addStreakFreeze: () =>
         set((s) => ({ streakFreezes: s.streakFreezes + 1 })),
 
@@ -1244,7 +1261,7 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: "neurocompass-store",
-      version: 7,
+      version: 8,
       storage:
         typeof window !== "undefined"
           ? createJSONStorage(() => localStorage)
@@ -1326,6 +1343,11 @@ export const useAppStore = create<AppState>()(
         if (version < 7) {
           if (!state.dayEndTime) {
             state.dayEndTime = "22:00";
+          }
+        }
+        if (version < 8) {
+          if (!state.journalEntries) {
+            state.journalEntries = [];
           }
         }
         return state;

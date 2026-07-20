@@ -18,8 +18,10 @@ import {
   Bell,
   Plus,
   X,
+  BookOpen,
   type LucideIcon,
 } from "lucide-react";
+import Link from "next/link";
 import { EnergyLevel, PleasantnessLevel, MoodEntry } from "@/types";
 
 // Emotion matrix quadrants (based on Russell's circumplex model)
@@ -605,6 +607,18 @@ export default function MoodPage() {
               <p className="text-xs text-slate-400 mt-0.5 leading-snug">Physical sensations</p>
             </button>
           </div>
+          {/* Journal */}
+          <Link
+            href="/mood/journal"
+            className="flex items-center gap-3 bg-white border border-slate-100 rounded-2xl px-4 py-3.5 transition-all active:scale-[0.98] hover:border-sage-200"
+          >
+            <BookOpen size={16} className="text-sage-500 shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-slate-800">Journal</p>
+              <p className="text-xs text-slate-400 mt-0.5">Write freely, no prompts</p>
+            </div>
+            <ChevronDown size={14} className="text-slate-300 shrink-0 -rotate-90" />
+          </Link>
         </div>
       )}
 

@@ -217,6 +217,12 @@ export interface MVSCItem {
   completedDates: string[];
 }
 
+export interface JournalEntry {
+  id: string;
+  timestamp: string; // ISO string
+  content: string;
+}
+
 export interface HabitStack {
   id: string;
   anchor: string;
