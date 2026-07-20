@@ -70,11 +70,16 @@ export default function ReminderManager() {
       if (hasSlotDue) due.push(type);
     });
 
-    // Medication reminders: show banner if time has passed and not taken today
+    // Medication reminders: show banner if any due slot hasn't been taken yet
     const takenToday = medicationTakenDates[today] ?? [];
-    const dueMeds = medicationReminders.filter(
-      (m) => isTimePast(m.time) && !takenToday.includes(m.id)
-    ).map((m) => m.id);
+    const dueMeds = medicationReminders.filter((m) => {
+      if (m.schedule === "both") {
+        const morningDue = isTimePast(m.time) && !takenToday.includes(`${m.id}-morning`);
+        const eveningDue = m.eveningTime && isTimePast(m.eveningTime) && !takenToday.includes(`${m.id}-evening`);
+        return morningDue || eveningDue;
+      }
+      return isTimePast(m.time) && !takenToday.includes(m.id);
+    }).map((m) => m.id);
     if (dueMeds.length > 0) {
       setMedBanners(dueMeds);
     }

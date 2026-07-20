@@ -4,7 +4,7 @@ import Link from "next/link";
 import {
   Brain, Leaf, Zap, Shield, Sparkles, ListChecks, Plus,
   Trash2, Check, ChevronDown, ChevronUp, X, ChevronRight,
-  Pill, SlidersHorizontal,
+  Pill, SlidersHorizontal, Sun, Moon,
   LayoutGrid, LayoutList,
 } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
@@ -825,6 +825,41 @@ export default function MePage() {
           </div>
           <div className="space-y-1.5">
             {medicationReminders.map((med) => {
+              const isBoth = med.schedule === "both";
+              if (isBoth) {
+                return (
+                  <div key={med.id} className="space-y-1">
+                    <p className="text-xs font-semibold text-slate-500 px-1">{med.name}</p>
+                    <div className="flex gap-2">
+                      {(["morning", "evening"] as const).map((slot) => {
+                        const key = `${med.id}-${slot}`;
+                        const taken = takenToday.includes(key);
+                        return (
+                          <button
+                            key={slot}
+                            onClick={() => toggleMedicationTaken(med.id, today, slot)}
+                            className={cn(
+                              "flex-1 flex items-center gap-2 rounded-xl px-3 py-2 border transition-all text-left",
+                              taken ? "bg-sage-50 border-sage-200" : "bg-white border-slate-200 hover:border-sage-300"
+                            )}
+                          >
+                            <div className={cn(
+                              "w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0",
+                              taken ? "bg-sage-500 border-sage-500" : "border-slate-300"
+                            )}>
+                              {taken && <Check size={8} className="text-white" strokeWidth={3} />}
+                            </div>
+                            {slot === "morning" ? <Sun size={11} className="text-amber-400" /> : <Moon size={11} className="text-indigo-400" />}
+                            <span className={cn("text-xs font-medium flex-1 capitalize", taken ? "line-through text-slate-400" : "text-slate-600")}>
+                              {slot}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              }
               const taken = takenToday.includes(med.id);
               return (
                 <button

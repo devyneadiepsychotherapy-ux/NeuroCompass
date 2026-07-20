@@ -351,5 +351,8 @@ export interface SavedMindMap {
 export interface MedicationReminder {
   id: string;
   name: string;
-  time: string; // "HH:MM" 24-hour
+  time: string; // morning (or single) reminder time "HH:MM"
+  eveningTime?: string; // "HH:MM" — only used when schedule === "both"
+  schedule?: "morning" | "evening" | "both"; // undefined = legacy single (treated as "morning")
+  xpReward?: number; // XP awarded per checkoff; defaults to 5 if undefined
 }

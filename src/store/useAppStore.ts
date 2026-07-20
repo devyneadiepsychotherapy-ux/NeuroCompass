@@ -214,7 +214,7 @@ interface AppState {
   addMedicationReminder: (med: Omit<MedicationReminder, "id">) => void;
   updateMedicationReminder: (id: string, updates: Partial<Omit<MedicationReminder, "id">>) => void;
   deleteMedicationReminder: (id: string) => void;
-  toggleMedicationTaken: (id: string, date: string) => void;
+  toggleMedicationTaken: (id: string, date: string, slot?: "morning" | "evening") => void;
   setMedicationShowOnMe: (v: boolean) => void;
   setMedicationShowOnHome: (v: boolean) => void;
 
@@ -933,16 +933,18 @@ export const useAppStore = create<AppState>()(
       deleteMedicationReminder: (id) =>
         set((s) => ({ medicationReminders: s.medicationReminders.filter((m) => m.id !== id) })),
 
-      toggleMedicationTaken: (id, date) =>
-        set((s) => {
-          const taken = s.medicationTakenDates[date] ?? [];
-          return {
-            medicationTakenDates: {
-              ...s.medicationTakenDates,
-              [date]: taken.includes(id) ? taken.filter((x) => x !== id) : [...taken, id],
-            },
-          };
-        }),
+      toggleMedicationTaken: (id, date, slot) => {
+        const s = get();
+        const key = slot ? `${id}-${slot}` : id;
+        const taken = s.medicationTakenDates[date] ?? [];
+        const alreadyTaken = taken.includes(key);
+        const newTaken = alreadyTaken ? taken.filter((x) => x !== key) : [...taken, key];
+        set({ medicationTakenDates: { ...s.medicationTakenDates, [date]: newTaken } });
+        if (!alreadyTaken) {
+          const med = s.medicationReminders.find((m) => m.id === id);
+          get().addXp(med?.xpReward ?? 5);
+        }
+      },
 
       setMedicationShowOnMe: (v) => set({ medicationShowOnMe: v }),
       setMedicationShowOnHome: (v) => set({ medicationShowOnHome: v }),
