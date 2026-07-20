@@ -141,14 +141,16 @@ function FreezeSavedBanner({ onDismiss }: { onDismiss: () => void }) {
 // Streak card
 // ---------------------------------------------------------------------------
 
-function StreakCard({ streak, longestStreak, streakFreezes }: { streak: number; longestStreak: number; streakFreezes: number }) {
+function StreakCard({ streak, longestStreak, streakFreezes, quote }: {
+  streak: number; longestStreak: number; streakFreezes: number; quote?: string;
+}) {
   return (
-    <div className="rounded-3xl p-5 overflow-hidden relative" style={{ background: "linear-gradient(135deg, var(--color-cream-50) 0%, var(--color-cream-100) 100%)" }}>
+    <div className="rounded-3xl overflow-hidden relative" style={{ background: "linear-gradient(135deg, var(--color-cream-50) 0%, var(--color-cream-100) 100%)" }}>
       {/* Background flame decoration */}
-      <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-10">
+      <div className="absolute right-4 top-6 opacity-10">
         <Flame size={80} className="text-[#B8897A] fill-[#B8897A]" />
       </div>
-      <div className="flex items-center gap-4 relative">
+      <div className="flex items-center gap-4 relative px-5 pt-5 pb-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-2">
             <p className="text-5xl font-black text-slate-700 leading-none">{streak}</p>
@@ -161,6 +163,12 @@ function StreakCard({ streak, longestStreak, streakFreezes }: { streak: number; 
           {streakFreezes} freeze{streakFreezes !== 1 ? "s" : ""}
         </span>
       </div>
+      {quote && (
+        <div className="border-t border-cream-200 px-5 py-3">
+          <p className="text-[10px] font-semibold text-sage-600 uppercase tracking-wide mb-1">Today&apos;s thought</p>
+          <p className="text-xs text-slate-500 italic leading-relaxed">&ldquo;{quote}&rdquo;</p>
+        </div>
+      )}
     </div>
   );
 }
@@ -676,17 +684,16 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Streak */}
+      {/* Streak + Quote (merged into one card) */}
       {homeVisibility.streak && (
         <StreakCard
           streak={mounted ? streak : 0}
           longestStreak={mounted ? longestStreak : 0}
           streakFreezes={mounted ? streakFreezes : 0}
+          quote={homeVisibility.quote ? todayQuote : undefined}
         />
       )}
-
-      {/* Quote */}
-      {homeVisibility.quote && (
+      {!homeVisibility.streak && homeVisibility.quote && (
         <div className="rounded-2xl px-4 py-3.5 border-l-4 border-sage-300" style={{ background: "linear-gradient(135deg, var(--color-sage-50) 0%, var(--color-sage-100) 100%)" }}>
           <p className="text-xs font-semibold text-sage-600 mb-1">Today&apos;s thought</p>
           <p className="text-sm text-slate-600 italic leading-relaxed">&ldquo;{todayQuote}&rdquo;</p>
