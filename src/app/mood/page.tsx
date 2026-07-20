@@ -95,7 +95,14 @@ const PLEASANT_OPTIONS: PleasantOption[] = [
 const PLEASANT_LABELS = ["Very Unpleasant", "Unpleasant", "Neutral", "Pleasant", "Very Pleasant"];
 
 type FlowType = "both" | "mood" | "body";
-type StepType = "flow" | "matrix" | "body" | "notes" | "done";
+type StepType = "flow" | "energy" | "matrix" | "body" | "notes" | "done";
+
+type CapacityLevel = "low" | "medium" | "high";
+const CAPACITY_OPTIONS: { label: CapacityLevel; energyValue: EnergyLevel; color: string; bg: string }[] = [
+  { label: "low",    energyValue: 2, color: "text-rose-500",   bg: "bg-rose-50 border-rose-200"   },
+  { label: "medium", energyValue: 3, color: "text-stone-500",  bg: "bg-stone-50 border-stone-200" },
+  { label: "high",   energyValue: 4, color: "text-sage-600",   bg: "bg-sage-50 border-sage-200"   },
+];
 
 function XpToast({ amount }: { amount: number }) {
   return (
@@ -437,7 +444,7 @@ export default function MoodPage() {
 
   const startFlow = (selected: FlowType) => {
     setFlow(selected);
-    setStep(selected === "body" ? "body" : "matrix");
+    setStep(selected === "body" ? "energy" : "matrix");
   };
 
   const nextFromMatrix = () => {
@@ -450,7 +457,7 @@ export default function MoodPage() {
 
   const backFromBody = () => {
     if (flow === "body") {
-      setStep("flow");
+      setStep("energy");
     } else {
       setStep("matrix");
     }
@@ -467,7 +474,7 @@ export default function MoodPage() {
   // Derive visible steps for progress bar
   const visibleSteps: StepType[] =
     flow === "mood" ? ["matrix", "notes"] :
-    flow === "body" ? ["body", "notes"] :
+    flow === "body" ? ["energy", "body", "notes"] :
     ["matrix", "body", "notes"];
 
   const recentEntries = moodEntries.slice(0, 5);
@@ -607,6 +614,46 @@ export default function MoodPage() {
       {/* Past check-ins : always visible on flow step */}
       {step === "flow" && moodEntries.length > 0 && (
         <PastCheckIns entries={moodEntries} />
+      )}
+
+      {/* Step: Energy (body-only flow) */}
+      {step === "energy" && (
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-lg font-bold text-slate-800 mb-1">How&apos;s your energy?</h2>
+            <p className="text-sm text-slate-500">A quick read on your capacity right now.</p>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            {CAPACITY_OPTIONS.map(({ label, energyValue, color, bg }) => {
+              const active = energy === energyValue;
+              return (
+                <button
+                  key={label}
+                  onClick={() => { setEnergy(energyValue); setStep("body"); }}
+                  className={cn(
+                    "flex flex-col items-center gap-3 py-6 rounded-2xl border-2 font-semibold text-sm capitalize transition-all active:scale-[0.97]",
+                    active ? `${bg} border-current ${color}` : "bg-cream-50 border-slate-200 text-slate-500 hover:border-slate-300"
+                  )}
+                >
+                  <span className="text-2xl">
+                    {label === "low" ? "🔋" : label === "medium" ? "⚡" : "✨"}
+                  </span>
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+          <div className="flex gap-3">
+            <button onClick={() => setStep("flow")}
+              className="flex-1 border border-slate-200 text-slate-600 rounded-2xl py-3 font-semibold hover:bg-slate-50 transition-all">
+              Back
+            </button>
+            <button onClick={() => setStep("body")}
+              className="flex-1 border border-slate-200 text-slate-600 rounded-2xl py-3 font-semibold hover:bg-slate-50 transition-all text-sm">
+              Skip energy &rarr;
+            </button>
+          </div>
+        </div>
       )}
 
       {/* Step: Emotion matrix */}

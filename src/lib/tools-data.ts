@@ -21,6 +21,7 @@ export interface ToolContent {
 }
 
 export const TOOL_CATEGORIES = [
+  { id: "daily", label: "Daily Routines", icon: "Pill", color: "bg-[#e4eee8] text-[#3a6850]" },
   { id: "time", label: "Time Management", icon: "Clock", color: "bg-[#ede8e0] text-[#6b5f50]" },
   { id: "motivation", label: "Motivation & Activation", icon: "Zap", color: "bg-[#f0e8d0] text-[#7a6030]" },
   { id: "attention", label: "Attention & Focus", icon: "Brain", color: "bg-[#dde4ec] text-[#4a607a]" },
@@ -1197,6 +1198,16 @@ export const TOOLS: Tool[] = [
         "You don't have to feel motivated before starting. Let the music create the feeling.",
       ],
     }
+  },
+  {
+    id: "medication-reminder",
+    title: "Medication Reminder",
+    description: "Set up daily medication reminders and track whether you've taken them",
+    category: "daily",
+    icon: "Pill",
+    type: "interactive",
+    linkTo: "/tools/medication-reminder",
+    content: {},
   },
   {
     id: "freeze-compassion",

@@ -34,6 +34,7 @@ import {
   SensoryContingencyContact,
   HabitBuilderItem,
   CheckInReminders,
+  MedicationReminder,
 } from "@/types";
 import { generateId, levelFromXp, getTodayKey, localDateKey } from "@/lib/utils";
 import { ThemeId, THEMES } from "@/lib/themes";
@@ -202,6 +203,14 @@ interface AppState {
   setShowStreakCelebration: (v: boolean) => void;
   showFreezeSaved: boolean;
   setShowFreezeSaved: (v: boolean) => void;
+
+  // Medication reminders
+  medicationReminders: MedicationReminder[];
+  medicationTakenDates: Record<string, string[]>; // dateKey -> array of medication IDs taken
+  addMedicationReminder: (med: Omit<MedicationReminder, "id">) => void;
+  updateMedicationReminder: (id: string, updates: Partial<Omit<MedicationReminder, "id">>) => void;
+  deleteMedicationReminder: (id: string) => void;
+  toggleMedicationTaken: (id: string, date: string) => void;
 
   // Daily streak & simple XP
   streak: number;
@@ -376,6 +385,8 @@ export const useAppStore = create<AppState>()(
       shopRewards: defaultShopRewards,
       purchasedRewards: [],
       usedPurchasedIndices: [],
+      medicationReminders: [],
+      medicationTakenDates: {},
       streakFreezes: 0,
       showStreakCelebration: false,
       showFreezeSaved: false,
@@ -876,6 +887,28 @@ export const useAppStore = create<AppState>()(
             ? s.usedPurchasedIndices.filter((i) => i !== index)
             : [...s.usedPurchasedIndices, index],
         })),
+
+      addMedicationReminder: (med) =>
+        set((s) => ({ medicationReminders: [...s.medicationReminders, { ...med, id: generateId() }] })),
+
+      updateMedicationReminder: (id, updates) =>
+        set((s) => ({
+          medicationReminders: s.medicationReminders.map((m) => m.id === id ? { ...m, ...updates } : m),
+        })),
+
+      deleteMedicationReminder: (id) =>
+        set((s) => ({ medicationReminders: s.medicationReminders.filter((m) => m.id !== id) })),
+
+      toggleMedicationTaken: (id, date) =>
+        set((s) => {
+          const taken = s.medicationTakenDates[date] ?? [];
+          return {
+            medicationTakenDates: {
+              ...s.medicationTakenDates,
+              [date]: taken.includes(id) ? taken.filter((x) => x !== id) : [...taken, id],
+            },
+          };
+        }),
 
       addStreakFreeze: () =>
         set((s) => ({ streakFreezes: s.streakFreezes + 1 })),

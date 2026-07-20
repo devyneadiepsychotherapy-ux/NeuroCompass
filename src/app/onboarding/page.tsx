@@ -6,7 +6,7 @@ import { useTour } from "@/components/layout/TourProvider";
 import {
   Compass, Cat, Star, Moon, Leaf, Zap, Sparkles, Mountain,
   Flower2, BookOpen, Music, Gamepad2, Heart, Telescope, Feather, Waves,
-  ArrowRight, Check, Wrench, Gift, Flame,
+  ArrowRight, Check, Wrench, Gift, Flame, Repeat, Coins,
   ShoppingBag, CalendarDays, User, Bell, BellRing, BellOff,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -526,19 +526,218 @@ function StepNotification({
 }
 
 // ---------------------------------------------------------------------------
+// Step 6: First task
+// ---------------------------------------------------------------------------
+
+function StepFirstTask({ onNext, onSkip }: { onNext: () => void; onSkip: () => void }) {
+  const { addTask } = useAppStore();
+  const [title, setTitle] = useState("");
+  const [recurring, setRecurring] = useState(false);
+
+  const handleAdd = () => {
+    const t = title.trim();
+    if (!t) { onNext(); return; }
+    addTask({
+      title: t,
+      priority: "medium",
+      type: "task",
+      status: "todo",
+      isRecurring: recurring,
+      recurType: recurring ? "weekly" : undefined,
+      tags: [],
+      xpReward: 10,
+    });
+    onNext();
+  };
+
+  return (
+    <div className="flex flex-col min-h-screen px-6 py-16">
+      <div className="max-w-sm mx-auto w-full flex flex-col justify-center flex-1 gap-6">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-800 leading-tight mb-2">Add your first task</h2>
+          <p className="text-sm text-slate-500 leading-relaxed">
+            Something you want to get done this week, or a regular habit you want to track.
+          </p>
+        </div>
+
+        <div className="space-y-3">
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+            placeholder="e.g. Reply to emails, Go for a walk..."
+            className="w-full border-2 border-sage-200 focus:border-sage-500 rounded-2xl px-5 py-4 text-base text-slate-800 placeholder-slate-300 bg-cream-50 focus:outline-none transition-colors"
+            autoFocus
+          />
+          <button
+            onClick={() => setRecurring((v) => !v)}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all",
+              recurring
+                ? "bg-sage-50 border-sage-300 text-sage-700"
+                : "bg-cream-50 border-slate-200 text-slate-400"
+            )}
+          >
+            <Repeat size={14} />
+            {recurring ? "Repeats weekly" : "Make it weekly recurring"}
+          </button>
+        </div>
+
+        <button
+          onClick={handleAdd}
+          className="w-full bg-sage-600 hover:bg-sage-700 active:scale-[0.98] text-white font-semibold text-base py-4 rounded-2xl shadow-md transition-all"
+        >
+          {title.trim() ? "Add task & continue" : "Skip for now"}
+          <ArrowRight size={16} className="inline ml-2" />
+        </button>
+        <button onClick={onSkip} className="text-sm text-slate-400 hover:text-slate-600 transition-colors text-center py-1">
+          Skip
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Step 7: First reward
+// ---------------------------------------------------------------------------
+
+function StepFirstReward({ onNext, onSkip }: { onNext: () => void; onSkip: () => void }) {
+  const { addShopReward } = useAppStore();
+  const [name, setName] = useState("");
+  const [cost, setCost] = useState(20);
+
+  const handleAdd = () => {
+    const n = name.trim();
+    if (!n) { onNext(); return; }
+    addShopReward({ name: n, description: "", cost, icon: "Gift", isCustom: true });
+    onNext();
+  };
+
+  return (
+    <div className="flex flex-col min-h-screen px-6 py-16">
+      <div className="max-w-sm mx-auto w-full flex flex-col justify-center flex-1 gap-6">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-800 leading-tight mb-2">Add your first reward</h2>
+          <p className="text-sm text-slate-500 leading-relaxed">
+            Something that feels genuinely good to you: a snack, a nap, screen time, a treat. You earn it with coins from completing tasks.
+          </p>
+        </div>
+
+        <div className="space-y-3">
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+            placeholder="e.g. Fancy coffee, 30 min gaming, Movie night..."
+            className="w-full border-2 border-sage-200 focus:border-sage-500 rounded-2xl px-5 py-4 text-base text-slate-800 placeholder-slate-300 bg-cream-50 focus:outline-none transition-colors"
+            autoFocus
+          />
+          <div className="flex items-center gap-3">
+            <Coins size={16} className="text-[#B8A96A] shrink-0" />
+            <p className="text-sm text-slate-600 shrink-0">Coin cost:</p>
+            <div className="flex gap-2">
+              {[10, 20, 30, 50].map((v) => (
+                <button
+                  key={v}
+                  onClick={() => setCost(v)}
+                  className={cn(
+                    "px-3 py-1.5 rounded-xl text-sm font-semibold border transition-all",
+                    cost === v
+                      ? "bg-sage-600 text-white border-sage-600"
+                      : "bg-cream-50 text-slate-500 border-slate-200 hover:border-sage-300"
+                  )}
+                >
+                  {v}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <button
+          onClick={handleAdd}
+          className="w-full bg-sage-600 hover:bg-sage-700 active:scale-[0.98] text-white font-semibold text-base py-4 rounded-2xl shadow-md transition-all"
+        >
+          {name.trim() ? "Add reward & continue" : "Skip for now"}
+          <ArrowRight size={16} className="inline ml-2" />
+        </button>
+        <button onClick={onSkip} className="text-sm text-slate-400 hover:text-slate-600 transition-colors text-center py-1">
+          Skip
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Step 8: First habit
+// ---------------------------------------------------------------------------
+
+function StepFirstHabit({ onFinish, onSkip }: { onFinish: () => void; onSkip: () => void }) {
+  const { addHabit } = useAppStore();
+  const [name, setName] = useState("");
+
+  const handleAdd = () => {
+    const n = name.trim();
+    if (!n) { onFinish(); return; }
+    addHabit(n);
+    onFinish();
+  };
+
+  return (
+    <div className="flex flex-col min-h-screen px-6 py-16">
+      <div className="max-w-sm mx-auto w-full flex flex-col justify-center flex-1 gap-6">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-800 leading-tight mb-2">Set a daily habit</h2>
+          <p className="text-sm text-slate-500 leading-relaxed">
+            Something small you want to do every day. You can track streaks for it in the Habits section.
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+            placeholder="e.g. Drink water, Go outside, Take meds..."
+            className="w-full border-2 border-sage-200 focus:border-sage-500 rounded-2xl px-5 py-4 text-base text-slate-800 placeholder-slate-300 bg-cream-50 focus:outline-none transition-colors"
+            autoFocus
+          />
+        </div>
+
+        <button
+          onClick={handleAdd}
+          className="w-full bg-sage-600 hover:bg-sage-700 active:scale-[0.98] text-white font-semibold text-base py-4 rounded-2xl shadow-md transition-all flex items-center justify-center gap-2"
+        >
+          {name.trim() ? "Add habit & finish" : "Skip & finish"}
+          <Check size={16} />
+        </button>
+        <button onClick={onSkip} className="text-sm text-slate-400 hover:text-slate-600 transition-colors text-center py-1">
+          Skip
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Progress dots
 // ---------------------------------------------------------------------------
 
 function ProgressDots({ step }: { step: number }) {
   return (
-    <div className="fixed top-0 left-0 right-0 flex justify-center gap-2 pt-8 z-10">
-      {[1, 2, 3, 4, 5].map((s) => (
+    <div className="fixed top-0 left-0 right-0 flex justify-center gap-1.5 pt-8 z-10">
+      {[1, 2, 3, 4, 5, 6, 7, 8].map((s) => (
         <div
           key={s}
           className={cn(
             "rounded-full transition-all duration-300",
             s === step
-              ? "w-6 h-2 bg-sage-500"
+              ? "w-5 h-2 bg-sage-500"
               : s < step
               ? "w-2 h-2 bg-sage-300"
               : "w-2 h-2 bg-stone-200"
@@ -609,7 +808,19 @@ export default function OnboardingPage() {
       )}
 
       {step === 5 && (
-        <StepOverview onNext={() => finish(name, avatar, notifStyle)} onTutorial={startTour} />
+        <StepOverview onNext={() => setStep(6)} onTutorial={startTour} />
+      )}
+
+      {step === 6 && (
+        <StepFirstTask onNext={() => setStep(7)} onSkip={() => setStep(7)} />
+      )}
+
+      {step === 7 && (
+        <StepFirstReward onNext={() => setStep(8)} onSkip={() => setStep(8)} />
+      )}
+
+      {step === 8 && (
+        <StepFirstHabit onFinish={() => finish(name, avatar, notifStyle)} onSkip={() => finish(name, avatar, notifStyle)} />
       )}
     </div>
   );

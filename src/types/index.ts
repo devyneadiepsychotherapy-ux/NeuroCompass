@@ -327,3 +327,9 @@ export interface SavedMindMap {
   colorIdx: number;
   savedAt: string;
 }
+
+export interface MedicationReminder {
+  id: string;
+  name: string;
+  time: string; // "HH:MM" 24-hour
+}

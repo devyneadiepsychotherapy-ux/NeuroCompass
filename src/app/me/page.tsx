@@ -4,11 +4,11 @@ import Link from "next/link";
 import {
   Brain, Leaf, Zap, Shield, Sparkles, ListChecks, Plus,
   Trash2, Check, ChevronDown, ChevronUp, X, ChevronRight,
-  Heart,
+  Heart, Pill,
   LayoutGrid, LayoutList,
 } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
-import { cn, xpForLevel } from "@/lib/utils";
+import { cn, xpForLevel, getTodayKey } from "@/lib/utils";
 import { SpecialInterest, UserList, ToolFavorite } from "@/types";
 import { TOOLS } from "@/lib/tools-data";
 import { ICON_MAP } from "@/lib/icon-map";
@@ -635,7 +635,8 @@ function MyListsCard() {
 // ---------------------------------------------------------------------------
 
 export default function MePage() {
-  const { profile, sensoryProfile, favorites, userName, userAvatar } =
+  const { profile, sensoryProfile, favorites, userName, userAvatar,
+    medicationReminders, medicationTakenDates, toggleMedicationTaken } =
     useAppStore();
   const avatarInfo = getAvatarOption(userAvatar);
   const [mounted, setMounted] = useState(false);
@@ -643,6 +644,9 @@ export default function MePage() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const today = getTodayKey();
+  const takenToday = medicationTakenDates[today] ?? [];
 
   return (
     <div className="px-4 pt-0 pb-24 space-y-4">
@@ -676,6 +680,47 @@ export default function MePage() {
           )}
         </div>
       </div>
+
+      {/* Medication checkoff */}
+      {mounted && medicationReminders.length > 0 && (
+        <div className="bg-cream-50 rounded-2xl border border-slate-200 shadow-sm p-4 space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Pill size={15} className="text-sage-500 shrink-0" />
+              <p className="text-sm font-semibold text-slate-700">Medications today</p>
+            </div>
+            <Link href="/tools/medication-reminder" className="text-xs text-sage-600 font-medium hover:underline">
+              Manage
+            </Link>
+          </div>
+          <div className="space-y-1.5">
+            {medicationReminders.map((med) => {
+              const taken = takenToday.includes(med.id);
+              return (
+                <button
+                  key={med.id}
+                  onClick={() => toggleMedicationTaken(med.id, today)}
+                  className={cn(
+                    "w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all",
+                    taken ? "bg-sage-50 border border-sage-200" : "bg-white border border-slate-200 hover:border-sage-300"
+                  )}
+                >
+                  <div className={cn(
+                    "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
+                    taken ? "bg-sage-500 border-sage-500" : "border-slate-300"
+                  )}>
+                    {taken && <Check size={10} className="text-white" strokeWidth={3} />}
+                  </div>
+                  <span className={cn("text-sm flex-1", taken ? "line-through text-slate-400" : "text-slate-700 font-medium")}>
+                    {med.name}
+                  </span>
+                  {taken && <span className="text-xs text-sage-500 font-semibold shrink-0">Done</span>}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* ND Strengths */}
       {mounted ? (
