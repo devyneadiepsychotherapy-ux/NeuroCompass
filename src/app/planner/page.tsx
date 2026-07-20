@@ -523,7 +523,7 @@ function FocusList({
           <span className={cn("text-sm flex-1", item.done ? "line-through text-slate-400" : "text-slate-700")}>
             {item.text}
           </span>
-          <button onClick={() => deleteItem(key, item.id)} className="opacity-0 group-hover:opacity-100 text-slate-600 hover:text-red-500 transition-all">
+          <button onClick={() => deleteItem(key, item.id)} className="opacity-40 hover:opacity-100 text-slate-400 hover:text-red-500 transition-all">
             <Trash2 size={13} />
           </button>
         </div>
@@ -548,7 +548,15 @@ function FocusList({
 // Recurring to-do list (weekly / monthly)
 // ---------------------------------------------------------------------------
 
-function RecurringTodosList({ recurType, asOfDate }: { recurType: "weekly" | "monthly"; asOfDate?: string }) {
+function RecurringTodosList({
+  recurType,
+  asOfDate,
+  monthKey,
+}: {
+  recurType: "weekly" | "monthly";
+  asOfDate?: string;
+  monthKey?: string; // "YYYY-MM" — when provided, W1-W4 writes per-month overrides
+}) {
   const { tasks, addTask, updateTask, completeTask, deleteTask } = useAppStore();
   const [input, setInput] = useState("");
   const [repeat, setRepeat] = useState(true);
@@ -579,6 +587,26 @@ function RecurringTodosList({ recurType, asOfDate }: { recurType: "weekly" | "mo
     setInput("");
   };
 
+  // Effective week for a monthly task: per-month override takes precedence over global default.
+  const effectiveWeek = (task: Task): 1 | 2 | 3 | 4 | undefined =>
+    (monthKey ? task.weekOverrides?.[monthKey] : undefined) ?? task.weekOfMonth;
+
+  // Update the per-month override (or global if no monthKey context).
+  const setWeekPill = (task: Task, w: 1 | 2 | 3 | 4) => {
+    const current = effectiveWeek(task);
+    if (monthKey) {
+      const overrides = { ...(task.weekOverrides ?? {}) };
+      if (current === w) {
+        delete overrides[monthKey];
+      } else {
+        overrides[monthKey] = w;
+      }
+      updateTask(task.id, { weekOverrides: overrides });
+    } else {
+      updateTask(task.id, { weekOfMonth: current === w ? undefined : w });
+    }
+  };
+
   return (
     <div className="space-y-2">
       {recurTasks.length === 0 && (
@@ -586,6 +614,8 @@ function RecurringTodosList({ recurType, asOfDate }: { recurType: "weekly" | "mo
       )}
       {recurTasks.map((task) => {
         const done = isTaskDone(task, asOfDate);
+        const ew = effectiveWeek(task);
+        const hasMonthOverride = monthKey && task.weekOverrides?.[monthKey] !== undefined;
         return (
           <div key={task.id} className="space-y-1 group">
             <div className="flex items-center gap-3">
@@ -606,28 +636,35 @@ function RecurringTodosList({ recurType, asOfDate }: { recurType: "weekly" | "mo
               )}
               <button
                 onClick={() => deleteTask(task.id)}
-                className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 transition-all"
+                className="opacity-40 hover:opacity-100 text-slate-400 hover:text-red-500 transition-all"
               >
                 <Trash2 size={13} />
               </button>
             </div>
             {recurType === "monthly" && (
               <div className="flex items-center gap-1 pl-8">
-                <span className="text-[10px] text-slate-400 mr-0.5">Week:</span>
+                <span className="text-[10px] text-slate-400 mr-0.5">
+                  {monthKey ? "This month:" : "Week:"}
+                </span>
                 {([1, 2, 3, 4] as const).map((w) => (
                   <button
                     key={w}
-                    onClick={() => updateTask(task.id, { weekOfMonth: task.weekOfMonth === w ? undefined : w })}
+                    onClick={() => setWeekPill(task, w)}
                     className={cn(
                       "text-[10px] px-1.5 py-0.5 rounded font-semibold transition-all",
-                      task.weekOfMonth === w
-                        ? "bg-sage-500 text-white"
+                      ew === w
+                        ? hasMonthOverride
+                          ? "bg-amber-500 text-white"   // amber = per-month override active
+                          : "bg-sage-500 text-white"    // sage = global default
                         : "bg-slate-100 text-slate-400 hover:bg-slate-200"
                     )}
                   >
                     W{w}
                   </button>
                 ))}
+                {hasMonthOverride && (
+                  <span className="text-[9px] text-amber-600 ml-0.5">this month</span>
+                )}
               </div>
             )}
           </div>
@@ -3226,40 +3263,67 @@ export default function PlannerPage() {
             </div>
             {(() => {
               const weekNum = getWeekOfMonth(selectedDate);
+              const mKey = getMonthKey(selectedDate);
+              const asOf = dateKey(selectedDate);
+
+              // Helper: effective week for a monthly task this month
+              const effWeek = (t: Task): number | undefined =>
+                t.weekOverrides?.[mKey] ?? t.weekOfMonth;
+
               const monthlyThisWeek = tasks.filter(
-                (t) => t.isRecurring && t.recurType === "monthly" && t.weekOfMonth === weekNum
+                (t) => t.isRecurring && t.recurType === "monthly" && effWeek(t) === weekNum
               );
-              if (monthlyThisWeek.length === 0) return null;
+
+              // Carryover: monthly tasks assigned to weekNum-1 that are still undone.
+              // Only carries over one week — if still undone in the following week it stays but doesn't cascade.
+              const carriedOver = weekNum > 1 ? tasks.filter(
+                (t) => t.isRecurring && t.recurType === "monthly" &&
+                        effWeek(t) === (weekNum - 1) &&
+                        !isTaskDone(t, asOf)
+              ) : [];
+
+              if (monthlyThisWeek.length === 0 && carriedOver.length === 0) return null;
+
+              const MonthlyTaskRow = ({ task, carried }: { task: Task; carried?: boolean }) => {
+                const done = isTaskDone(task, asOf);
+                return (
+                  <div className={cn("flex items-center gap-3", carried && "pl-1")}>
+                    <button
+                      onClick={() => {
+                        if (done) {
+                          updateTask(task.id, { status: "todo", completedAt: undefined });
+                        } else {
+                          completeTask(task.id, asOf);
+                        }
+                      }}
+                      className={cn(
+                        "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
+                        done ? "bg-sage-500 border-sage-500" : "border-slate-300 hover:border-sage-500"
+                      )}
+                    >
+                      {done && <Check size={10} className="text-white" />}
+                    </button>
+                    <span className={cn("text-sm flex-1", done ? "line-through text-slate-400" : "text-slate-700")}>
+                      {task.title}
+                    </span>
+                    {carried && (
+                      <span className="text-[9px] text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-full font-medium shrink-0">
+                        carried over
+                      </span>
+                    )}
+                    <Repeat size={11} className="text-sage-400 shrink-0 opacity-60" />
+                  </div>
+                );
+              };
+
               return (
                 <div className="pt-6 pb-1">
-                  <h2 className="font-[family-name:var(--font-fraunces)] italic text-sm text-slate-600 mb-1">Monthly To-Do&apos;s (Week {weekNum})</h2>
+                  <h2 className="font-[family-name:var(--font-fraunces)] italic text-sm text-slate-600 mb-1">
+                    Monthly To-Do&apos;s (Week {weekNum})
+                  </h2>
                   <div className="space-y-2">
-                    {monthlyThisWeek.map((task) => {
-                      const done = isTaskDone(task, dateKey(selectedDate));
-                      return (
-                        <div key={task.id} className="flex items-center gap-3">
-                          <button
-                            onClick={() => {
-                              if (done) {
-                                updateTask(task.id, { status: "todo", completedAt: undefined });
-                              } else {
-                                completeTask(task.id, dateKey(selectedDate));
-                              }
-                            }}
-                            className={cn(
-                              "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
-                              done ? "bg-sage-500 border-sage-500" : "border-slate-300 hover:border-sage-500"
-                            )}
-                          >
-                            {done && <Check size={10} className="text-white" />}
-                          </button>
-                          <span className={cn("text-sm flex-1", done ? "line-through text-slate-400" : "text-slate-700")}>
-                            {task.title}
-                          </span>
-                          <Repeat size={11} className="text-sage-400 shrink-0 opacity-60" />
-                        </div>
-                      );
-                    })}
+                    {monthlyThisWeek.map((task) => <MonthlyTaskRow key={task.id} task={task} />)}
+                    {carriedOver.map((task) => <MonthlyTaskRow key={task.id} task={task} carried />)}
                   </div>
                 </div>
               );
@@ -3287,7 +3351,7 @@ export default function PlannerPage() {
             </div>
             <div className="pt-6 pb-1">
               <h2 className="font-[family-name:var(--font-fraunces)] italic text-sm text-slate-600 mb-3">Monthly To-Do&apos;s</h2>
-              <RecurringTodosList recurType="monthly" asOfDate={dateKey(selectedDate)} />
+              <RecurringTodosList recurType="monthly" asOfDate={dateKey(selectedDate)} monthKey={getMonthKey(selectedDate)} />
             </div>
           </div>
         );
