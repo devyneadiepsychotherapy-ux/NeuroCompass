@@ -636,7 +636,8 @@ function MyListsCard() {
 
 export default function MePage() {
   const { profile, sensoryProfile, favorites, userName, userAvatar,
-    medicationReminders, medicationTakenDates, toggleMedicationTaken } =
+    medicationReminders, medicationTakenDates, toggleMedicationTaken, medicationShowOnMe,
+    moodEntries, addMoodEntry, addXP } =
     useAppStore();
   const avatarInfo = getAvatarOption(userAvatar);
   const [mounted, setMounted] = useState(false);
@@ -647,6 +648,13 @@ export default function MePage() {
 
   const today = getTodayKey();
   const takenToday = medicationTakenDates[today] ?? [];
+  const todayEnergyEntry = moodEntries.find((e) => e.timestamp.startsWith(today));
+  const todayEnergy = todayEnergyEntry?.energy;
+
+  const handleEnergyLog = (value: 2 | 3 | 4) => {
+    addMoodEntry({ energy: value, pleasantness: 3, emotions: [] });
+    addXP(2);
+  };
 
   return (
     <div className="px-4 pt-0 pb-24 space-y-4">
@@ -681,8 +689,46 @@ export default function MePage() {
         </div>
       </div>
 
+      {/* Energy quick-log */}
+      {mounted && (() => {
+        const ENERGY_LEVELS: { label: string; value: 2 | 3 | 4; emoji: string; activeBg: string }[] = [
+          { label: "Low",    value: 2, emoji: "🔋", activeBg: "bg-rose-50 border-rose-300"   },
+          { label: "Medium", value: 3, emoji: "⚡", activeBg: "bg-stone-100 border-stone-300" },
+          { label: "High",   value: 4, emoji: "✨", activeBg: "bg-sage-50 border-sage-300"   },
+        ];
+        return (
+          <div className="bg-cream-50 rounded-2xl border border-slate-100 shadow-sm p-4 space-y-3">
+            <p className="text-sm font-semibold text-slate-700">How&apos;s your energy today?</p>
+            <div className="grid grid-cols-3 gap-2">
+              {ENERGY_LEVELS.map(({ label, value, emoji, activeBg }) => {
+                const active = (todayEnergy as number | undefined) === value;
+                return (
+                  <button
+                    key={value}
+                    onClick={() => handleEnergyLog(value)}
+                    className={cn(
+                      "flex flex-col items-center gap-1.5 py-3 rounded-xl border-2 text-xs font-semibold transition-all active:scale-[0.96]",
+                      active ? activeBg : "bg-white border-slate-200 text-slate-500 hover:border-slate-300"
+                    )}
+                  >
+                    <span className="text-xl">{emoji}</span>
+                    {label}
+                    {active && <Check size={10} className="text-current" />}
+                  </button>
+                );
+              })}
+            </div>
+            {todayEnergy && (
+              <p className="text-xs text-slate-400 text-center">
+                Logged today · <Link href="/mood" className="text-sage-600 font-medium">view history</Link>
+              </p>
+            )}
+          </div>
+        );
+      })()}
+
       {/* Medication checkoff */}
-      {mounted && medicationReminders.length > 0 && (
+      {mounted && medicationShowOnMe && medicationReminders.length > 0 && (
         <div className="bg-cream-50 rounded-2xl border border-slate-200 shadow-sm p-4 space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">

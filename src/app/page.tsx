@@ -10,7 +10,7 @@ import Link from "next/link";
 import {
   Heart, Star, Zap, Flame, Sparkles, Brain, ChevronRight,
   Wind, Shuffle, X, PersonStanding, Snowflake,
-  HeartHandshake, ExternalLink,
+  HeartHandshake, ExternalLink, SlidersHorizontal, Check, Pill,
 } from "lucide-react";
 import { ICON_MAP } from "@/lib/icon-map";
 import { cn } from "@/lib/utils";
@@ -443,6 +443,105 @@ function FeelingFrozenCard({ openTool }: { openTool: (id: string) => void }) {
 }
 
 // ---------------------------------------------------------------------------
+// Energy quick-log widget (shared across home + me page)
+// ---------------------------------------------------------------------------
+
+const ENERGY_LEVELS = [
+  { label: "Low",    value: 2 as const, emoji: "🔋", color: "text-rose-500",  activeBg: "bg-rose-50 border-rose-300"   },
+  { label: "Medium", value: 3 as const, emoji: "⚡", color: "text-stone-500", activeBg: "bg-stone-100 border-stone-300" },
+  { label: "High",   value: 4 as const, emoji: "✨", color: "text-sage-600",  activeBg: "bg-sage-50 border-sage-300"   },
+] as const;
+
+function EnergyWidget({ todayEnergy, onLog }: { todayEnergy?: number; onLog: (v: 2 | 3 | 4) => void }) {
+  return (
+    <div className="bg-white/70 border border-slate-200 rounded-2xl p-4 space-y-3">
+      <p className="text-sm font-semibold text-slate-700">How&apos;s your energy today?</p>
+      <div className="grid grid-cols-3 gap-2">
+        {ENERGY_LEVELS.map(({ label, value, emoji, activeBg }) => {
+          const active = todayEnergy === value;
+          return (
+            <button
+              key={value}
+              onClick={() => onLog(value)}
+              className={cn(
+                "flex flex-col items-center gap-1.5 py-3 rounded-xl border-2 text-xs font-semibold transition-all active:scale-[0.96]",
+                active ? activeBg : "bg-cream-50 border-slate-200 text-slate-500 hover:border-slate-300"
+              )}
+            >
+              <span className="text-xl">{emoji}</span>
+              {label}
+              {active && <Check size={10} className="text-current" />}
+            </button>
+          );
+        })}
+      </div>
+      {todayEnergy && (
+        <p className="text-xs text-slate-400 text-center">
+          Logged · <span className="text-sage-600 font-medium">shows in check-in history</span>
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Home page customize panel
+// ---------------------------------------------------------------------------
+
+const HOME_SECTIONS: { key: keyof import("@/types").HomeVisibility; label: string; desc: string }[] = [
+  { key: "streak",          label: "Streak",             desc: "Your daily app-open streak" },
+  { key: "energyWidget",    label: "Energy check-in",    desc: "Quick Low/Medium/High energy log" },
+  { key: "medicationWidget",label: "Medication checkoff",desc: "Today's medication checkboxes" },
+  { key: "quote",           label: "Daily quote",        desc: "A neurodivergent-affirming thought" },
+  { key: "frozen",          label: "Feeling Frozen",     desc: "Quick tools to get unstuck" },
+  { key: "toolbox",         label: "My Toolbox",         desc: "Your favourited tools" },
+  { key: "learn",           label: "Learn",              desc: "Psychoeducation & how your brain works" },
+  { key: "support",         label: "Professional Support", desc: "Links to ND therapists and coaches" },
+];
+
+function CustomizePanel({ visibility, onToggle, onClose }: {
+  visibility: import("@/types").HomeVisibility;
+  onToggle: (k: keyof import("@/types").HomeVisibility) => void;
+  onClose: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-end" onClick={onClose}>
+      <div
+        className="w-full max-w-sm mx-auto bg-white rounded-t-3xl shadow-2xl border border-slate-200 pb-8"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-slate-100">
+          <p className="text-base font-bold text-slate-800">Customise Home</p>
+          <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-slate-600 transition-colors">
+            <X size={18} />
+          </button>
+        </div>
+        <div className="px-5 pt-3 space-y-1">
+          {HOME_SECTIONS.map(({ key, label, desc }) => (
+            <button
+              key={key}
+              onClick={() => onToggle(key)}
+              className="w-full flex items-center gap-3 py-3 text-left"
+            >
+              <div className={cn(
+                "w-5 h-5 rounded flex items-center justify-center shrink-0 border-2 transition-all",
+                visibility[key] ? "bg-sage-500 border-sage-500" : "border-slate-300"
+              )}>
+                {visibility[key] && <Check size={11} className="text-white" strokeWidth={3} />}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-slate-700">{label}</p>
+                <p className="text-xs text-slate-400">{desc}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Home page
 // ---------------------------------------------------------------------------
 
@@ -455,6 +554,9 @@ export default function HomePage() {
     showFreezeSaved, setShowFreezeSaved,
     streakFreezes,
     _hasHydrated,
+    moodEntries, addMoodEntry, addXP,
+    homeVisibility, toggleHomeSection,
+    medicationReminders, medicationTakenDates, toggleMedicationTaken, medicationShowOnHome,
   } = useAppStore();
   const router = useRouter();
 
@@ -475,6 +577,7 @@ export default function HomePage() {
   }, [mounted]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [openTool, setOpenTool] = useState<Tool | null>(null);
+  const [showCustomize, setShowCustomize] = useState(false);
 
   const handleOpenToolById = (id: string) => {
     const tool = TOOLS.find((t) => t.id === id);
@@ -482,6 +585,15 @@ export default function HomePage() {
   };
 
   const today = getTodayKey();
+  const todayEnergyEntry = moodEntries.find((e) => e.timestamp.startsWith(today));
+  const todayEnergy = todayEnergyEntry?.energy;
+
+  const handleEnergyLog = (value: 2 | 3 | 4) => {
+    addMoodEntry({ energy: value, pleasantness: 3, emotions: [] });
+    addXP(2);
+  };
+
+  const todayMedTaken = medicationTakenDates[today] ?? [];
   const todayTasks = tasks.filter(
     (t) => t.status !== "done" && (!t.dueDate || t.dueDate === today)
   );
@@ -508,6 +620,13 @@ export default function HomePage() {
       {mounted && showStreakCelebration && (
         <StreakCelebrationModal streak={streak} onDismiss={() => setShowStreakCelebration(false)} />
       )}
+      {mounted && showCustomize && (
+        <CustomizePanel
+          visibility={homeVisibility}
+          onToggle={toggleHomeSection}
+          onClose={() => setShowCustomize(false)}
+        />
+      )}
 
       {/* Greeting header : flush with nav, breathing room inside */}
       <div className="-mx-4 px-4 pt-3 pb-5 relative overflow-hidden" style={{ background: "linear-gradient(to bottom, var(--background) 0%, transparent 100%)" }}>
@@ -521,12 +640,21 @@ export default function HomePage() {
             </h1>
             <p className="text-sm text-slate-500 mt-1 leading-relaxed">{greeting}</p>
           </div>
-          {mounted && userAvatar && (() => {
-            const av = getAvatarOption(userAvatar);
-            if (!av) return null;
-            const { Icon, bg, iconColor } = av;
-            return <Icon size={32} className={iconColor} />;
-          })()}
+          <div className="flex items-center gap-2 shrink-0">
+            {mounted && userAvatar && (() => {
+              const av = getAvatarOption(userAvatar);
+              if (!av) return null;
+              const { Icon, iconColor } = av;
+              return <Icon size={32} className={iconColor} />;
+            })()}
+            <button
+              onClick={() => setShowCustomize(true)}
+              className="p-2 text-slate-400 hover:text-slate-600 transition-colors"
+              aria-label="Customise home page"
+            >
+              <SlidersHorizontal size={18} />
+            </button>
+          </div>
         </div>
         {/* XP bar */}
         <div className="mt-4">
@@ -546,104 +674,157 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Streak (right below greeting) */}
-      <StreakCard
-        streak={mounted ? streak : 0}
-        longestStreak={mounted ? longestStreak : 0}
-        streakFreezes={mounted ? streakFreezes : 0}
-      />
+      {/* Streak */}
+      {homeVisibility.streak && (
+        <StreakCard
+          streak={mounted ? streak : 0}
+          longestStreak={mounted ? longestStreak : 0}
+          streakFreezes={mounted ? streakFreezes : 0}
+        />
+      )}
 
-      {/* Quote */}
-      <div className="rounded-2xl px-4 py-3.5 border-l-4 border-sage-300" style={{ background: "linear-gradient(135deg, var(--color-sage-50) 0%, var(--color-sage-100) 100%)" }}>
-        <p className="text-xs font-semibold text-sage-600 mb-1">Today's thought</p>
-        <p className="text-sm text-slate-600 italic leading-relaxed">&ldquo;{todayQuote}&rdquo;</p>
-      </div>
+      {/* Energy quick-log */}
+      {homeVisibility.energyWidget && (
+        <EnergyWidget todayEnergy={todayEnergy} onLog={handleEnergyLog} />
+      )}
 
-      {/* Feeling Frozen */}
-      <FeelingFrozenCard openTool={handleOpenToolById} />
-
-      {/* My Toolbox (favourites) */}
-      <div className="p-4 rounded-3xl" style={{ background: "linear-gradient(135deg, var(--color-sage-50) 0%, var(--color-sage-100) 100%)" }}>
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-sm font-bold text-slate-700">My Toolbox</p>
-          <Link href="/tools" className="text-xs text-sage-600 font-semibold">Browse all</Link>
-        </div>
-        {favTools.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 py-3 text-center">
-            <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
-              <Heart size={18} className="text-slate-300" />
+      {/* Medication checkoff */}
+      {homeVisibility.medicationWidget && medicationShowOnHome && medicationReminders.length > 0 && (
+        <div className="bg-white/70 border border-slate-200 rounded-2xl p-4 space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Pill size={14} className="text-sage-500 shrink-0" />
+              <p className="text-sm font-semibold text-slate-700">Medications today</p>
             </div>
-            <p className="text-sm text-slate-400 leading-relaxed max-w-[200px]">
-              Heart your favourite tools to pin them here
-            </p>
-            <Link href="/tools" className="text-xs text-sage-600 font-medium underline underline-offset-2 mt-1">
-              Browse tools
-            </Link>
+            <Link href="/tools/medication-reminder" className="text-xs text-sage-600 font-medium">Manage</Link>
           </div>
-        ) : (
-          <div className="grid grid-cols-4 gap-2">
-            {favTools.map((tool) => {
-              const card = (
-                <div className="flex flex-col items-center gap-1.5 group active:scale-[0.95] transition-all">
-                  <div className="w-12 h-12 flex items-center justify-center">
-                    {(() => { const IC = ICON_MAP[tool.icon]; return IC ? <IC size={24} className="text-sage-500" /> : null; })()}
+          <div className="space-y-1.5">
+            {medicationReminders.map((med) => {
+              const taken = todayMedTaken.includes(med.id);
+              return (
+                <button
+                  key={med.id}
+                  onClick={() => toggleMedicationTaken(med.id, today)}
+                  className={cn(
+                    "w-full flex items-center gap-3 rounded-xl px-3 py-2 text-left transition-all border",
+                    taken ? "bg-sage-50 border-sage-200" : "bg-white border-slate-200 hover:border-sage-300"
+                  )}
+                >
+                  <div className={cn(
+                    "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0",
+                    taken ? "bg-sage-500 border-sage-500" : "border-slate-300"
+                  )}>
+                    {taken && <Check size={10} className="text-white" strokeWidth={3} />}
                   </div>
-                  <p className="text-xs font-medium text-slate-600 text-center leading-tight w-full px-0.5 truncate">{tool.title}</p>
-                </div>
-              );
-              return tool.linkTo ? (
-                <Link key={tool.id} href={tool.linkTo}>{card}</Link>
-              ) : (
-                <button key={tool.id} onClick={() => setOpenTool(tool)} className="w-full">
-                  {card}
+                  <span className={cn("text-sm flex-1", taken ? "line-through text-slate-400" : "text-slate-700 font-medium")}>
+                    {med.name}
+                  </span>
                 </button>
               );
             })}
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* Quote */}
+      {homeVisibility.quote && (
+        <div className="rounded-2xl px-4 py-3.5 border-l-4 border-sage-300" style={{ background: "linear-gradient(135deg, var(--color-sage-50) 0%, var(--color-sage-100) 100%)" }}>
+          <p className="text-xs font-semibold text-sage-600 mb-1">Today&apos;s thought</p>
+          <p className="text-sm text-slate-600 italic leading-relaxed">&ldquo;{todayQuote}&rdquo;</p>
+        </div>
+      )}
+
+      {/* Feeling Frozen */}
+      {homeVisibility.frozen && <FeelingFrozenCard openTool={handleOpenToolById} />}
+
+      {/* My Toolbox (favourites) */}
+      {homeVisibility.toolbox && (
+        <div className="p-4 rounded-3xl" style={{ background: "linear-gradient(135deg, var(--color-sage-50) 0%, var(--color-sage-100) 100%)" }}>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm font-bold text-slate-700">My Toolbox</p>
+            <Link href="/tools" className="text-xs text-sage-600 font-semibold">Browse all</Link>
+          </div>
+          {favTools.length === 0 ? (
+            <div className="flex flex-col items-center gap-2 py-3 text-center">
+              <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
+                <Heart size={18} className="text-slate-300" />
+              </div>
+              <p className="text-sm text-slate-400 leading-relaxed max-w-[200px]">
+                Heart your favourite tools to pin them here
+              </p>
+              <Link href="/tools" className="text-xs text-sage-600 font-medium underline underline-offset-2 mt-1">
+                Browse tools
+              </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-4 gap-2">
+              {favTools.map((tool) => {
+                const card = (
+                  <div className="flex flex-col items-center gap-1.5 group active:scale-[0.95] transition-all">
+                    <div className="w-12 h-12 flex items-center justify-center">
+                      {(() => { const IC = ICON_MAP[tool.icon]; return IC ? <IC size={24} className="text-sage-500" /> : null; })()}
+                    </div>
+                    <p className="text-xs font-medium text-slate-600 text-center leading-tight w-full px-0.5 truncate">{tool.title}</p>
+                  </div>
+                );
+                return tool.linkTo ? (
+                  <Link key={tool.id} href={tool.linkTo}>{card}</Link>
+                ) : (
+                  <button key={tool.id} onClick={() => setOpenTool(tool)} className="w-full">
+                    {card}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Learn */}
-      <Link
-        href="/psychoed"
-        className="bg-gradient-to-br from-sage-50 to-stone-50 border border-sage-200 rounded-2xl p-4 flex items-center gap-4 hover:border-sage-300 hover:shadow-md transition-all active:scale-[0.98]"
-      >
-        <Brain size={20} className="text-sage-600 shrink-0" />
-        <div className="flex-1">
-          <p className="font-semibold text-slate-800 text-sm">Learn</p>
-          <p className="text-xs text-slate-500 mt-0.5">How your brain works</p>
-        </div>
-        <ChevronRight size={16} className="text-slate-300 shrink-0" />
-      </Link>
+      {homeVisibility.learn && (
+        <Link
+          href="/psychoed"
+          className="bg-gradient-to-br from-sage-50 to-stone-50 border border-sage-200 rounded-2xl p-4 flex items-center gap-4 hover:border-sage-300 hover:shadow-md transition-all active:scale-[0.98]"
+        >
+          <Brain size={20} className="text-sage-600 shrink-0" />
+          <div className="flex-1">
+            <p className="font-semibold text-slate-800 text-sm">Learn</p>
+            <p className="text-xs text-slate-500 mt-0.5">How your brain works</p>
+          </div>
+          <ChevronRight size={16} className="text-slate-300 shrink-0" />
+        </Link>
+      )}
 
-      {/* Professional Support (compact) */}
-      <div className="bg-sage-50 rounded-2xl p-4 border border-sage-200 space-y-3">
-        <div className="flex items-center gap-2">
-          <HeartHandshake size={15} className="text-sage-600 shrink-0" />
-          <p className="text-sm font-semibold text-slate-800">Need professional support?</p>
+      {/* Professional Support */}
+      {homeVisibility.support && (
+        <div className="bg-sage-50 rounded-2xl p-4 border border-sage-200 space-y-3">
+          <div className="flex items-center gap-2">
+            <HeartHandshake size={15} className="text-sage-600 shrink-0" />
+            <p className="text-sm font-semibold text-slate-800">Need professional support?</p>
+          </div>
+          <div className="space-y-2">
+            {[
+              { label: "ND Therapists", desc: "Find ND-affirming therapists (US and Canada)", href: "https://ndtherapists.com/" },
+              { label: "ND Practitioners", desc: "Browse practitioners and coaches (Worldwide)", href: "https://neurodivergentpractitioners.org/" },
+              { label: "Willow Creek Counselling & Psychotherapy", desc: "ND-affirming counselling in Ontario (virtual sessions available)", href: "https://www.willowcreekcounselling.com/" },
+            ].map(({ label, desc, href }) => (
+              <a
+                key={href}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 bg-white/70 border border-sage-200 rounded-xl px-3 py-2.5 hover:border-sage-400 hover:shadow-sm transition-all active:scale-[0.98]"
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-slate-800">{label}</p>
+                  <p className="text-xs text-slate-500 mt-0.5 leading-snug">{desc}</p>
+                </div>
+                <ExternalLink size={12} className="text-sage-500 shrink-0" />
+              </a>
+            ))}
+          </div>
         </div>
-        <div className="space-y-2">
-          {[
-            { label: "ND Therapists", desc: "Find ND-affirming therapists (US and Canada)", href: "https://ndtherapists.com/" },
-            { label: "ND Practitioners", desc: "Browse practitioners and coaches (Worldwide)", href: "https://neurodivergentpractitioners.org/" },
-            { label: "Willow Creek Counselling & Psychotherapy", desc: "ND-affirming counselling in Ontario (virtual sessions available)", href: "https://www.willowcreekcounselling.com/" },
-          ].map(({ label, desc, href }) => (
-            <a
-              key={href}
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-3 bg-white/70 border border-sage-200 rounded-xl px-3 py-2.5 hover:border-sage-400 hover:shadow-sm transition-all active:scale-[0.98]"
-            >
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-slate-800">{label}</p>
-                <p className="text-xs text-slate-500 mt-0.5 leading-snug">{desc}</p>
-              </div>
-              <ExternalLink size={12} className="text-sage-500 shrink-0" />
-            </a>
-          ))}
-        </div>
-      </div>
+      )}
 
       {openTool && <ToolModal tool={openTool} onClose={() => setOpenTool(null)} />}
     </div>

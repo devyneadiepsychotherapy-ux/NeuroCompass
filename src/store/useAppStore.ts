@@ -35,6 +35,7 @@ import {
   HabitBuilderItem,
   CheckInReminders,
   MedicationReminder,
+  HomeVisibility,
 } from "@/types";
 import { generateId, levelFromXp, getTodayKey, localDateKey } from "@/lib/utils";
 import { ThemeId, THEMES } from "@/lib/themes";
@@ -207,10 +208,18 @@ interface AppState {
   // Medication reminders
   medicationReminders: MedicationReminder[];
   medicationTakenDates: Record<string, string[]>; // dateKey -> array of medication IDs taken
+  medicationShowOnMe: boolean;
+  medicationShowOnHome: boolean;
   addMedicationReminder: (med: Omit<MedicationReminder, "id">) => void;
   updateMedicationReminder: (id: string, updates: Partial<Omit<MedicationReminder, "id">>) => void;
   deleteMedicationReminder: (id: string) => void;
   toggleMedicationTaken: (id: string, date: string) => void;
+  setMedicationShowOnMe: (v: boolean) => void;
+  setMedicationShowOnHome: (v: boolean) => void;
+
+  // Home page customisation
+  homeVisibility: HomeVisibility;
+  toggleHomeSection: (section: keyof HomeVisibility) => void;
 
   // Daily streak & simple XP
   streak: number;
@@ -387,6 +396,18 @@ export const useAppStore = create<AppState>()(
       usedPurchasedIndices: [],
       medicationReminders: [],
       medicationTakenDates: {},
+      medicationShowOnMe: true,
+      medicationShowOnHome: true,
+      homeVisibility: {
+        streak: true,
+        quote: true,
+        frozen: true,
+        toolbox: true,
+        learn: true,
+        support: true,
+        energyWidget: true,
+        medicationWidget: true,
+      },
       streakFreezes: 0,
       showStreakCelebration: false,
       showFreezeSaved: false,
@@ -909,6 +930,14 @@ export const useAppStore = create<AppState>()(
             },
           };
         }),
+
+      setMedicationShowOnMe: (v) => set({ medicationShowOnMe: v }),
+      setMedicationShowOnHome: (v) => set({ medicationShowOnHome: v }),
+
+      toggleHomeSection: (section) =>
+        set((s) => ({
+          homeVisibility: { ...s.homeVisibility, [section]: !s.homeVisibility[section] },
+        })),
 
       addStreakFreeze: () =>
         set((s) => ({ streakFreezes: s.streakFreezes + 1 })),

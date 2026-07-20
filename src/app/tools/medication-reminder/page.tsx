@@ -125,6 +125,10 @@ export default function MedicationReminderPage() {
     updateMedicationReminder,
     deleteMedicationReminder,
     toggleMedicationTaken,
+    medicationShowOnMe,
+    medicationShowOnHome,
+    setMedicationShowOnMe,
+    setMedicationShowOnHome,
   } = useAppStore();
 
   const today = getTodayKey();
@@ -209,11 +213,51 @@ export default function MedicationReminderPage() {
       )}
 
       {medicationReminders.length > 0 && (
-        <div className="bg-slate-50 rounded-2xl border border-slate-100 p-4 space-y-1.5">
-          <p className="text-xs font-semibold text-slate-600">How reminders work</p>
-          <p className="text-xs text-slate-400 leading-relaxed">
-            A daily checkoff appears on your Me page. The app will also show a banner reminder when you open it after the scheduled time if you haven't checked off yet.
-          </p>
+        <div className="space-y-3">
+          <div className="bg-white rounded-2xl border border-slate-200 divide-y divide-slate-100">
+            <div className="flex items-center gap-3 px-4 py-3.5">
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-slate-700">Show on Me page</p>
+                <p className="text-xs text-slate-400">Daily checkoff appears on your profile</p>
+              </div>
+              <button
+                onClick={() => setMedicationShowOnMe(!medicationShowOnMe)}
+                className={cn(
+                  "w-11 h-6 rounded-full relative transition-colors shrink-0",
+                  medicationShowOnMe ? "bg-sage-500" : "bg-slate-200"
+                )}
+              >
+                <span className={cn(
+                  "absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all",
+                  medicationShowOnMe ? "left-[22px]" : "left-0.5"
+                )} />
+              </button>
+            </div>
+            <div className="flex items-center gap-3 px-4 py-3.5">
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-slate-700">Show on Home page</p>
+                <p className="text-xs text-slate-400">Daily checkoff appears on the home screen</p>
+              </div>
+              <button
+                onClick={() => setMedicationShowOnHome(!medicationShowOnHome)}
+                className={cn(
+                  "w-11 h-6 rounded-full relative transition-colors shrink-0",
+                  medicationShowOnHome ? "bg-sage-500" : "bg-slate-200"
+                )}
+              >
+                <span className={cn(
+                  "absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-all",
+                  medicationShowOnHome ? "left-[22px]" : "left-0.5"
+                )} />
+              </button>
+            </div>
+          </div>
+          <div className="bg-slate-50 rounded-2xl border border-slate-100 p-4 space-y-1.5">
+            <p className="text-xs font-semibold text-slate-600">How reminders work</p>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              A banner appears when you open the app after the scheduled time if you haven&apos;t checked off yet. The checkoff can appear on the Me page and/or the home page — toggle above to choose.
+            </p>
+          </div>
         </div>
       )}
     </div>

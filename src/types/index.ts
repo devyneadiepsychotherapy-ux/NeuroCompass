@@ -141,6 +141,17 @@ export interface SectionVisibility {
   meal: boolean;
 }
 
+export interface HomeVisibility {
+  streak: boolean;
+  quote: boolean;
+  frozen: boolean;
+  toolbox: boolean;
+  learn: boolean;
+  support: boolean;
+  energyWidget: boolean;
+  medicationWidget: boolean;
+}
+
 export interface FocusSession {
   isActive: boolean;
   durationSeconds: number;
