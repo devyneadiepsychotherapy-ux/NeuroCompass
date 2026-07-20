@@ -742,6 +742,87 @@ function scheduleNotification(title: string, fireAt: Date) {
   }, msUntil);
 }
 
+// ---------------------------------------------------------------------------
+// Day progress bar
+// ---------------------------------------------------------------------------
+
+function DayProgressBar({ selectedDate }: { selectedDate: Date }) {
+  const { appointments } = useAppStore();
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 60_000);
+    return () => clearInterval(id);
+  }, []);
+
+  const todayKey = getTodayKey();
+  if (dateKey(selectedDate) !== todayKey) return null;
+
+  // 6 AM – 11 PM window
+  const DAY_START = 6 * 60;
+  const DAY_END = 23 * 60;
+  const DAY_TOTAL = DAY_END - DAY_START;
+
+  const nowMins = now.getHours() * 60 + now.getMinutes();
+  const clampedMins = Math.max(DAY_START, Math.min(DAY_END, nowMins));
+  const pct = Math.round(((clampedMins - DAY_START) / DAY_TOTAL) * 100);
+
+  const timeLabel = now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+
+  // Next appointment today that hasn't started yet
+  const nextAppt = appointments
+    .filter((a) => a.date === todayKey && a.startTime && !a.allDay)
+    .sort((a, b) => a.startTime.localeCompare(b.startTime))
+    .find((a) => {
+      const [h, m] = a.startTime.split(":").map(Number);
+      return h * 60 + m > nowMins;
+    });
+
+  let countdownLabel: string | null = null;
+  if (nextAppt) {
+    const [h, m] = nextAppt.startTime.split(":").map(Number);
+    const diff = h * 60 + m - nowMins;
+    const hrs = Math.floor(diff / 60);
+    const mins = diff % 60;
+    countdownLabel = hrs > 0 ? `in ${hrs}h ${mins}m` : `in ${mins}m`;
+  }
+
+  return (
+    <div className="mt-3 mb-0.5 space-y-1.5">
+      {/* Bar + dot */}
+      <div className="relative h-1.5 bg-slate-100 rounded-full">
+        <div
+          className="h-full bg-sage-400 rounded-full"
+          style={{ width: `${pct}%` }}
+        />
+        <div
+          className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 bg-sage-600 rounded-full border-2 border-white shadow"
+          style={{ left: `calc(${pct}% - 5px)` }}
+        />
+      </div>
+
+      {/* Labels row */}
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-[11px] text-slate-400 shrink-0">
+          <span className="font-semibold text-slate-500">{timeLabel}</span>
+          {" · "}
+          {pct}% of day
+        </p>
+        {nextAppt && countdownLabel && (
+          <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full px-2 py-0.5 min-w-0">
+            <Clock size={9} className="text-slate-400 shrink-0" />
+            <p className="text-[10px] text-slate-500 truncate">
+              <span className="font-medium text-slate-600">Next:</span>{" "}
+              <span className="text-slate-700">{nextAppt.title}</span>{" "}
+              <span className="text-slate-400">{countdownLabel}</span>
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
   const { appointments, addAppointment, deleteAppointment, updateAppointment } = useAppStore();
   const [showForm, setShowForm] = useState(false);
@@ -2950,6 +3031,8 @@ export default function PlannerPage() {
       {/* Day view */}
       {activeView === "day" && (
         <>
+          {mounted && <DayProgressBar selectedDate={selectedDate} />}
+
           {/* Hidden section chips */}
           {hiddenSections.length > 0 && (
             <div className="flex flex-wrap gap-2">
