@@ -101,12 +101,38 @@ function getMonthKey(date: Date): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 }
 
-function getWeekOfMonth(date: Date): 1 | 2 | 3 | 4 {
-  // Find Monday of the week containing date
+// Returns the Monday of the ISO week containing `date` (Monday = day 1).
+function getMondayOfWeek(date: Date): Date {
   const d = new Date(date);
-  const day = d.getDay();
-  d.setDate(d.getDate() - (day === 0 ? 6 : day - 1));
-  return Math.min(4, Math.ceil(d.getDate() / 7)) as 1 | 2 | 3 | 4;
+  const day = d.getDay(); // 0=Sun … 6=Sat
+  d.setDate(d.getDate() + (day === 0 ? -6 : 1 - day));
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+// Which week of the month does this date fall in?
+// Week 1 = the Monday-starting week that contains the 1st of the month.
+// Supports 5-week months; capped at 5.
+function getWeekOfMonth(date: Date): 1 | 2 | 3 | 4 | 5 {
+  const firstOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+  const firstMonday = getMondayOfWeek(firstOfMonth);
+  const dateMonday  = getMondayOfWeek(date);
+  const diff = Math.round(
+    (dateMonday.getTime() - firstMonday.getTime()) / (7 * 24 * 60 * 60 * 1000)
+  );
+  return Math.min(5, diff + 1) as 1 | 2 | 3 | 4 | 5;
+}
+
+// How many distinct Monday-starting weeks does a given month span? (max 5)
+function getWeekCountInMonth(year: number, month: number): number {
+  const firstOfMonth = new Date(year, month, 1);
+  const lastOfMonth  = new Date(year, month + 1, 0);
+  const firstMonday  = getMondayOfWeek(firstOfMonth);
+  const lastMonday   = getMondayOfWeek(lastOfMonth);
+  const diff = Math.round(
+    (lastMonday.getTime() - firstMonday.getTime()) / (7 * 24 * 60 * 60 * 1000)
+  );
+  return Math.min(5, diff + 1);
 }
 
 function formatDateLabel(date: Date, view: PlannerView): string {
@@ -631,10 +657,15 @@ function RecurringTodosList({
     setEditText("");
   };
 
-  const effectiveWeek = (task: Task): 1 | 2 | 3 | 4 | undefined =>
+  const weekCount = monthKey
+    ? getWeekCountInMonth(parseInt(monthKey.slice(0, 4)), parseInt(monthKey.slice(5, 7)) - 1)
+    : 4;
+  const weekNums = Array.from({ length: weekCount }, (_, i) => (i + 1) as 1 | 2 | 3 | 4 | 5);
+
+  const effectiveWeek = (task: Task): 1 | 2 | 3 | 4 | 5 | undefined =>
     (monthKey ? task.weekOverrides?.[monthKey] : undefined) ?? task.weekOfMonth;
 
-  const setWeekPill = (task: Task, w: 1 | 2 | 3 | 4) => {
+  const setWeekPill = (task: Task, w: 1 | 2 | 3 | 4 | 5) => {
     const current = effectiveWeek(task);
     if (monthKey) {
       const overrides = { ...(task.weekOverrides ?? {}) };
@@ -706,7 +737,7 @@ function RecurringTodosList({
             {recurType === "monthly" && !isEditing && (
               <div className="flex items-center flex-wrap gap-1 pl-8">
                 <span className="text-[10px] text-slate-400 mr-0.5">{monthKey ? "This month:" : "Week:"}</span>
-                {([1, 2, 3, 4] as const).map((w) => (
+                {weekNums.map((w) => (
                   <button
                     key={w}
                     onClick={() => setWeekPill(task, w)}

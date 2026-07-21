@@ -28,8 +28,8 @@ export interface Task {
   endTime?: string;   // "HH:MM" e.g. "11:30"
   reminderMinsBefore?: number; // 0 = at time, undefined = no reminder
   carryOver?: boolean; // if true, task reappears on days after its dueDate
-  weekOfMonth?: 1 | 2 | 3 | 4; // monthly recurring tasks: pin to a specific week (Mon-Sun boundaries)
-  weekOverrides?: Record<string, 1 | 2 | 3 | 4>; // "YYYY-MM" -> per-month week override
+  weekOfMonth?: 1 | 2 | 3 | 4 | 5; // monthly recurring tasks: pin to a specific week (Mon-Sun boundaries)
+  weekOverrides?: Record<string, 1 | 2 | 3 | 4 | 5>; // "YYYY-MM" -> per-month week override
   monthlyCarryOver?: boolean; // if true, task shows in next week when incomplete
 }
 
