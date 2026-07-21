@@ -123,11 +123,43 @@ function XpToast({ amount }: { amount: number }) {
 // Past check-ins component
 // ---------------------------------------------------------------------------
 
-function PastCheckIns({ entries }: { entries: MoodEntry[] }) {
+type MoodRow   = { kind: "mood";   entry: MoodEntry; dailyEnergy?: 2 | 3 | 4; sortKey: string };
+type EnergyRow = { kind: "energy"; date: string; level: 2 | 3 | 4; sortKey: string };
+type HistoryRow = MoodRow | EnergyRow;
+
+function PastCheckIns({
+  entries,
+  dailyEnergyLogs,
+}: {
+  entries: MoodEntry[];
+  dailyEnergyLogs: Record<string, 2 | 3 | 4>;
+}) {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [showAll, setShowAll] = useState(false);
 
-  const displayed = showAll ? entries : entries.slice(0, 5);
+  // Dates that already have at least one mood entry
+  const moodDates = new Set(entries.map((e) => e.timestamp.slice(0, 10)));
+
+  const rows: HistoryRow[] = [
+    // All mood entries, each annotated with the daily energy for that date (if any)
+    ...entries.map((e) => ({
+      kind: "mood" as const,
+      entry: e,
+      dailyEnergy: dailyEnergyLogs[e.timestamp.slice(0, 10)],
+      sortKey: e.timestamp,
+    })),
+    // Energy-only dates: dailyEnergyLog exists but no mood entry for that date
+    ...Object.entries(dailyEnergyLogs)
+      .filter(([date]) => !moodDates.has(date))
+      .map(([date, level]) => ({
+        kind: "energy" as const,
+        date,
+        level,
+        sortKey: date + "T12:00:00Z",
+      })),
+  ].sort((a, b) => b.sortKey.localeCompare(a.sortKey));
+
+  const displayed = showAll ? rows : rows.slice(0, 5);
 
   const dot = (p: number) =>
     p >= 4 ? "bg-emerald-400" : p >= 3 ? "bg-stone-400" : "bg-rose-400";
@@ -136,14 +168,51 @@ function PastCheckIns({ entries }: { entries: MoodEntry[] }) {
     <div className="space-y-3 pt-2">
       <div className="flex items-center justify-between">
         <p className="text-sm font-bold text-slate-700">Past check-ins</p>
-        <span className="text-xs text-slate-400">{entries.length} total</span>
+        <span className="text-xs text-slate-400">{rows.length} total</span>
       </div>
 
       <div className="space-y-2">
-        {displayed.map((entry) => {
+        {displayed.map((row) => {
+          // ── Energy-only row ──────────────────────────────────────────────
+          if (row.kind === "energy") {
+            const opt = ENERGY_OPTIONS.find((o) => o.value === row.level);
+            const Icon = opt?.icon;
+            return (
+              <div
+                key={`energy-${row.date}`}
+                className="bg-cream-50 rounded-2xl border border-slate-100 overflow-hidden"
+              >
+                <div className="flex items-center gap-3 px-4 py-3">
+                  {Icon ? (
+                    <Icon size={14} className={cn("shrink-0", opt?.color)} />
+                  ) : (
+                    <div className="w-2.5 h-2.5 rounded-full bg-stone-300 shrink-0" />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-slate-700">
+                      Energy: {opt?.label}
+                    </p>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      {new Date(row.date + "T12:00:00").toLocaleDateString("en-CA", {
+                        weekday: "short",
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
+          // ── Mood row ─────────────────────────────────────────────────────
+          const { entry, dailyEnergy } = row;
           const isOpen = expanded === entry.id;
           return (
-            <div key={entry.id} className="bg-cream-50 rounded-2xl border border-slate-100 overflow-hidden relative transition-colors hover:border-slate-200">
+            <div
+              key={entry.id}
+              className="bg-cream-50 rounded-2xl border border-slate-100 overflow-hidden relative transition-colors hover:border-slate-200"
+            >
               <button
                 className="w-full flex items-center gap-3 px-4 py-3 text-left cursor-pointer hover:bg-slate-50 active:bg-slate-100 transition-colors"
                 style={{ WebkitTapHighlightColor: "transparent" }}
@@ -154,20 +223,37 @@ function PastCheckIns({ entries }: { entries: MoodEntry[] }) {
                   <p className="text-sm font-medium text-slate-700 truncate">
                     {PLEASANT_LABELS[entry.pleasantness - 1]}
                     {entry.emotions?.length > 0 && (
-                      <span className="text-slate-400 font-normal"> · {entry.emotions.slice(0, 2).join(", ")}{entry.emotions.length > 2 ? ` +${entry.emotions.length - 2}` : ""}</span>
+                      <span className="text-slate-400 font-normal">
+                        {" · "}
+                        {entry.emotions.slice(0, 2).join(", ")}
+                        {entry.emotions.length > 2 ? ` +${entry.emotions.length - 2}` : ""}
+                      </span>
                     )}
                   </p>
                   <p className="text-xs text-slate-400 mt-0.5">
-                    {new Date(entry.timestamp).toLocaleDateString("en-CA", { weekday: "short", month: "short", day: "numeric" })}
+                    {new Date(entry.timestamp).toLocaleDateString("en-CA", {
+                      weekday: "short",
+                      month: "short",
+                      day: "numeric",
+                    })}
                     {" · "}
-                    {new Date(entry.timestamp).toLocaleTimeString("en-CA", { hour: "2-digit", minute: "2-digit" })}
+                    {new Date(entry.timestamp).toLocaleTimeString("en-CA", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   {entry.energy && (
-                    <span className="text-xs text-slate-400">{ENERGY_OPTIONS.find(o => o.value === entry.energy)?.label}</span>
+                    <span className="text-xs text-slate-400">
+                      {ENERGY_OPTIONS.find((o) => o.value === entry.energy)?.label}
+                    </span>
                   )}
-                  {isOpen ? <ChevronUp size={14} className="text-slate-300" /> : <ChevronDown size={14} className="text-slate-300" />}
+                  {isOpen ? (
+                    <ChevronUp size={14} className="text-slate-300" />
+                  ) : (
+                    <ChevronDown size={14} className="text-slate-300" />
+                  )}
                 </div>
               </button>
 
@@ -175,7 +261,14 @@ function PastCheckIns({ entries }: { entries: MoodEntry[] }) {
                 <div className="px-4 pb-4 space-y-2 border-t border-slate-100 pt-3">
                   {entry.energy && (
                     <p className="text-xs text-slate-600">
-                      <span className="font-medium">Energy:</span> {ENERGY_OPTIONS.find(o => o.value === entry.energy)?.label}
+                      <span className="font-medium">Energy:</span>{" "}
+                      {ENERGY_OPTIONS.find((o) => o.value === entry.energy)?.label}
+                    </p>
+                  )}
+                  {dailyEnergy && (
+                    <p className="text-xs text-slate-600">
+                      <span className="font-medium">Daily energy:</span>{" "}
+                      {ENERGY_OPTIONS.find((o) => o.value === dailyEnergy)?.label}
                     </p>
                   )}
                   {entry.emotions?.length > 0 && (
@@ -183,7 +276,12 @@ function PastCheckIns({ entries }: { entries: MoodEntry[] }) {
                       <p className="text-xs font-medium text-slate-600 mb-1">Emotions:</p>
                       <div className="flex flex-wrap gap-1">
                         {entry.emotions.map((e) => (
-                          <span key={e} className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">{e}</span>
+                          <span
+                            key={e}
+                            className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full"
+                          >
+                            {e}
+                          </span>
                         ))}
                       </div>
                     </div>
@@ -193,7 +291,12 @@ function PastCheckIns({ entries }: { entries: MoodEntry[] }) {
                       <p className="text-xs font-medium text-slate-600 mb-1">Body areas:</p>
                       <div className="flex flex-wrap gap-1">
                         {entry.bodyAreas.map((a) => (
-                          <span key={a} className="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-100">{a}</span>
+                          <span
+                            key={a}
+                            className="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-100"
+                          >
+                            {a}
+                          </span>
                         ))}
                       </div>
                     </div>
@@ -214,12 +317,12 @@ function PastCheckIns({ entries }: { entries: MoodEntry[] }) {
         })}
       </div>
 
-      {entries.length > 5 && (
+      {rows.length > 5 && (
         <button
           onClick={() => setShowAll((v) => !v)}
           className="w-full text-xs text-slate-500 hover:text-slate-700 py-2 border border-slate-200 rounded-xl transition-all hover:bg-slate-50"
         >
-          {showAll ? "Show fewer" : `Show all ${entries.length} check-ins`}
+          {showAll ? "Show fewer" : `Show all ${rows.length} check-ins`}
         </button>
       )}
     </div>
@@ -392,7 +495,7 @@ function CheckInReminderSettings() {
 }
 
 export default function MoodPage() {
-  const { addMoodEntry, moodEntries, addXP } = useAppStore();
+  const { addMoodEntry, moodEntries, addXP, dailyEnergyLogs } = useAppStore();
   const [xpFlash, setXpFlash] = useState<number | null>(null);
   const xpTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -535,7 +638,7 @@ export default function MoodPage() {
           )}
         </div>
         <div className="w-full">
-          <PastCheckIns entries={moodEntries.slice(0, 5)} />
+          <PastCheckIns entries={moodEntries} dailyEnergyLogs={dailyEnergyLogs} />
         </div>
         <button
           onClick={resetAll}
@@ -626,8 +729,8 @@ export default function MoodPage() {
       {step === "flow" && <CheckInReminderSettings />}
 
       {/* Past check-ins : always visible on flow step */}
-      {step === "flow" && moodEntries.length > 0 && (
-        <PastCheckIns entries={moodEntries} />
+      {step === "flow" && (moodEntries.length > 0 || Object.keys(dailyEnergyLogs).length > 0) && (
+        <PastCheckIns entries={moodEntries} dailyEnergyLogs={dailyEnergyLogs} />
       )}
 
       {/* Step: Energy (body-only flow) */}
