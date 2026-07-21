@@ -99,7 +99,7 @@ function NodeItem({
                 <div className={cn("w-3 h-3 rounded-full border", node.color.split(" ").slice(0, 2).join(" "))} />
               </button>
               {showPalette && (
-                <div className="absolute right-0 top-7 z-20 bg-white rounded-xl shadow-lg border border-slate-100 p-2 flex flex-wrap gap-1.5 w-28">
+                <div className="absolute right-0 bottom-full mb-1 z-20 bg-white rounded-xl shadow-lg border border-slate-100 p-2 flex flex-wrap gap-1.5 w-28">
                   {COLOR_SWATCHES.map((s, i) => (
                     <button
                       key={i}
