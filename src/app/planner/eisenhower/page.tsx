@@ -165,7 +165,7 @@ export default function EisenhowerPage() {
         {QUADRANTS.map(q => {
           const qTasks = tasks.filter(t => t.quadrant === q.key);
           return (
-            <div key={q.key} className={cn("rounded-2xl border-2 p-3 min-h-36", q.color)}>
+            <div key={q.key} className={cn("rounded-2xl border-2 p-3 min-h-36 overflow-hidden", q.color)}>
               <div className="mb-3">
                 <p className="font-bold text-slate-800 text-sm">{q.emoji} {q.label}</p>
                 <p className="text-xs text-slate-500">{q.subtitle}</p>
@@ -175,58 +175,68 @@ export default function EisenhowerPage() {
                   <p className="text-xs text-slate-400 italic py-2">{q.description}</p>
                 )}
                 {qTasks.map(task => (
-                  <div key={task.id} className="bg-cream-50 rounded-xl px-3 py-2 shadow-sm border border-white space-y-1.5">
-                    <div className="flex items-start gap-2">
-                      <p className="text-xs text-slate-700 flex-1 leading-snug">{task.title}</p>
-                      <button onClick={() => removeTask(task.id)} className="text-slate-300 hover:text-red-400 transition-colors shrink-0">
-                        <X size={12} />
+                  <div key={task.id} className="bg-cream-50 rounded-xl px-2.5 py-2 shadow-sm border border-white/80 space-y-1.5 overflow-hidden">
+                    {/* Title row — × button sits inline, text wraps below it */}
+                    <div className="flex items-start gap-1.5">
+                      <p className="text-xs text-slate-700 flex-1 leading-snug break-words min-w-0">
+                        {task.title}
+                      </p>
+                      <button
+                        onClick={() => removeTask(task.id)}
+                        className="text-slate-300 hover:text-red-400 transition-colors shrink-0 mt-0.5"
+                      >
+                        <X size={11} />
                       </button>
                     </div>
+                    {/* "Do First" action */}
                     {q.key === "do" && (
                       <button
                         onClick={() => handleAddToToday(task)}
                         disabled={addedToday.has(task.id)}
-                        className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50 disabled:cursor-default transition-colors w-full"
+                        className="flex items-center gap-1 text-[10px] px-2 py-1 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50 disabled:cursor-default transition-colors w-full"
                       >
-                        <CheckSquare size={11} />
-                        {addedToday.has(task.id) ? "Added to today ✓" : "Add to today's tasks"}
+                        <CheckSquare size={10} />
+                        {addedToday.has(task.id) ? "Added ✓" : "Add to today"}
                       </button>
                     )}
+                    {/* "Schedule" action — date picker stacked vertically */}
                     {q.key === "schedule" && (
                       <div className="space-y-1">
                         {scheduledIds.has(task.id) ? (
-                          <span className="flex items-center gap-1 text-xs text-stone-500 px-1">
-                            <Calendar size={11} /> Scheduled ✓
+                          <span className="flex items-center gap-1 text-[10px] text-stone-500">
+                            <Calendar size={10} /> Scheduled ✓
                           </span>
                         ) : schedulePickerId === task.id ? (
-                          <div className="flex gap-1">
+                          <div className="space-y-1">
                             <input
                               type="date"
-                              className="flex-1 text-xs border border-stone-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-sage-400"
+                              className="w-full text-[10px] border border-stone-200 rounded-lg px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-sage-400 bg-white"
                               value={scheduleDateInput}
                               onChange={e => setScheduleDateInput(e.target.value)}
                             />
-                            <button
-                              onClick={() => handleSchedule(task)}
-                              disabled={!scheduleDateInput}
-                              className="text-xs px-2 py-1 rounded-lg bg-sage-600 text-white disabled:opacity-40"
-                            >
-                              Save
-                            </button>
-                            <button
-                              onClick={() => { setSchedulePickerId(null); setScheduleDateInput(""); }}
-                              className="text-xs px-2 py-1 rounded-lg border border-stone-200 text-slate-500"
-                            >
-                              ✕
-                            </button>
+                            <div className="flex gap-1">
+                              <button
+                                onClick={() => handleSchedule(task)}
+                                disabled={!scheduleDateInput}
+                                className="flex-1 text-[10px] py-1 rounded-lg bg-sage-600 text-white disabled:opacity-40 font-medium"
+                              >
+                                Save
+                              </button>
+                              <button
+                                onClick={() => { setSchedulePickerId(null); setScheduleDateInput(""); }}
+                                className="flex-1 text-[10px] py-1 rounded-lg border border-stone-200 text-slate-500"
+                              >
+                                Cancel
+                              </button>
+                            </div>
                           </div>
                         ) : (
                           <button
                             onClick={() => setSchedulePickerId(task.id)}
-                            className="flex items-center gap-1 text-xs px-2 py-1 rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200 transition-colors w-full"
+                            className="flex items-center gap-1 text-[10px] px-2 py-1 rounded-lg bg-stone-100 text-stone-700 hover:bg-stone-200 transition-colors w-full"
                           >
-                            <Calendar size={11} />
-                            Schedule in planner
+                            <Calendar size={10} />
+                            Schedule
                           </button>
                         )}
                       </div>
