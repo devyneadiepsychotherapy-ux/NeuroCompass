@@ -693,6 +693,16 @@ function RecurringTodosList({
                 </>
               )}
             </div>
+            {isEditing && (
+              <div className="pl-8">
+                <button
+                  onMouseDown={(e) => { e.preventDefault(); deleteTask(task.id); setEditingId(null); }}
+                  className="text-xs text-red-400 hover:text-red-600 font-medium transition-colors"
+                >
+                  Delete task
+                </button>
+              </div>
+            )}
             {recurType === "monthly" && !isEditing && (
               <div className="flex items-center flex-wrap gap-1 pl-8">
                 <span className="text-[10px] text-slate-400 mr-0.5">{monthKey ? "This month:" : "Week:"}</span>
@@ -945,9 +955,9 @@ function DayProgressBar({ selectedDate }: { selectedDate: Date }) {
           )}
         </div>
         {nextAppt && countdownLabel && (
-          <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full px-2 py-0.5 min-w-0">
+          <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-full px-2 py-0.5 shrink-0">
             <Clock size={9} className="text-slate-400 shrink-0" />
-            <p className="text-[10px] text-slate-500 truncate">
+            <p className="text-[10px] text-slate-500 whitespace-nowrap">
               <span className="font-medium text-slate-600">Next:</span>{" "}
               <span className="text-slate-700">{nextAppt.title}</span>{" "}
               <span className="text-slate-400">{countdownLabel}</span>
