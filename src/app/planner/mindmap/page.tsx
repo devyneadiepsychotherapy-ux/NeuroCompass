@@ -177,14 +177,17 @@ const EMPTY_TREE: MindNode = { id: "root", text: "Central idea", children: [], c
 
 export default function MindMapPage() {
   const router = useRouter();
-  const { toggleFavorite, isFavorite, savedMindMaps, saveMindMap, deleteSavedMindMap } = useAppStore();
+  const { toggleFavorite, isFavorite, savedMindMaps, saveMindMap, updateSavedMindMap, deleteSavedMindMap } = useAppStore();
   const favorite = isFavorite("mind-map");
   const [colorIdx, setColorIdx] = useState(0);
   const [tree, setTree] = useState<MindNode>(EMPTY_TREE);
   const [showSaved, setShowSaved] = useState(false);
   const [saveNameInput, setSaveNameInput] = useState("");
-  const [showSaveInput, setShowSaveInput] = useState(false);
+  const [showSaveAsInput, setShowSaveAsInput] = useState(false);
   const [savedMsg, setSavedMsg] = useState(false);
+  // Tracks the currently loaded map (null = new/unsaved map)
+  const [currentMapId, setCurrentMapId] = useState<string | null>(null);
+  const [currentMapName, setCurrentMapName] = useState<string | null>(null);
 
   const handleUpdate = (id: string, text: string) => {
     if (id === "root") setTree(prev => ({ ...prev, text }));
@@ -230,20 +233,37 @@ export default function MindMapPage() {
   const reset = () => {
     setTree(EMPTY_TREE);
     setColorIdx(0);
+    setCurrentMapId(null);
+    setCurrentMapName(null);
   };
 
-  const handleSave = () => {
+  // Overwrite the currently-loaded map in place
+  const handleSaveExisting = () => {
+    if (!currentMapId) return;
+    updateSavedMindMap(currentMapId, tree, colorIdx);
+    setSavedMsg(true);
+    setTimeout(() => setSavedMsg(false), 2000);
+  };
+
+  // Save as a brand-new map (always prompts for a name)
+  const handleSaveAs = () => {
     const name = saveNameInput.trim() || tree.text || "Mind map";
     saveMindMap(name, tree, colorIdx);
     setSaveNameInput("");
-    setShowSaveInput(false);
+    setShowSaveAsInput(false);
     setSavedMsg(true);
     setTimeout(() => setSavedMsg(false), 2000);
+    // The new map becomes the active map — find it by savedAt (latest entry)
+    // We don't have the new id here, so just clear the active map to avoid confusion
+    setCurrentMapId(null);
+    setCurrentMapName(null);
   };
 
   const handleLoad = (map: typeof savedMindMaps[0]) => {
     setTree(map.tree);
     setColorIdx(map.colorIdx);
+    setCurrentMapId(map.id);
+    setCurrentMapName(map.name);
     setShowSaved(false);
   };
 
@@ -298,14 +318,44 @@ export default function MindMapPage() {
 
       {/* Save / Load */}
       <div className="space-y-2">
-        <div className="flex gap-2">
-          <button
-            onClick={() => setShowSaveInput(!showSaveInput)}
-            className="flex items-center gap-2 px-4 py-2 bg-sage-600 text-white rounded-xl text-sm font-medium hover:bg-sage-700 transition-all"
-          >
-            <Save size={15} />
-            {savedMsg ? "Saved ✓" : "Save map"}
-          </button>
+        {/* Active-map label */}
+        {currentMapId && currentMapName && (
+          <p className="text-xs text-slate-500">
+            Editing: <span className="font-semibold text-slate-700">{currentMapName}</span>
+          </p>
+        )}
+
+        <div className="flex flex-wrap gap-2">
+          {/* Primary save button — overwrites if a map is loaded, otherwise opens name input */}
+          {currentMapId ? (
+            <button
+              onClick={handleSaveExisting}
+              className="flex items-center gap-2 px-4 py-2 bg-sage-600 text-white rounded-xl text-sm font-medium hover:bg-sage-700 transition-all"
+            >
+              <Save size={15} />
+              {savedMsg ? "Saved ✓" : "Save"}
+            </button>
+          ) : (
+            <button
+              onClick={() => setShowSaveAsInput(!showSaveAsInput)}
+              className="flex items-center gap-2 px-4 py-2 bg-sage-600 text-white rounded-xl text-sm font-medium hover:bg-sage-700 transition-all"
+            >
+              <Save size={15} />
+              {savedMsg ? "Saved ✓" : "Save map"}
+            </button>
+          )}
+
+          {/* Secondary: save as new (only shown when a map is already loaded) */}
+          {currentMapId && (
+            <button
+              onClick={() => setShowSaveAsInput(!showSaveAsInput)}
+              className="flex items-center gap-2 px-4 py-2 bg-cream-50 border border-slate-200 text-slate-700 rounded-xl text-sm font-medium hover:border-sage-300 transition-all"
+            >
+              <Plus size={15} />
+              Save as new
+            </button>
+          )}
+
           {savedMindMaps.length > 0 && (
             <button
               onClick={() => setShowSaved(!showSaved)}
@@ -317,7 +367,8 @@ export default function MindMapPage() {
           )}
         </div>
 
-        {showSaveInput && (
+        {/* Name input for new saves */}
+        {showSaveAsInput && (
           <div className="flex gap-2">
             <input
               autoFocus
@@ -325,12 +376,12 @@ export default function MindMapPage() {
               placeholder={`Name (default: "${tree.text}")`}
               value={saveNameInput}
               onChange={e => setSaveNameInput(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && handleSave()}
+              onKeyDown={e => e.key === "Enter" && handleSaveAs()}
             />
-            <button onClick={handleSave} className="px-3 py-2 bg-sage-600 text-white rounded-xl text-sm font-medium hover:bg-sage-700">
+            <button onClick={handleSaveAs} className="px-3 py-2 bg-sage-600 text-white rounded-xl text-sm font-medium hover:bg-sage-700">
               Save
             </button>
-            <button onClick={() => { setShowSaveInput(false); setSaveNameInput(""); }} className="px-3 py-2 border border-slate-200 text-slate-600 rounded-xl text-sm hover:bg-slate-50">
+            <button onClick={() => { setShowSaveAsInput(false); setSaveNameInput(""); }} className="px-3 py-2 border border-slate-200 text-slate-600 rounded-xl text-sm hover:bg-slate-50">
               Cancel
             </button>
           </div>
@@ -340,19 +391,34 @@ export default function MindMapPage() {
           <div className="bg-cream-50 rounded-2xl border border-slate-100 p-3 space-y-2">
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Your saved maps</p>
             {[...savedMindMaps].reverse().map(map => (
-              <div key={map.id} className="flex items-center gap-2 bg-white rounded-xl px-3 py-2 border border-slate-100 shadow-sm">
+              <div
+                key={map.id}
+                className={cn(
+                  "flex items-center gap-2 bg-white rounded-xl px-3 py-2 border shadow-sm",
+                  map.id === currentMapId ? "border-sage-300" : "border-slate-100"
+                )}
+              >
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-slate-700 truncate">{map.name}</p>
                   <p className="text-xs text-slate-400">{new Date(map.savedAt).toLocaleDateString()}</p>
                 </div>
                 <button
                   onClick={() => handleLoad(map)}
-                  className="text-xs px-3 py-1.5 rounded-lg bg-sage-100 text-sage-700 hover:bg-sage-200 transition-colors font-medium"
+                  className={cn(
+                    "text-xs px-3 py-1.5 rounded-lg font-medium transition-colors",
+                    map.id === currentMapId
+                      ? "bg-sage-200 text-sage-800 cursor-default"
+                      : "bg-sage-100 text-sage-700 hover:bg-sage-200"
+                  )}
+                  disabled={map.id === currentMapId}
                 >
-                  Load
+                  {map.id === currentMapId ? "Active" : "Load"}
                 </button>
                 <button
-                  onClick={() => deleteSavedMindMap(map.id)}
+                  onClick={() => {
+                    deleteSavedMindMap(map.id);
+                    if (map.id === currentMapId) { setCurrentMapId(null); setCurrentMapName(null); }
+                  }}
                   className="p-1.5 rounded-lg hover:bg-red-50 text-slate-300 hover:text-red-400 transition-colors"
                 >
                   <Trash2 size={13} />

@@ -310,6 +310,7 @@ interface AppState {
   // Saved mind maps
   savedMindMaps: import("@/types").SavedMindMap[];
   saveMindMap: (name: string, tree: import("@/types").MindNode, colorIdx: number) => void;
+  updateSavedMindMap: (id: string, tree: import("@/types").MindNode, colorIdx: number) => void;
   deleteSavedMindMap: (id: string) => void;
 
   // Toolbox view mode
@@ -1256,6 +1257,12 @@ export const useAppStore = create<AppState>()(
             ...s.savedMindMaps,
             { id: Math.random().toString(36).slice(2), name, tree, colorIdx, savedAt: new Date().toISOString() },
           ],
+        })),
+      updateSavedMindMap: (id, tree, colorIdx) =>
+        set(s => ({
+          savedMindMaps: s.savedMindMaps.map(m =>
+            m.id === id ? { ...m, tree, colorIdx, savedAt: new Date().toISOString() } : m
+          ),
         })),
       deleteSavedMindMap: (id) => set(s => ({ savedMindMaps: s.savedMindMaps.filter(m => m.id !== id) })),
 
