@@ -107,7 +107,7 @@ export const TOOLS: Tool[] = [
     id: "body-double",
     title: "Body Doubling",
     description: "Work alongside someone (real or virtual) to activate focus",
-    category: "time",
+    category: "motivation",
     icon: "Users",
     type: "guided",
     content: {
