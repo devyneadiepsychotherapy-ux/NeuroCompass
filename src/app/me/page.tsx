@@ -10,9 +10,10 @@ import {
 import { useAppStore } from "@/store/useAppStore";
 import { cn, xpForLevel, getTodayKey } from "@/lib/utils";
 import { SpecialInterest, UserList, ToolFavorite, MeVisibility } from "@/types";
-import { TOOLS } from "@/lib/tools-data";
+import { TOOLS, Tool } from "@/lib/tools-data";
 import { ICON_MAP } from "@/lib/icon-map";
 import { getAvatarOption } from "@/app/onboarding/page";
+import { ToolModal } from "@/components/ToolModal";
 
 // ---------------------------------------------------------------------------
 // ND Strengths data
@@ -72,7 +73,7 @@ function NDStrengthsCard({
 // My Toolbox card  (soft lavender) : 3-col grid, grid/list toggle
 // ---------------------------------------------------------------------------
 
-function MyToolboxCard({ favorites }: { favorites: ToolFavorite[] }) {
+function MyToolboxCard({ favorites, onOpenTool }: { favorites: ToolFavorite[]; onOpenTool: (tool: Tool) => void }) {
   const favTools = TOOLS.filter((t) => favorites.some((f) => f.toolId === t.id));
   const { toolboxViewMode: viewMode, setToolboxViewMode: setViewMode } = useAppStore();
 
@@ -150,20 +151,20 @@ function MyToolboxCard({ favorites }: { favorites: ToolFavorite[] }) {
               </>
             );
             const cls =
-              "flex items-center gap-2.5 bg-white/60 border border-slate-100 rounded-xl px-3 py-2 transition-all active:scale-[0.98]";
-            const href = tool.linkTo ? `${tool.linkTo}?from=me` : "/tools";
-            return (
-              <Link
-                key={tool.id}
-                href={href}
-                className={cls}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.borderColor = "#DDD9F0")
-                }
-                onMouseLeave={(e) => (e.currentTarget.style.borderColor = "")}
-              >
+              "flex items-center gap-2.5 bg-white/60 border border-slate-100 rounded-xl px-3 py-2 transition-all active:scale-[0.98] w-full text-left";
+            const hoverHandlers = {
+              onMouseEnter: (e: React.MouseEvent<HTMLElement>) =>
+                (e.currentTarget.style.borderColor = "#DDD9F0"),
+              onMouseLeave: (e: React.MouseEvent<HTMLElement>) => (e.currentTarget.style.borderColor = ""),
+            };
+            return tool.linkTo ? (
+              <Link key={tool.id} href={`${tool.linkTo}?from=me`} className={cls} {...hoverHandlers}>
                 {inner}
               </Link>
+            ) : (
+              <button key={tool.id} onClick={() => onOpenTool(tool)} className={cls} {...hoverHandlers}>
+                {inner}
+              </button>
             );
           })}
         </div>
@@ -171,24 +172,30 @@ function MyToolboxCard({ favorites }: { favorites: ToolFavorite[] }) {
         <div className="grid grid-cols-3 gap-2">
           {favTools.map((tool) => {
             const IC = ICON_MAP[tool.icon];
-            const href = tool.linkTo ? `${tool.linkTo}?from=me` : "/tools";
-            return (
-              <Link
-                key={tool.id}
-                href={href}
-                className="flex flex-col items-center gap-2 p-3 bg-white/60 border border-slate-100 rounded-xl transition-all active:scale-[0.98]"
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.borderColor = "#DDD9F0")
-                }
-                onMouseLeave={(e) => (e.currentTarget.style.borderColor = "")}
-              >
+            const cls = "flex flex-col items-center gap-2 p-3 bg-white/60 border border-slate-100 rounded-xl transition-all active:scale-[0.98] w-full";
+            const hoverHandlers = {
+              onMouseEnter: (e: React.MouseEvent<HTMLElement>) =>
+                (e.currentTarget.style.borderColor = "#DDD9F0"),
+              onMouseLeave: (e: React.MouseEvent<HTMLElement>) => (e.currentTarget.style.borderColor = ""),
+            };
+            const content = (
+              <>
                 <div className="w-10 h-10 rounded-xl bg-stone-100 flex items-center justify-center">
                   {IC && <IC size={18} className="text-stone-500" />}
                 </div>
                 <p className="text-xs font-medium text-slate-700 text-center leading-tight">
                   {tool.title}
                 </p>
+              </>
+            );
+            return tool.linkTo ? (
+              <Link key={tool.id} href={`${tool.linkTo}?from=me`} className={cls} {...hoverHandlers}>
+                {content}
               </Link>
+            ) : (
+              <button key={tool.id} onClick={() => onOpenTool(tool)} className={cls} {...hoverHandlers}>
+                {content}
+              </button>
             );
           })}
         </div>
@@ -708,6 +715,7 @@ export default function MePage() {
   const avatarInfo = getAvatarOption(userAvatar);
   const [mounted, setMounted] = useState(false);
   const [showCustomize, setShowCustomize] = useState(false);
+  const [selectedTool, setSelectedTool] = useState<Tool | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -870,7 +878,7 @@ export default function MePage() {
       )}
 
       {/* My Toolbox */}
-      {mounted && meVisibility.toolbox && <MyToolboxCard favorites={favorites} />}
+      {mounted && meVisibility.toolbox && <MyToolboxCard favorites={favorites} onOpenTool={setSelectedTool} />}
       {!mounted && (
         <div
           className="bg-cream-50 rounded-2xl border h-20 animate-pulse"
@@ -934,6 +942,8 @@ export default function MePage() {
           />
         </div>
       )}
+
+      {selectedTool && <ToolModal tool={selectedTool} onClose={() => setSelectedTool(null)} />}
     </div>
   );
 }

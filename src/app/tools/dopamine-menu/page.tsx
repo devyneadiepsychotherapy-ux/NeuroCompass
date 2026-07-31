@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppStore } from "@/store/useAppStore";
-import { Plus, Trash2, ArrowLeft } from "lucide-react";
+import { Plus, Trash2, ArrowLeft, Heart } from "lucide-react";
 
 const DM_CATS = ["Appetizers", "Main courses", "Desserts", "Sides"];
 
@@ -15,7 +15,8 @@ const DM_SUGGESTIONS: Record<string, string[]> = {
 
 export default function DopamineMenuPage() {
   const router = useRouter();
-  const { dopamineMenuItems, addDopamineMenuItem, removeDopamineMenuItem } = useAppStore();
+  const { dopamineMenuItems, addDopamineMenuItem, removeDopamineMenuItem, toggleFavorite, isFavorite } = useAppStore();
+  const favorite = isFavorite("dopamine-menu");
   const [dmCat, setDmCat] = useState(DM_CATS[0]);
   const [dmText, setDmText] = useState("");
 
@@ -36,12 +37,15 @@ export default function DopamineMenuPage() {
         >
           <ArrowLeft size={20} className="text-slate-600" />
         </button>
-        <div>
+        <div className="flex-1">
           <h1 className="text-2xl font-bold text-slate-800">Dopamine Menu</h1>
           <p className="text-sm text-slate-500 mt-0.5">
             Build your personal go-to list for motivation boosts
           </p>
         </div>
+        <button onClick={() => toggleFavorite("dopamine-menu")} className="p-2 rounded-xl hover:bg-slate-100">
+          <Heart size={20} className={favorite ? "text-rose-400 fill-rose-400" : "text-slate-400"} />
+        </button>
       </div>
 
       <div className="bg-gradient-to-br from-stone-100 to-sage-50 rounded-2xl p-4 border border-stone-200">

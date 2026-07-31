@@ -374,7 +374,7 @@ function ToolsPageInner() {
           {[
             { label: "ND Therapists Directory", desc: "Find neurodivergent-affirming therapists (US and Canada)", href: "https://ndtherapists.com/" },
             { label: "ND Practitioners", desc: "Browse neurodivergent practitioners and coaches (Worldwide)", href: "https://neurodivergentpractitioners.org/" },
-            { label: "Willow Creek Counselling & Psychotherapy", desc: "ND-affirming counselling in Ontario (virtual sessions available)", href: "https://www.willowcreekcounselling.com/" },
+            { label: "Willow Creek Counselling & Psychotherapy", desc: "ND-affirming counselling in Ontario (virtual sessions available). Disclosure: this practice is owned by NeuroCompass's creator.", href: "https://www.willowcreekcounselling.com/" },
           ].map(({ label, desc, href }) => (
             <a
               key={href}

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import { MedicationReminder } from "@/types";
 import { cn } from "@/lib/utils";
-import { Pill, Plus, Trash2, Check, Edit2, ArrowLeft, Sun, Moon, Minus } from "lucide-react";
+import { Pill, Plus, Trash2, Check, Edit2, ArrowLeft, Sun, Moon, Minus, Heart } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getTodayKey } from "@/lib/utils";
 
@@ -316,7 +316,10 @@ export default function MedicationReminderPage() {
     medicationShowOnHome,
     setMedicationShowOnMe,
     setMedicationShowOnHome,
+    toggleFavorite,
+    isFavorite,
   } = useAppStore();
+  const favorite = isFavorite("medication-reminder");
 
   const router = useRouter();
   const today = getTodayKey();
@@ -333,13 +336,16 @@ export default function MedicationReminderPage() {
         <button onClick={() => router.back()} className="p-2 -ml-2 text-slate-400 hover:text-slate-600 transition-colors">
           <ArrowLeft size={20} />
         </button>
-        <div>
+        <div className="flex-1">
           <h1 className="text-2xl font-bold text-slate-800 leading-tight" style={{ fontFamily: "var(--font-fraunces)" }}>
             Medication Reminder
           </h1>
           <p className="text-sm text-slate-500 mt-0.5">Track your daily medications</p>
         </div>
-        <Pill size={22} className="text-sage-500 ml-auto shrink-0" />
+        <button onClick={() => toggleFavorite("medication-reminder")} className="p-2 rounded-xl hover:bg-slate-100">
+          <Heart size={20} className={favorite ? "text-rose-400 fill-rose-400" : "text-slate-400"} />
+        </button>
+        <Pill size={22} className="text-sage-500 shrink-0" />
       </div>
 
       {medicationReminders.length === 0 && !showAdd && (
