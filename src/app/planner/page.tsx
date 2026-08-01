@@ -3111,6 +3111,16 @@ function TasksSection({
     if (!taskMatchesView(t, activeView)) return false;
     if (filter === "today") {
       if (isTaskDone(t, selKey)) return false;
+      // Monthly recurring to-do's (no fixed dueDate) belong to a specific week of the
+      // month, not to "every day" - only surface them on days within their assigned week.
+      if (t.isRecurring && t.recurType === "monthly" && !t.dueDate) {
+        const mKey = getMonthKey(selectedDate);
+        const weekNum = getWeekOfMonth(selectedDate);
+        const effWeek = t.weekOverrides?.[mKey] ?? t.weekOfMonth;
+        if (effWeek === weekNum) return true;
+        if (t.monthlyCarryOver && weekNum > 1 && effWeek === weekNum - 1) return true;
+        return false;
+      }
       if (!t.dueDate) return true;
       if (t.dueDate > selKey) return false;
       if (t.dueDate === selKey) return true;
