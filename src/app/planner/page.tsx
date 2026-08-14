@@ -110,29 +110,44 @@ function getMondayOfWeek(date: Date): Date {
   return d;
 }
 
+// The Monday that starts the first FULL Mon-Sun week of the given month.
+// If the 1st falls mid-week, that leading stub (e.g. Aug 1-2) isn't a full
+// week, so the first full week starts on the next Monday.
+function getFirstFullWeekMonday(firstOfMonth: Date): Date {
+  const monday = getMondayOfWeek(firstOfMonth);
+  if (monday.getMonth() !== firstOfMonth.getMonth() || monday.getFullYear() !== firstOfMonth.getFullYear()) {
+    const shifted = new Date(monday);
+    shifted.setDate(shifted.getDate() + 7);
+    return shifted;
+  }
+  return monday;
+}
+
 // Which week of the month does this date fall in?
-// Week 1 = the Monday-starting week that contains the 1st of the month.
-// Supports 5-week months; capped at 5.
-function getWeekOfMonth(date: Date): 1 | 2 | 3 | 4 | 5 {
+// Week 1 = the first FULL Monday-starting week of the month (not a partial
+// leading stub). Dates that fall before the first full week (e.g. Aug 1-2)
+// return 0, meaning they belong to no week. Supports 5-week months; capped at 5.
+function getWeekOfMonth(date: Date): 0 | 1 | 2 | 3 | 4 | 5 {
   const firstOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
-  const firstMonday = getMondayOfWeek(firstOfMonth);
-  const dateMonday  = getMondayOfWeek(date);
+  const firstFullWeekMonday = getFirstFullWeekMonday(firstOfMonth);
+  const dateMonday = getMondayOfWeek(date);
+  if (dateMonday.getTime() < firstFullWeekMonday.getTime()) return 0;
   const diff = Math.round(
-    (dateMonday.getTime() - firstMonday.getTime()) / (7 * 24 * 60 * 60 * 1000)
+    (dateMonday.getTime() - firstFullWeekMonday.getTime()) / (7 * 24 * 60 * 60 * 1000)
   );
   return Math.min(5, diff + 1) as 1 | 2 | 3 | 4 | 5;
 }
 
-// How many distinct Monday-starting weeks does a given month span? (max 5)
+// How many distinct full Monday-starting weeks does a given month span? (max 5)
 function getWeekCountInMonth(year: number, month: number): number {
   const firstOfMonth = new Date(year, month, 1);
   const lastOfMonth  = new Date(year, month + 1, 0);
-  const firstMonday  = getMondayOfWeek(firstOfMonth);
+  const firstFullWeekMonday = getFirstFullWeekMonday(firstOfMonth);
   const lastMonday   = getMondayOfWeek(lastOfMonth);
   const diff = Math.round(
-    (lastMonday.getTime() - firstMonday.getTime()) / (7 * 24 * 60 * 60 * 1000)
+    (lastMonday.getTime() - firstFullWeekMonday.getTime()) / (7 * 24 * 60 * 60 * 1000)
   );
-  return Math.min(5, diff + 1);
+  return Math.min(5, Math.max(0, diff + 1));
 }
 
 function formatDateLabel(date: Date, view: PlannerView): string {
