@@ -17,7 +17,7 @@ export default function BottomNav() {
   return (
     <div className="fixed bottom-4 left-0 right-0 z-50 flex justify-center px-4" style={{ paddingBottom: "env(safe-area-inset-bottom)" }}>
       <nav className="w-full max-w-lg bg-white rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-black/5 px-2">
-        <div className="flex justify-around items-center h-[60px]">
+        <div className="grid grid-cols-5 items-center h-[60px]">
           {nav.map(({ href, icon: Icon, label }) => {
             // Only highlight if the path exactly matches or starts with this href
             // (the home page "/" never matches any of these, so nothing is highlighted there)
@@ -26,7 +26,7 @@ export default function BottomNav() {
               <Link
                 key={href}
                 href={href}
-                className="flex flex-col items-center gap-0.5 px-3 py-2"
+                className="flex flex-col items-center gap-0.5 py-2 min-w-0"
               >
                 <div className={cn(
                   "w-10 h-8 rounded-xl flex items-center justify-center transition-all duration-200",
@@ -39,7 +39,7 @@ export default function BottomNav() {
                   />
                 </div>
                 <span className={cn(
-                  "text-[9px] font-semibold tracking-wide transition-colors",
+                  "text-[9px] font-semibold tracking-wide transition-colors whitespace-nowrap",
                   active ? "text-sage-700" : "text-stone-400"
                 )}>
                   {label}
