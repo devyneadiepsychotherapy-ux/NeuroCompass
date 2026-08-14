@@ -95,7 +95,9 @@ function LevelUpToast({
 
         {/* Theme unlock row */}
         {unlockedTheme && (
-          <div
+          <Link
+            href="/themes"
+            onClick={onDismiss}
             className="rounded-xl px-3 py-2 flex items-center gap-2.5 border"
             style={{
               background: unlockedTheme.background,
@@ -109,15 +111,13 @@ function LevelUpToast({
                 {unlockedTheme.name}
               </span>
             </p>
-            <Link
-              href="/themes"
+            <span
               className="text-xs font-semibold underline underline-offset-2 shrink-0"
               style={{ color: unlockedTheme.primary }}
-              onClick={onDismiss}
             >
               Try it
-            </Link>
-          </div>
+            </span>
+          </Link>
         )}
 
         {/* No theme unlock - show next hint */}
