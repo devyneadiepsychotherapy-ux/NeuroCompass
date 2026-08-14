@@ -7,14 +7,15 @@ import sharp from 'sharp';
 import { readFileSync } from 'fs';
 
 const svg = readFileSync('public/icon.svg');
+const transparent = { r: 0, g: 0, b: 0, alpha: 0 };
 
-await sharp(svg).resize(512).png().toFile('public/icon-512.png');
+await sharp(svg, { density: 288 }).resize(512, 512, { fit: 'contain', background: transparent }).ensureAlpha().png().toFile('public/icon-512.png');
 console.log('✓ icon-512.png');
 
-await sharp(svg).resize(192).png().toFile('public/icon-192.png');
+await sharp(svg, { density: 288 }).resize(192, 192, { fit: 'contain', background: transparent }).ensureAlpha().png().toFile('public/icon-192.png');
 console.log('✓ icon-192.png');
 
-await sharp(svg).resize(180).png().toFile('public/apple-touch-icon.png');
-console.log('✓ apple-touch-icon.png');
+// apple-touch-icon.png is generated separately by make-icon.py (opaque background —
+// iOS renders transparent PNG areas as black, so it must not go through the transparent path above).
 
 console.log('Done.');

@@ -1089,7 +1089,7 @@ export const TOOLS: Tool[] = [
   },
   {
     id: "emotion-matrix",
-    title: "Emotion Matrix",
+    title: "Feelings Compass Grid",
     description: "Map your emotions by energy level and pleasantness to choose your response",
     category: "emotion",
     icon: "LayoutGrid",
@@ -1098,15 +1098,15 @@ export const TOOLS: Tool[] = [
     content: {
       intro: "From Russ Harris's ACT work: emotions can be mapped on two axes -energy (high/low) and valence (pleasant/unpleasant). This helps you respond to emotions instead of reacting.",
       variants: [
-        { label: "High energy + unpleasant", description: "Anxious, angry, panicked, overwhelmed → needs grounding and nervous system down-regulation" },
-        { label: "Low energy + unpleasant", description: "Sad, numb, shut down, hopeless → needs gentle activation, warmth, and compassion" },
-        { label: "High energy + pleasant", description: "Excited, joyful, enthusiastic → can be channelled into action and connection" },
-        { label: "Low energy + pleasant", description: "Calm, content, peaceful, safe → protective and restorative, worth cultivating intentionally" },
+        { label: "High energy + unpleasant", description: "Anxious, angry, panicked, overwhelmed, irritable, frustrated, jittery, on edge → needs grounding and nervous system down-regulation" },
+        { label: "Low energy + unpleasant", description: "Sad, numb, shut down, hopeless, lonely, drained, discouraged, defeated → needs gentle activation, warmth, and compassion" },
+        { label: "High energy + pleasant", description: "Excited, joyful, enthusiastic, proud, energized, playful, hopeful, elated → can be channelled into action and connection" },
+        { label: "Low energy + pleasant", description: "Calm, content, peaceful, safe, relaxed, cosy, grateful, at ease → protective and restorative, worth cultivating intentionally" },
       ],
       tips: [
         "Different quadrants need different tools: activation for low-energy states, regulation for high-energy ones",
         "Notice which quadrant you spend the most time in -it's useful data about your nervous system",
-        "The goal isn't to feel pleasant all the time, it's to have flexibility across the matrix",
+        "The goal isn't to feel pleasant all the time, it's to have flexibility across the grid",
       ],
       prompts: [
         "Which quadrant am I in right now?",

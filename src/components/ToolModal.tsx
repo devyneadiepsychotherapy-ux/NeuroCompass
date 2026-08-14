@@ -323,10 +323,10 @@ function EmotionWheelTool() {
 function EmotionMatrixTool() {
   const [marker, setMarker] = useState<{ qx: number; qy: number; px: number; py: number } | null>(null);
   const QUADRANTS = [
-    { qx: 0, qy: 1, label: "High energy\nUnpleasant", sublabel: "Tense / Anxious", bg: "#FBF0EE", border: "#E8C4BC" },
-    { qx: 1, qy: 1, label: "High energy\nPleasant",   sublabel: "Excited / Happy", bg: "#F0F7EF", border: "#B8D4B5" },
-    { qx: 0, qy: 0, label: "Low energy\nUnpleasant",  sublabel: "Sad / Bored",     bg: "#F0F2F8", border: "#C0CAE0" },
-    { qx: 1, qy: 0, label: "Low energy\nPleasant",    sublabel: "Calm / Content",  bg: "#F8F5EF", border: "#D8CEB8" },
+    { qx: 0, qy: 1, label: "High energy\nUnpleasant", sublabel: "Tense / Anxious / Panicked / Irritable", bg: "#FBF0EE", border: "#E8C4BC" },
+    { qx: 1, qy: 1, label: "High energy\nPleasant",   sublabel: "Excited / Happy / Proud / Energized",    bg: "#F0F7EF", border: "#B8D4B5" },
+    { qx: 0, qy: 0, label: "Low energy\nUnpleasant",  sublabel: "Sad / Bored / Numb / Lonely",             bg: "#F0F2F8", border: "#C0CAE0" },
+    { qx: 1, qy: 0, label: "Low energy\nPleasant",    sublabel: "Calm / Content / Relaxed / Grateful",     bg: "#F8F5EF", border: "#D8CEB8" },
   ];
 
   const handleQuadrantClick = (e: React.MouseEvent<HTMLDivElement>, qx: number, qy: number) => {
