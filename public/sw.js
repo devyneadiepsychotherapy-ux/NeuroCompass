@@ -1,7 +1,7 @@
 // NeuroCompass Service Worker
 // Cache strategy: network-first for HTML navigation, cache-first for static assets.
 
-const CACHE_NAME = 'neurocompass-v1';
+const CACHE_NAME = 'neurocompass-v2';
 
 // App shell — pages and assets to pre-cache on install
 const PRECACHE_URLS = [
