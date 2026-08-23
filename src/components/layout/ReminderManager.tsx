@@ -11,33 +11,59 @@ import { getTodayKey } from "@/lib/utils";
 import { Heart, Scan, ClipboardList, Pill, X, Flame } from "lucide-react";
 
 type ReminderType = "mood" | "body" | "full" | "thirstHunger";
+type NotifStyle = "cheerleader" | "gentle" | "silent";
 
-const REMINDER_CONFIG: Record<ReminderType, { label: string; body: string; href: string; Icon: React.ElementType }> = {
+const REMINDER_CONFIG: Record<ReminderType, {
+  label: string;
+  cheerBody: string;
+  gentleBody: string;
+  href: string;
+  Icon: React.ElementType;
+}> = {
   mood: {
     label: "Mood Check-In",
-    body: "Time for a quick mood check-in 💚",
+    cheerBody: "Time for a quick mood check-in 💚",
+    gentleBody: "No rush, a mood check-in is here whenever you want it.",
     href: "/mood",
     Icon: Heart,
   },
   body: {
     label: "Body Check-In",
-    body: "Take a moment to check in with your body 🌿",
+    cheerBody: "Take a moment to check in with your body 🌿",
+    gentleBody: "Your body check-in is here whenever you're ready. No pressure.",
     href: "/mood",
     Icon: Scan,
   },
   full: {
     label: "Full Check-In",
-    body: "Your full daily check-in is ready when you are 🌟",
+    cheerBody: "Your full daily check-in is ready when you are 🌟",
+    gentleBody: "Your full check-in is ready whenever it feels right today.",
     href: "/mood",
     Icon: ClipboardList,
   },
   thirstHunger: {
     label: "Thirst & Hunger Check-In",
-    body: "Have you had water and food recently? 💧🍎",
+    cheerBody: "Have you had water and food recently? 💧🍎",
+    gentleBody: "A quiet reminder: water and food, whenever you get a chance.",
     href: "/tools",
     Icon: ClipboardList,
   },
 };
+
+const STREAK_CONFIG: Record<Exclude<NotifStyle, "silent">, { title: string; body: (streak: number) => string }> = {
+  cheerleader: {
+    title: "Keep your streak going! 🔥",
+    body: (streak) => `You're on a ${streak}-day streak. Open NeuroCompass to keep it alive.`,
+  },
+  gentle: {
+    title: "Your streak is still here",
+    body: (streak) => `${streak} days and counting. No pressure to check in today.`,
+  },
+};
+
+function reminderBody(cfg: { cheerBody: string; gentleBody: string }, style: Exclude<NotifStyle, "silent">) {
+  return style === "cheerleader" ? cfg.cheerBody : cfg.gentleBody;
+}
 
 
 function isTimePast(time: string): boolean {
@@ -51,13 +77,22 @@ export default function ReminderManager() {
     checkInReminders, markReminderNotified, setReminderPermissionState,
     streakReminder, markStreakReminderNotified, streak,
     medicationReminders, medicationTakenDates,
+    notificationStyle, _hasHydrated,
   } = useAppStore();
+  // _hasHydrated is set to true by onRehydrateStorage in the store once Zustand
+  // persist has finished reading from localStorage. Without gating on it, this
+  // effect runs against default (empty) reminder state on cold mount and never
+  // reruns, so reminders would silently never fire on a fresh app open.
+  const mounted = _hasHydrated;
   const router = useRouter();
   const [banners, setBanners] = useState<ReminderType[]>([]);
   const [medBanners, setMedBanners] = useState<string[]>([]); // medication IDs
   const [showStreakBanner, setShowStreakBanner] = useState(false);
 
   function checkReminders() {
+    if (notificationStyle === "silent") return;
+    const style = notificationStyle as Exclude<NotifStyle, "silent">;
+
     const today = getTodayKey();
     const due: ReminderType[] = [];
 
@@ -100,7 +135,7 @@ export default function ReminderManager() {
           if (!isTimePast(t) || r.lastNotifiedDates[t] === today) return;
           try {
             new Notification(cfg.label, {
-              body: cfg.body,
+              body: reminderBody(cfg, style),
               icon: "/icon-192.png",
               badge: "/icon-192.png",
               tag: `checkin-${type}-${t}`,
@@ -111,9 +146,10 @@ export default function ReminderManager() {
       });
 
       if (streakDue) {
+        const streakCfg = STREAK_CONFIG[style];
         try {
-          new Notification("Keep your streak going! 🔥", {
-            body: `You're on a ${streak}-day streak. Open NeuroCompass to keep it alive.`,
+          new Notification(streakCfg.title, {
+            body: streakCfg.body(streak),
             icon: "/icon-192.png",
             badge: "/icon-192.png",
             tag: "streak-reminder",
@@ -142,6 +178,8 @@ export default function ReminderManager() {
   }
 
   useEffect(() => {
+    if (!mounted) return;
+
     if (typeof Notification !== "undefined") {
       setReminderPermissionState(Notification.permission as "default" | "granted" | "denied");
     }
@@ -154,9 +192,14 @@ export default function ReminderManager() {
     document.addEventListener("visibilitychange", handleVisibility);
     return () => document.removeEventListener("visibilitychange", handleVisibility);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [mounted]);
 
   if (banners.length === 0 && medBanners.length === 0 && !showStreakBanner) return null;
+
+  // Banners only ever get populated when notificationStyle !== "silent" (checkReminders
+  // returns early otherwise), so this fallback is just to satisfy the type checker.
+  const style: Exclude<NotifStyle, "silent"> = notificationStyle === "silent" ? "gentle" : notificationStyle;
+  const streakCfg = STREAK_CONFIG[style];
 
   return (
     <div className="fixed top-4 left-4 right-4 z-50 space-y-2 max-w-sm mx-auto">
@@ -166,8 +209,8 @@ export default function ReminderManager() {
             <Flame size={17} className="text-terracotta-600" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold text-slate-800">Keep your streak going!</p>
-            <p className="text-xs text-slate-500 mt-0.5">{streak}-day streak. Open the app to keep it alive.</p>
+            <p className="text-xs font-bold text-slate-800">{streakCfg.title}</p>
+            <p className="text-xs text-slate-500 mt-0.5">{streakCfg.body(streak)}</p>
           </div>
           <button
             onClick={() => { setShowStreakBanner(false); router.push("/"); }}
@@ -195,7 +238,7 @@ export default function ReminderManager() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-bold text-slate-800">{cfg.label}</p>
-              <p className="text-xs text-slate-500 mt-0.5">Ready when you are</p>
+              <p className="text-xs text-slate-500 mt-0.5">{reminderBody(cfg, style)}</p>
             </div>
             <button
               onClick={() => {
