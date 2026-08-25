@@ -969,8 +969,8 @@ function DayProgressBar({ selectedDate }: { selectedDate: Date }) {
       {/* Labels row */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 shrink-0 min-w-0">
-          <p className="text-[11px] text-slate-400">
-            <span className="font-semibold text-slate-500">{timeLabel}</span>
+          <p className="text-[11px] text-slate-700">
+            <span className="font-semibold text-slate-800">{timeLabel}</span>
             {" · "}
             {remainingLabel}
           </p>
@@ -990,7 +990,7 @@ function DayProgressBar({ selectedDate }: { selectedDate: Date }) {
           ) : (
             <button
               onClick={() => setEditingEndTime(true)}
-              className="text-[10px] text-slate-300 hover:text-sage-500 transition-colors"
+              className="text-[10px] text-slate-600 hover:text-sage-800 transition-colors"
               title="Set end of day time"
             >
               ends {dayEndTime.split(":").map((p, i) => {

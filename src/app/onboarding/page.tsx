@@ -730,7 +730,7 @@ function StepFirstHabit({ onFinish, onSkip }: { onFinish: () => void; onSkip: ()
 
 function ProgressDots({ step }: { step: number }) {
   return (
-    <div className="fixed top-0 left-0 right-0 flex justify-center gap-1.5 pt-8 z-10">
+    <div className="fixed top-14 left-0 right-0 flex justify-center gap-1.5 pt-3 z-10">
       {[1, 2, 3, 4, 5, 6, 7, 8].map((s) => (
         <div
           key={s}
