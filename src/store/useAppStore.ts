@@ -379,6 +379,80 @@ const defaultSectionVisibility: SectionVisibility = {
   meal: true,
 };
 
+export const STORAGE_KEY = "neurocompass-store";
+export const STORE_VERSION = 8;
+
+export function migrateAppState(persistedState: unknown, version: number): unknown {
+  const state = persistedState as Record<string, unknown>;
+  if (version < 1) {
+    // Before v1, shopRewards may have been stored as [] before defaults were seeded.
+    // Restore defaults for any device that has an empty array.
+    const rewards = state.shopRewards;
+    if (!Array.isArray(rewards) || rewards.length === 0) {
+      state.shopRewards = defaultShopRewards;
+    }
+  }
+  if (version < 2) {
+    // topPriorities (flat array) replaced by topPrioritiesByDate (date-keyed map).
+    // Drop old flat data : each day now starts fresh automatically.
+    delete state.topPriorities;
+    if (!state.topPrioritiesByDate) {
+      state.topPrioritiesByDate = {};
+    }
+  }
+  if (version < 3) {
+    // CheckInReminderEntry changed from single time/lastNotifiedDate
+    // to times[] / lastNotifiedDates map.
+    const reminders = state.checkInReminders as Record<string, unknown> | undefined;
+    if (reminders) {
+      for (const key of ["mood", "body", "full"]) {
+        const entry = reminders[key] as Record<string, unknown> | undefined;
+        if (entry && typeof entry.time === "string") {
+          entry.times = [entry.time];
+          entry.lastNotifiedDates = {};
+          delete entry.time;
+          delete entry.lastNotifiedDate;
+        }
+      }
+    }
+  }
+  if (version < 4) {
+    // Add thirstHunger reminder entry if missing
+    const reminders = state.checkInReminders as Record<string, unknown> | undefined;
+    if (reminders && !reminders.thirstHunger) {
+      reminders.thirstHunger = { enabled: false, times: ["10:00", "14:00", "18:00"], lastNotifiedDates: {} };
+    }
+  }
+  if (version < 5) {
+    if (!state.meVisibility) {
+      state.meVisibility = {
+        energyWidget: true,
+        medication: true,
+        strengths: true,
+        toolbox: true,
+        sensoryProfile: true,
+        quickLinks: true,
+      };
+    }
+  }
+  if (version < 6) {
+    if (!state.dailyEnergyLogs) {
+      state.dailyEnergyLogs = {};
+    }
+  }
+  if (version < 7) {
+    if (!state.dayEndTime) {
+      state.dayEndTime = "22:00";
+    }
+  }
+  if (version < 8) {
+    if (!state.journalEntries) {
+      state.journalEntries = [];
+    }
+  }
+  return state;
+}
+
 export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
@@ -1281,8 +1355,8 @@ export const useAppStore = create<AppState>()(
       setPendingLevelUp: (v) => set({ pendingLevelUp: v }),
     }),
     {
-      name: "neurocompass-store",
-      version: 8,
+      name: STORAGE_KEY,
+      version: STORE_VERSION,
       storage:
         typeof window !== "undefined"
           ? createJSONStorage(() => localStorage)
@@ -1303,76 +1377,7 @@ export const useAppStore = create<AppState>()(
         const { showStreakCelebration, showFreezeSaved, okayMode, pendingLevelUp, _hasHydrated, ...rest } = state;
         return rest;
       },
-      migrate: (persistedState: unknown, version: number) => {
-        const state = persistedState as Record<string, unknown>;
-        if (version < 1) {
-          // Before v1, shopRewards may have been stored as [] before defaults were seeded.
-          // Restore defaults for any device that has an empty array.
-          const rewards = state.shopRewards;
-          if (!Array.isArray(rewards) || rewards.length === 0) {
-            state.shopRewards = defaultShopRewards;
-          }
-        }
-        if (version < 2) {
-          // topPriorities (flat array) replaced by topPrioritiesByDate (date-keyed map).
-          // Drop old flat data : each day now starts fresh automatically.
-          delete state.topPriorities;
-          if (!state.topPrioritiesByDate) {
-            state.topPrioritiesByDate = {};
-          }
-        }
-        if (version < 3) {
-          // CheckInReminderEntry changed from single time/lastNotifiedDate
-          // to times[] / lastNotifiedDates map.
-          const reminders = state.checkInReminders as Record<string, unknown> | undefined;
-          if (reminders) {
-            for (const key of ["mood", "body", "full"]) {
-              const entry = reminders[key] as Record<string, unknown> | undefined;
-              if (entry && typeof entry.time === "string") {
-                entry.times = [entry.time];
-                entry.lastNotifiedDates = {};
-                delete entry.time;
-                delete entry.lastNotifiedDate;
-              }
-            }
-          }
-        }
-        if (version < 4) {
-          // Add thirstHunger reminder entry if missing
-          const reminders = state.checkInReminders as Record<string, unknown> | undefined;
-          if (reminders && !reminders.thirstHunger) {
-            reminders.thirstHunger = { enabled: false, times: ["10:00", "14:00", "18:00"], lastNotifiedDates: {} };
-          }
-        }
-        if (version < 5) {
-          if (!state.meVisibility) {
-            state.meVisibility = {
-              energyWidget: true,
-              medication: true,
-              strengths: true,
-              toolbox: true,
-              sensoryProfile: true,
-              quickLinks: true,
-            };
-          }
-        }
-        if (version < 6) {
-          if (!state.dailyEnergyLogs) {
-            state.dailyEnergyLogs = {};
-          }
-        }
-        if (version < 7) {
-          if (!state.dayEndTime) {
-            state.dayEndTime = "22:00";
-          }
-        }
-        if (version < 8) {
-          if (!state.journalEntries) {
-            state.journalEntries = [];
-          }
-        }
-        return state;
-      },
+      migrate: migrateAppState,
     }
   )
 );

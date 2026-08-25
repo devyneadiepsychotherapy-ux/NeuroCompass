@@ -1,14 +1,15 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAppStore } from "@/store/useAppStore";
+import { useAppStore, STORAGE_KEY, migrateAppState } from "@/store/useAppStore";
 import { getTheme } from "@/lib/themes";
 import { getAvatarOption } from "@/app/onboarding/page";
 import {
   ArrowLeft, Check, Bell, BellOff, BellRing, User, Flame,
   Cat, Star, Moon, Leaf, Zap, Sparkles, Mountain, Flower2, Compass, BookOpen,
   Music, Gamepad2, Heart, Telescope, Feather, Waves, ChevronRight,
+  Download, Upload, AlertTriangle, CheckCircle2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -96,6 +97,137 @@ function StreakReminderSetting() {
             onChange={(e) => updateStreakReminder({ time: e.target.value })}
             className="text-sm font-semibold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-sage-400"
           />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Backup & restore
+// ---------------------------------------------------------------------------
+
+function DataBackupSection() {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [status, setStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
+  const handleExport = () => {
+    const raw = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null;
+    if (!raw) {
+      setStatus({ type: "error", message: "There's no data to export yet." });
+      return;
+    }
+    const blob = new Blob([raw], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const dateStamp = new Date().toISOString().slice(0, 10);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `neurocompass-backup-${dateStamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    setStatus({ type: "success", message: "Backup file downloaded. Save it somewhere safe." });
+  };
+
+  const handleImportClick = () => {
+    if (!window.confirm("Restoring a backup will replace all your current data. Continue?")) return;
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(reader.result as string);
+      } catch {
+        setStatus({ type: "error", message: "That file isn't valid JSON — it may be corrupted." });
+        return;
+      }
+      try {
+        if (
+          !parsed || typeof parsed !== "object" ||
+          typeof (parsed as Record<string, unknown>).state !== "object" ||
+          (parsed as Record<string, unknown>).state === null
+        ) {
+          throw new Error("That file doesn't look like a NeuroCompass backup.");
+        }
+        const importedVersion = typeof (parsed as Record<string, unknown>).version === "number"
+          ? (parsed as Record<string, number>).version
+          : 0;
+        const migrated = migrateAppState((parsed as Record<string, unknown>).state, importedVersion) as Record<string, unknown>;
+        useAppStore.setState(migrated);
+        setStatus({ type: "success", message: "Your data has been restored from the backup." });
+      } catch (err) {
+        setStatus({
+          type: "error",
+          message: err instanceof Error ? err.message : "Couldn't read that file.",
+        });
+      }
+    };
+    reader.onerror = () => setStatus({ type: "error", message: "Couldn't read that file." });
+    reader.readAsText(file);
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="rounded-2xl border border-slate-100 bg-white p-4 space-y-3">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-sage-100 flex items-center justify-center shrink-0">
+            <Download size={15} className="text-sage-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-slate-700">Export your data</p>
+            <p className="text-xs text-slate-400 mt-0.5">Save a backup file with everything you&apos;ve tracked</p>
+          </div>
+        </div>
+        <button
+          onClick={handleExport}
+          className="w-full bg-sage-600 text-white font-semibold rounded-xl py-2.5 text-sm hover:bg-sage-700 transition-all"
+        >
+          Download backup
+        </button>
+      </div>
+
+      <div className="rounded-2xl border border-slate-100 bg-white p-4 space-y-3">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-terracotta-100 flex items-center justify-center shrink-0">
+            <Upload size={15} className="text-terracotta-600" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-slate-700">Restore from backup</p>
+            <p className="text-xs text-slate-400 mt-0.5">Replaces your current data with a backup file</p>
+          </div>
+        </div>
+        <button
+          onClick={handleImportClick}
+          className="w-full border border-slate-200 text-slate-600 font-semibold rounded-xl py-2.5 text-sm hover:bg-slate-50 transition-all"
+        >
+          Choose backup file
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="application/json,.json"
+          onChange={handleFileSelected}
+          className="hidden"
+        />
+      </div>
+
+      {status && (
+        <div className={cn(
+          "flex items-start gap-2 rounded-xl px-3.5 py-2.5 text-xs font-medium",
+          status.type === "success" ? "bg-sage-50 text-sage-700" : "bg-red-50 text-red-600"
+        )}>
+          {status.type === "success"
+            ? <CheckCircle2 size={14} className="shrink-0 mt-0.5" />
+            : <AlertTriangle size={14} className="shrink-0 mt-0.5" />}
+          <span>{status.message}</span>
         </div>
       )}
     </div>
@@ -321,6 +453,12 @@ export default function SettingsPage() {
             </div>
             <ChevronRight size={14} className="text-slate-300 shrink-0" />
           </Link>
+        </section>
+
+        {/* ── Backup & restore ── */}
+        <section>
+          <SectionHeading label="Backup & Restore" />
+          <DataBackupSection />
         </section>
 
       </div>
