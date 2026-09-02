@@ -346,6 +346,13 @@ function CheckInReminderSettings() {
   const anyEnabled = TYPES.some((t) => checkInReminders[t.key].enabled);
 
   async function requestPermission() {
+    const { detectNative, requestNativePermission } = await import("@/lib/nativeNotifications");
+    if (await detectNative()) {
+      // Capacitor build: OS-level permission (Android 13+ system dialog).
+      const result = await requestNativePermission();
+      setReminderPermissionState(result);
+      return;
+    }
     if (typeof Notification === "undefined") return;
     const result = await Notification.requestPermission();
     setReminderPermissionState(result as "granted" | "denied" | "default");

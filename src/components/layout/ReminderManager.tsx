@@ -8,6 +8,12 @@ import { useEffect, useState } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import { useRouter } from "next/navigation";
 import { getTodayKey } from "@/lib/utils";
+import {
+  detectNative,
+  syncNativeNotifications,
+  checkNativePermission,
+  addNativeTapListener,
+} from "@/lib/nativeNotifications";
 import { Heart, Scan, ClipboardList, Pill, X, Flame } from "lucide-react";
 
 type ReminderType = "mood" | "body" | "full" | "thirstHunger";
@@ -179,18 +185,79 @@ export default function ReminderManager() {
 
   useEffect(() => {
     if (!mounted) return;
+    let disposed = false;
 
-    if (typeof Notification !== "undefined") {
-      setReminderPermissionState(Notification.permission as "default" | "granted" | "denied");
-    }
+    (async () => {
+      const native = await detectNative();
+      if (disposed) return;
+      if (native) {
+        // On the Capacitor build, notification permission is an OS-level grant
+        // (Android 13+ system dialog), not the web Notification API.
+        const perm = await checkNativePermission();
+        if (!disposed) setReminderPermissionState(perm);
+      } else if (typeof Notification !== "undefined") {
+        setReminderPermissionState(Notification.permission as "default" | "granted" | "denied");
+      }
+    })();
 
+    // In-app banners + web Notification() fallback. On native this still runs so
+    // opening the app surfaces the banner nudge; OS-scheduled notifications
+    // (see the sync effect below) cover the app-closed case.
     checkReminders();
 
     const handleVisibility = () => {
       if (document.visibilityState === "visible") checkReminders();
     };
     document.addEventListener("visibilitychange", handleVisibility);
-    return () => document.removeEventListener("visibilitychange", handleVisibility);
+    return () => {
+      disposed = true;
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mounted]);
+
+  // Reconcile real OS-scheduled local notifications with reminder state. No-op on
+  // web. Re-runs whenever any reminder slice changes (toggle, time edit, style,
+  // streak count, meds) and on every foreground so schedules stay in step.
+  useEffect(() => {
+    if (!mounted) return;
+    let disposed = false;
+
+    const sync = () => {
+      void syncNativeNotifications({
+        notificationStyle,
+        checkInReminders,
+        streakReminder,
+        streak,
+        medicationReminders,
+      });
+    };
+
+    sync();
+
+    const handleVisibility = () => {
+      if (!disposed && document.visibilityState === "visible") sync();
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      disposed = true;
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [mounted, notificationStyle, checkInReminders, streakReminder, streak, medicationReminders]);
+
+  // Route the SPA when a scheduled notification is tapped (native only).
+  useEffect(() => {
+    if (!mounted) return;
+    let remove: (() => void) | undefined;
+    let disposed = false;
+    addNativeTapListener((href) => router.push(href)).then((fn) => {
+      if (disposed) fn();
+      else remove = fn;
+    });
+    return () => {
+      disposed = true;
+      remove?.();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mounted]);
 
