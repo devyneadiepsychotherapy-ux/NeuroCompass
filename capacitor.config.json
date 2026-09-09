@@ -1,5 +1,9 @@
 {
-  "appId": "com.willowcreekcounselling.neurocompass",
+  "appId": "app.vercel.neuro_compass.twa",
   "appName": "NeuroCompass",
-  "webDir": "out"
+  "webDir": "out",
+  "server": {
+    "url": "https://neuro-compass.vercel.app",
+    "cleartext": false
+  }
 }
