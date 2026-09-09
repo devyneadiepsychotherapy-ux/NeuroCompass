@@ -26,21 +26,27 @@ export default function BottomNav() {
               <Link
                 key={href}
                 href={href}
-                className="flex flex-col items-center gap-0.5 py-2 min-w-0"
+                aria-label={label}
+                aria-current={active ? "page" : undefined}
+                className="flex flex-col items-center gap-0.5 py-2 min-w-0 group"
               >
                 <div className={cn(
                   "w-10 h-8 rounded-xl flex items-center justify-center transition-all duration-200",
-                  active ? "bg-sage-100" : ""
+                  "group-active:scale-90",
+                  active ? "bg-sage-100" : "group-hover:bg-stone-100"
                 )}>
                   <Icon
                     size={20}
-                    strokeWidth={active ? 2.5 : 1.8}
-                    className={active ? "text-sage-700" : "text-stone-400"}
+                    strokeWidth={active ? 2.5 : 2}
+                    className={cn(
+                      "transition-colors",
+                      active ? "text-sage-700" : "text-stone-500 group-hover:text-stone-700"
+                    )}
                   />
                 </div>
                 <span className={cn(
                   "text-[9px] font-semibold tracking-wide transition-colors whitespace-nowrap",
-                  active ? "text-sage-700" : "text-stone-400"
+                  active ? "text-sage-700" : "text-stone-500 group-hover:text-stone-700"
                 )}>
                   {label}
                 </span>

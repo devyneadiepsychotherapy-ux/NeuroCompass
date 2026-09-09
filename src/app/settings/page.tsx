@@ -5,13 +5,24 @@ import Link from "next/link";
 import { useAppStore, STORAGE_KEY, migrateAppState } from "@/store/useAppStore";
 import { getTheme } from "@/lib/themes";
 import { getAvatarOption } from "@/app/onboarding/page";
+import { useTour } from "@/components/layout/TourProvider";
 import {
   ArrowLeft, Check, Bell, BellOff, BellRing, User, Flame,
   Cat, Star, Moon, Leaf, Zap, Sparkles, Mountain, Flower2, Compass, BookOpen,
   Music, Gamepad2, Heart, Telescope, Feather, Waves, ChevronRight,
-  Download, Upload, AlertTriangle, CheckCircle2,
+  Download, Upload, AlertTriangle, CheckCircle2, MapPin, Share2, Copy, X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+// ---------------------------------------------------------------------------
+// App links
+// ---------------------------------------------------------------------------
+
+const APP_URL = "https://neuro-compass.vercel.app";
+const PLAY_STORE_URL =
+  "https://play.google.com/store/apps/details?id=app.vercel.neuro_compass.twa";
+const DEFAULT_SHARE_MESSAGE =
+  "I've been using NeuroCompass — a daily planner and companion app made for ADHD, autistic, and other neurodivergent minds. Thought you might like it:";
 
 // ---------------------------------------------------------------------------
 // Avatar picker (reused from onboarding)
@@ -235,6 +246,156 @@ function DataBackupSection() {
 }
 
 // ---------------------------------------------------------------------------
+// Share sheet
+// ---------------------------------------------------------------------------
+
+function ShareModal({ onClose }: { onClose: () => void }) {
+  const [message, setMessage] = useState(DEFAULT_SHARE_MESSAGE);
+  const [copied, setCopied] = useState(false);
+
+  const shareText = `${message.trim()}\n\n${APP_URL}`;
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(shareText);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
+  };
+
+  const handleShare = async () => {
+    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+      try {
+        // Include the link in `text` too — some Android share targets drop `url`.
+        await navigator.share({ title: "NeuroCompass", text: shareText, url: APP_URL });
+        onClose();
+        return;
+      } catch (err) {
+        // User dismissed the share sheet — leave the modal open, do nothing.
+        if (err instanceof Error && err.name === "AbortError") return;
+      }
+    }
+    // No Web Share API (or it threw a non-abort error): fall back to copy.
+    handleCopy();
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center px-4 pb-6 sm:pb-0"
+      style={{ background: "rgba(0,0,0,0.45)" }}
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Share NeuroCompass"
+    >
+      <div
+        className="w-full max-w-sm bg-white rounded-3xl shadow-2xl border border-slate-100 p-5 space-y-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between">
+          <p className="text-base font-bold text-slate-800">Share NeuroCompass</p>
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            className="w-8 h-8 rounded-xl bg-stone-100 flex items-center justify-center hover:bg-stone-200 transition-colors"
+          >
+            <X size={15} className="text-slate-500" />
+          </button>
+        </div>
+
+        <p className="text-xs text-slate-500 leading-relaxed">
+          Edit the message if you like, then send it however you want.
+        </p>
+
+        <textarea
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          rows={4}
+          className="w-full border border-sage-200 focus:border-sage-500 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 bg-cream-50 focus:outline-none transition-colors resize-none"
+          aria-label="Share message"
+        />
+
+        <div className="rounded-xl bg-stone-50 border border-slate-100 px-3.5 py-2 text-xs text-slate-500 break-all">
+          {APP_URL}
+        </div>
+
+        <div className="flex gap-2">
+          <button
+            onClick={handleCopy}
+            className="flex-1 border border-slate-200 text-slate-600 font-semibold rounded-xl py-2.5 text-sm hover:bg-slate-50 transition-all flex items-center justify-center gap-1.5"
+          >
+            {copied ? <><Check size={14} /> Copied</> : <><Copy size={14} /> Copy</>}
+          </button>
+          <button
+            onClick={handleShare}
+            className="flex-1 bg-sage-600 text-white font-semibold rounded-xl py-2.5 text-sm hover:bg-sage-700 transition-all flex items-center justify-center gap-1.5"
+          >
+            <Share2 size={14} /> Share
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Support & sharing (rate, share, replay tour)
+// ---------------------------------------------------------------------------
+
+function SupportSection() {
+  const { startTour } = useTour();
+  const [shareOpen, setShareOpen] = useState(false);
+
+  const handleRate = () => {
+    window.open(PLAY_STORE_URL, "_blank", "noopener,noreferrer");
+  };
+
+  const rowClass =
+    "w-full flex items-center gap-3 rounded-2xl border border-slate-100 bg-white p-4 text-left hover:border-slate-200 active:scale-[0.99] transition-all";
+
+  return (
+    <div className="space-y-3">
+      <button onClick={() => startTour()} className={rowClass}>
+        <div className="w-8 h-8 rounded-xl bg-sage-100 flex items-center justify-center shrink-0">
+          <MapPin size={15} className="text-sage-600" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-slate-700">Replay the guided tour</p>
+          <p className="text-xs text-slate-400 mt-0.5">A quick walkthrough of the main sections</p>
+        </div>
+        <ChevronRight size={14} className="text-slate-300 shrink-0" />
+      </button>
+
+      <button onClick={handleRate} className={rowClass}>
+        <div className="w-8 h-8 rounded-xl bg-gold-400/25 flex items-center justify-center shrink-0">
+          <Star size={15} className="text-gold-600" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-slate-700">Rate NeuroCompass</p>
+          <p className="text-xs text-slate-400 mt-0.5">Leave a review on the Play Store</p>
+        </div>
+        <ChevronRight size={14} className="text-slate-300 shrink-0" />
+      </button>
+
+      <button onClick={() => setShareOpen(true)} className={rowClass}>
+        <div className="w-8 h-8 rounded-xl bg-lavender-100 flex items-center justify-center shrink-0">
+          <Share2 size={15} className="text-lavender-600" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-slate-700">Share NeuroCompass</p>
+          <p className="text-xs text-slate-400 mt-0.5">Send the app to someone who might need it</p>
+        </div>
+        <ChevronRight size={14} className="text-slate-300 shrink-0" />
+      </button>
+
+      {shareOpen && <ShareModal onClose={() => setShareOpen(false)} />}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Settings page
 // ---------------------------------------------------------------------------
 
@@ -453,6 +614,12 @@ export default function SettingsPage() {
             </div>
             <ChevronRight size={14} className="text-slate-300 shrink-0" />
           </Link>
+        </section>
+
+        {/* ── Support & sharing ── */}
+        <section>
+          <SectionHeading label="Support & Sharing" />
+          <SupportSection />
         </section>
 
         {/* ── Backup & restore ── */}
