@@ -18,6 +18,7 @@ import { TourProvider } from "@/components/layout/TourProvider";
 import ThemeProvider from "@/components/layout/ThemeProvider";
 import SidebarWrapper from "@/components/layout/SidebarWrapper";
 import StartPageGuard from "@/components/layout/StartPageGuard";
+import OnboardingGuard from "@/components/layout/OnboardingGuard";
 import ReminderManager from "@/components/layout/ReminderManager";
 import { Analytics } from "@vercel/analytics/react";
 // ServiceWorkerRegistration replaced by inline script in <head>;
@@ -68,7 +69,8 @@ if ('serviceWorker' in navigator) {
       <body>
         <ThemeProvider>
           <TourProvider>
-<StartPageGuard />
+            <StartPageGuard />
+            <OnboardingGuard />
             <ReminderManager />
             <SidebarWrapper />
             <main

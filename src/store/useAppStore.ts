@@ -383,6 +383,12 @@ export const STORAGE_KEY = "neurocompass-store";
 export const STORE_VERSION = 8;
 
 export function migrateAppState(persistedState: unknown, version: number): unknown {
+  // A non-object blob (null, a string, a truncated write) would make every
+  // `state.x` access below throw, which surfaces as a silent permanent blank
+  // screen. Treat it as "nothing persisted" and let store defaults take over.
+  if (!persistedState || typeof persistedState !== "object" || Array.isArray(persistedState)) {
+    return {};
+  }
   const state = persistedState as Record<string, unknown>;
   if (version < 1) {
     // Before v1, shopRewards may have been stored as [] before defaults were seeded.
@@ -1368,7 +1374,23 @@ export const useAppStore = create<AppState>()(
       // Set _hasHydrated: true once localStorage has been read. Components subscribe
       // to this flag instead of calling useAppStore.persist.hasHydrated(), which is
       // unreliable in Zustand v5.
-      onRehydrateStorage: () => (state) => {
+      //
+      // On a rehydration ERROR (corrupt / partially written localStorage, or
+      // migrate() throwing) Zustand invokes this with `state === undefined`, so the
+      // old `state?.setHasHydrated()` silently no-op'd and _hasHydrated stayed
+      // false forever -> permanent blank screen on every launch. Handle that:
+      // drop the unreadable blob so the next load starts clean, and still flip the
+      // flag (deferred a microtask so `useAppStore` is assigned by the time it runs).
+      onRehydrateStorage: () => (state, error) => {
+        if (error) {
+          try {
+            localStorage.removeItem(STORAGE_KEY);
+          } catch {
+            /* storage unavailable - nothing to clear */
+          }
+          queueMicrotask(() => useAppStore.setState({ _hasHydrated: true }));
+          return;
+        }
         state?.setHasHydrated(true);
       },
       // Exclude ephemeral UI flags - they should always start false on a fresh load.
