@@ -71,6 +71,46 @@ function reminderBody(cfg: { cheerBody: string; gentleBody: string }, style: Exc
   return style === "cheerleader" ? cfg.cheerBody : cfg.gentleBody;
 }
 
+// Check-in banners are grouped by destination so e.g. Mood + Body + Full all
+// being due at once (very possible - they're often set for similar times)
+// renders as ONE banner instead of three near-identical rows. Without this,
+// a handful of simultaneously-due reminders + a medication reminder produced
+// a tall stack of banners that visually buried the page underneath.
+type BannerGroup = {
+  key: string;
+  href: string;
+  Icon: React.ElementType;
+  title: string;
+  body: string;
+  types: ReminderType[];
+};
+
+function groupBanners(types: ReminderType[], style: Exclude<NotifStyle, "silent">): BannerGroup[] {
+  const byHref = new Map<string, ReminderType[]>();
+  types.forEach((t) => {
+    const href = REMINDER_CONFIG[t].href;
+    byHref.set(href, [...(byHref.get(href) ?? []), t]);
+  });
+  return Array.from(byHref.entries()).map(([href, group]) => {
+    if (group.length === 1) {
+      const cfg = REMINDER_CONFIG[group[0]];
+      return { key: href, href, Icon: cfg.Icon, title: cfg.label, body: reminderBody(cfg, style), types: group };
+    }
+    const names = group.map((t) => REMINDER_CONFIG[t].label.replace(" Check-In", "")).join(", ");
+    return {
+      key: href,
+      href,
+      Icon: ClipboardList,
+      title: "Check-Ins Ready",
+      body:
+        style === "cheerleader"
+          ? `Your ${names} check-ins are ready for you 💚`
+          : `${names} check-ins are ready whenever you are.`,
+      types: group,
+    };
+  });
+}
+
 
 function isTimePast(time: string): boolean {
   const [h, m] = time.split(":").map(Number);
@@ -261,6 +301,22 @@ export default function ReminderManager() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mounted]);
 
+  // Auto-dismiss: banners used to have no expiry, so an unattended one (nobody
+  // taps Go or X) rode along across every subsequent page - including ones it
+  // has nothing to do with, like Settings - sitting on top of the content
+  // underneath indefinitely. Give it a generous read window, then clear itself.
+  // Restarts the window on any change, so a newly-added banner still gets its
+  // full read time even if another one is already showing.
+  useEffect(() => {
+    if (banners.length === 0 && medBanners.length === 0 && !showStreakBanner) return;
+    const timer = setTimeout(() => {
+      setBanners([]);
+      setMedBanners([]);
+      setShowStreakBanner(false);
+    }, 10000);
+    return () => clearTimeout(timer);
+  }, [banners, medBanners, showStreakBanner]);
+
   if (banners.length === 0 && medBanners.length === 0 && !showStreakBanner) return null;
 
   // Banners only ever get populated when notificationStyle !== "silent" (checkReminders
@@ -293,38 +349,35 @@ export default function ReminderManager() {
           </button>
         </div>
       )}
-      {banners.map((type) => {
-        const cfg = REMINDER_CONFIG[type];
-        return (
-          <div
-            key={type}
-            className="flex items-center gap-3 bg-white rounded-2xl shadow-xl border border-sage-200 px-4 py-3"
-          >
-            <div className="w-9 h-9 rounded-xl bg-sage-100 flex items-center justify-center shrink-0">
-              <cfg.Icon size={17} className="text-sage-600" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-slate-800">{cfg.label}</p>
-              <p className="text-xs text-slate-500 mt-0.5">{reminderBody(cfg, style)}</p>
-            </div>
-            <button
-              onClick={() => {
-                setBanners((b) => b.filter((t) => t !== type));
-                router.push(cfg.href);
-              }}
-              className="text-xs font-semibold text-sage-600 underline underline-offset-2 shrink-0"
-            >
-              Go
-            </button>
-            <button
-              onClick={() => setBanners((b) => b.filter((t) => t !== type))}
-              className="text-slate-300 hover:text-slate-500 transition-colors shrink-0"
-            >
-              <X size={14} />
-            </button>
+      {groupBanners(banners, style).map((group) => (
+        <div
+          key={group.key}
+          className="flex items-center gap-3 bg-white rounded-2xl shadow-xl border border-sage-200 px-4 py-3"
+        >
+          <div className="w-9 h-9 rounded-xl bg-sage-100 flex items-center justify-center shrink-0">
+            <group.Icon size={17} className="text-sage-600" />
           </div>
-        );
-      })}
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-bold text-slate-800">{group.title}</p>
+            <p className="text-xs text-slate-500 mt-0.5">{group.body}</p>
+          </div>
+          <button
+            onClick={() => {
+              setBanners((b) => b.filter((t) => !group.types.includes(t)));
+              router.push(group.href);
+            }}
+            className="text-xs font-semibold text-sage-600 underline underline-offset-2 shrink-0"
+          >
+            Go
+          </button>
+          <button
+            onClick={() => setBanners((b) => b.filter((t) => !group.types.includes(t)))}
+            className="text-slate-300 hover:text-slate-500 transition-colors shrink-0"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      ))}
       {medBanners.length > 0 && (
         <div className="flex items-center gap-3 bg-white rounded-2xl shadow-xl border border-sage-200 px-4 py-3">
           <div className="w-9 h-9 rounded-xl bg-sage-100 flex items-center justify-center shrink-0">
