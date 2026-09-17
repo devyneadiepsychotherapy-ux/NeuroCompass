@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { EnergyLevel, PleasantnessLevel, MoodEntry } from "@/types";
+import { NotificationPermissionBanner } from "@/components/NotificationPermissionBanner";
 
 // Emotion matrix quadrants (based on Russell's circumplex model)
 const emotions: Record<string, { x: PleasantnessLevel; y: EnergyLevel }> = {
@@ -331,7 +332,7 @@ function PastCheckIns({
 
 // ── Check-in reminder settings ────────────────────────────────
 function CheckInReminderSettings() {
-  const { checkInReminders, updateCheckInReminder, addReminderTime, removeReminderTime, setReminderPermissionState } = useAppStore();
+  const { checkInReminders, updateCheckInReminder, addReminderTime, removeReminderTime } = useAppStore();
   const [open, setOpen] = useState(false);
   // Track which type is showing the "add time" input
   const [addingFor, setAddingFor] = useState<"mood" | "body" | "full" | null>(null);
@@ -344,19 +345,6 @@ function CheckInReminderSettings() {
   ];
 
   const anyEnabled = TYPES.some((t) => checkInReminders[t.key].enabled);
-
-  async function requestPermission() {
-    const { detectNative, requestNativePermission } = await import("@/lib/nativeNotifications");
-    if (await detectNative()) {
-      // Capacitor build: OS-level permission (Android 13+ system dialog).
-      const result = await requestNativePermission();
-      setReminderPermissionState(result);
-      return;
-    }
-    if (typeof Notification === "undefined") return;
-    const result = await Notification.requestPermission();
-    setReminderPermissionState(result as "granted" | "denied" | "default");
-  }
 
   function handleAddTime(key: "mood" | "body" | "full") {
     if (newTime) {
@@ -386,24 +374,7 @@ function CheckInReminderSettings() {
 
       {open && (
         <div className="px-4 pb-4 space-y-4 border-t border-slate-100 pt-3">
-          {/* Permission prompt */}
-          {checkInReminders.permissionState !== "granted" && (
-            <div className="bg-sage-50 border border-sage-100 rounded-xl px-3 py-2.5 flex items-center justify-between gap-3">
-              <p className="text-xs text-slate-600 flex-1">
-                {checkInReminders.permissionState === "denied"
-                  ? "Notifications blocked. Enable in device settings."
-                  : "Allow notifications to get reminders when the app is closed."}
-              </p>
-              {checkInReminders.permissionState !== "denied" && (
-                <button
-                  onClick={requestPermission}
-                  className="text-xs font-semibold text-sage-700 underline shrink-0"
-                >
-                  Allow
-                </button>
-              )}
-            </div>
-          )}
+          <NotificationPermissionBanner />
 
           {TYPES.map(({ key, label, sub }) => {
             const r = checkInReminders[key];

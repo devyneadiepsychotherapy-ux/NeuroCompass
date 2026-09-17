@@ -73,6 +73,22 @@ export async function requestNativePermission(): Promise<PermState> {
   }
 }
 
+/**
+ * Request whichever notification permission applies: the OS system dialog on
+ * the Capacitor build, or the web Notification API on plain web. Shared by
+ * every "Allow notifications" control in the app (Check-In, Settings,
+ * Medication Reminder) so they all trigger the same prompt the same way.
+ */
+export async function requestAnyNotificationPermission(): Promise<PermState> {
+  if (await detectNative()) return requestNativePermission();
+  if (typeof Notification === "undefined") return "default";
+  try {
+    return mapPerm(await Notification.requestPermission());
+  } catch {
+    return "default";
+  }
+}
+
 /** Read current OS notification permission without prompting. */
 export async function checkNativePermission(): Promise<PermState> {
   if (!(await detectNative())) return "default";

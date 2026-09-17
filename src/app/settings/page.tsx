@@ -6,6 +6,7 @@ import { useAppStore, STORAGE_KEY, migrateAppState } from "@/store/useAppStore";
 import { getTheme } from "@/lib/themes";
 import { getAvatarOption } from "@/app/onboarding/page";
 import { useTour } from "@/components/layout/TourProvider";
+import { NotificationPermissionBanner } from "@/components/NotificationPermissionBanner";
 import {
   ArrowLeft, Check, Bell, BellOff, BellRing, User, Flame,
   Cat, Star, Moon, Leaf, Zap, Sparkles, Mountain, Flower2, Compass, BookOpen,
@@ -72,7 +73,14 @@ function SectionHeading({ label }: { label: string }) {
 // ---------------------------------------------------------------------------
 
 function StreakReminderSetting() {
-  const { streakReminder, updateStreakReminder } = useAppStore();
+  const { streakReminder, updateStreakReminder, checkInReminders, setReminderPermissionState } = useAppStore();
+  const permissionState = checkInReminders.permissionState;
+  const needsPermission = streakReminder.enabled && permissionState !== "granted";
+
+  async function requestPermission() {
+    const { requestAnyNotificationPermission } = await import("@/lib/nativeNotifications");
+    setReminderPermissionState(await requestAnyNotificationPermission());
+  }
 
   return (
     <div className="mt-4 rounded-2xl border border-slate-100 bg-white p-4 space-y-3">
@@ -109,6 +117,18 @@ function StreakReminderSetting() {
             className="text-sm font-semibold text-slate-700 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-sage-400"
           />
         </div>
+      )}
+      {needsPermission && (
+        <p className="text-xs text-terracotta-600 pt-1 border-t border-slate-100 leading-relaxed">
+          {permissionState === "denied"
+            ? "Notifications are blocked, so this won't fire. Enable them in your device settings."
+            : (
+              <>
+                Notifications aren&apos;t allowed yet, so this won&apos;t fire.{" "}
+                <button onClick={requestPermission} className="underline font-semibold">Allow notifications</button>
+              </>
+            )}
+        </p>
       )}
     </div>
   );
@@ -550,6 +570,13 @@ export default function SettingsPage() {
         {/* ── Notifications ── */}
         <section>
           <SectionHeading label="Notifications" />
+
+          {/* Allow notifications: the OS-level grant everything below needs to
+              actually fire when the app is closed. Previously only reachable
+              from a collapsed accordion on the Check-In page. */}
+          <div className="mb-3">
+            <NotificationPermissionBanner />
+          </div>
 
           {/* Notification style */}
           <div className="space-y-2">

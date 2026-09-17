@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { Pill, Plus, Trash2, Check, Edit2, ArrowLeft, Sun, Moon, Minus, Heart } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getTodayKey } from "@/lib/utils";
+import { NotificationPermissionBanner } from "@/components/NotificationPermissionBanner";
 
 type Schedule = "morning" | "evening" | "both";
 
@@ -347,6 +348,8 @@ export default function MedicationReminderPage() {
         </button>
         <Pill size={22} className="text-sage-500 shrink-0" />
       </div>
+
+      <NotificationPermissionBanner />
 
       {medicationReminders.length === 0 && !showAdd && (
         <div className="bg-sage-50 border border-sage-100 rounded-2xl p-6 text-center space-y-3">
