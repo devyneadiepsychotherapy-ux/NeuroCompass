@@ -76,10 +76,17 @@ function StreakReminderSetting() {
   const { streakReminder, updateStreakReminder, checkInReminders, setReminderPermissionState } = useAppStore();
   const permissionState = checkInReminders.permissionState;
   const needsPermission = streakReminder.enabled && permissionState !== "granted";
+  const [requestFailed, setRequestFailed] = useState(false);
 
   async function requestPermission() {
-    const { requestAnyNotificationPermission } = await import("@/lib/nativeNotifications");
-    setReminderPermissionState(await requestAnyNotificationPermission());
+    setRequestFailed(false);
+    try {
+      const { requestAnyNotificationPermission } = await import("@/lib/nativeNotifications");
+      setReminderPermissionState(await requestAnyNotificationPermission());
+    } catch (e) {
+      console.error("[StreakReminderSetting] permission request failed", e);
+      setRequestFailed(true);
+    }
   }
 
   return (
@@ -126,6 +133,9 @@ function StreakReminderSetting() {
               <>
                 Notifications aren&apos;t allowed yet, so this won&apos;t fire.{" "}
                 <button onClick={requestPermission} className="underline font-semibold">Allow notifications</button>
+                {requestFailed && (
+                  <> That didn&apos;t work — enable them from Settings → Apps → NeuroCompass → Notifications instead.</>
+                )}
               </>
             )}
         </p>

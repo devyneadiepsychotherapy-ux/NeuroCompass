@@ -61,16 +61,51 @@ function mapPerm(display: string): PermState {
   return display === "granted" ? "granted" : display === "denied" ? "denied" : "default";
 }
 
-/** Ask the OS for notification permission (Android 13+ system dialog). */
+/**
+ * Guard every native call with this. `registerPlugin` (inside the
+ * @capacitor/local-notifications package) silently falls back to its web
+ * implementation - not native - whenever the bridge has no PluginHeader for
+ * "LocalNotifications", even while `Capacitor.isNativePlatform()` correctly
+ * reports true. That web fallback then throws "not supported in this
+ * browser" the moment it's actually called (Android's WebView doesn't
+ * implement the web Notification API), which every caller here used to
+ * catch-and-swallow into "default" - a button tap that visibly does nothing,
+ * a permission check that's silently always wrong, with zero trace of why.
+ * Checking `isPluginAvailable` up front tells the two failure modes apart
+ * and gets it into the logs instead of disappearing.
+ */
+async function assertPluginAvailable(): Promise<void> {
+  const { Capacitor } = await import("@capacitor/core");
+  if (!Capacitor.isPluginAvailable("LocalNotifications")) {
+    console.error(
+      "[nativeNotifications] LocalNotifications is not available on the native bridge " +
+        "(isNativePlatform() is true, so this is a plugin-registration problem, not a " +
+        "platform-detection one) - calls would silently fall back to the unsupported web implementation.",
+    );
+    throw new Error("LocalNotifications plugin unavailable on native bridge");
+  }
+}
+
+/**
+ * Ask the OS for notification permission (Android 13+ system dialog).
+ *
+ * Deliberately does NOT swallow failures into "default" the way the rest of
+ * this module does for background sync calls: a tester reported tapping
+ * "Allow" and getting no system dialog at all, with the app silently staying
+ * in the un-granted state - i.e. this exact call was failing and nobody
+ * could tell, because every catch here used to return "default" with no
+ * logging. Real OS responses (granted/denied/no-decision-yet) still resolve
+ * normally; an actual request failure (the plugin bridge unavailable, the
+ * native call throwing) now propagates so the caller can show the user
+ * something true ("that didn't work, try your phone's Settings app")
+ * instead of a button that looks broken with no explanation.
+ */
 export async function requestNativePermission(): Promise<PermState> {
   if (!(await detectNative())) return "default";
-  try {
-    const LN = await getPlugin();
-    const res = await LN.requestPermissions();
-    return mapPerm(res.display);
-  } catch {
-    return "default";
-  }
+  await assertPluginAvailable();
+  const LN = await getPlugin();
+  const res = await LN.requestPermissions();
+  return mapPerm(res.display);
 }
 
 /**
@@ -78,25 +113,33 @@ export async function requestNativePermission(): Promise<PermState> {
  * the Capacitor build, or the web Notification API on plain web. Shared by
  * every "Allow notifications" control in the app (Check-In, Settings,
  * Medication Reminder) so they all trigger the same prompt the same way.
+ * Throws on a genuine request failure - see requestNativePermission - so
+ * callers should catch it and show a fallback message rather than letting it
+ * disappear.
  */
 export async function requestAnyNotificationPermission(): Promise<PermState> {
   if (await detectNative()) return requestNativePermission();
   if (typeof Notification === "undefined") return "default";
-  try {
-    return mapPerm(await Notification.requestPermission());
-  } catch {
-    return "default";
-  }
+  return mapPerm(await Notification.requestPermission());
 }
 
-/** Read current OS notification permission without prompting. */
+/**
+ * Read current OS notification permission without prompting. Runs on every
+ * app foreground, so failures here are swallowed to "default" (a crash loop
+ * on every resume would be worse than a wrong reading) - but logged, since a
+ * silent failure here means the app can never see a permission the user
+ * granted straight from their phone's Settings app, and every reminder stays
+ * permanently un-scheduled with no visible explanation.
+ */
 export async function checkNativePermission(): Promise<PermState> {
   if (!(await detectNative())) return "default";
   try {
+    await assertPluginAvailable();
     const LN = await getPlugin();
     const res = await LN.checkPermissions();
     return mapPerm(res.display);
-  } catch {
+  } catch (e) {
+    console.error("[nativeNotifications] checkNativePermission failed", e);
     return "default";
   }
 }
@@ -250,8 +293,10 @@ export async function syncNativeNotifications(input: NativeSyncInput): Promise<v
 
   let LN: Awaited<ReturnType<typeof getPlugin>>;
   try {
+    await assertPluginAvailable();
     LN = await getPlugin();
-  } catch {
+  } catch (e) {
+    console.error("[nativeNotifications] syncNativeNotifications: plugin unavailable, nothing scheduled", e);
     return;
   }
 
@@ -283,7 +328,8 @@ export async function syncNativeNotifications(input: NativeSyncInput): Promise<v
   try {
     const perm = await LN.checkPermissions();
     if (perm.display !== "granted") return;
-  } catch {
+  } catch (e) {
+    console.error("[nativeNotifications] syncNativeNotifications: checkPermissions failed, nothing scheduled", e);
     return;
   }
 

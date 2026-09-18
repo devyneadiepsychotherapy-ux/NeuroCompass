@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import { useAppStore } from "@/store/useAppStore";
 
 /**
@@ -15,28 +16,46 @@ import { useAppStore } from "@/store/useAppStore";
 export function NotificationPermissionBanner() {
   const permissionState = useAppStore((s) => s.checkInReminders.permissionState);
   const setReminderPermissionState = useAppStore((s) => s.setReminderPermissionState);
+  const [requestFailed, setRequestFailed] = useState(false);
 
   if (permissionState === "granted") return null;
 
   async function requestPermission() {
-    const { requestAnyNotificationPermission } = await import("@/lib/nativeNotifications");
-    setReminderPermissionState(await requestAnyNotificationPermission());
+    setRequestFailed(false);
+    try {
+      const { requestAnyNotificationPermission } = await import("@/lib/nativeNotifications");
+      setReminderPermissionState(await requestAnyNotificationPermission());
+    } catch (e) {
+      // The request itself failed (e.g. the native plugin bridge rejected the
+      // call) rather than the user just not having decided yet - previously
+      // this was swallowed, so the button looked broken with zero feedback.
+      console.error("[NotificationPermissionBanner] permission request failed", e);
+      setRequestFailed(true);
+    }
   }
 
   return (
-    <div className="bg-sage-50 border border-sage-100 rounded-xl px-3 py-2.5 flex items-center justify-between gap-3">
-      <p className="text-xs text-slate-600 flex-1">
-        {permissionState === "denied"
-          ? "Notifications blocked. Enable in device settings."
-          : "Allow notifications to get reminders when the app is closed."}
-      </p>
-      {permissionState !== "denied" && (
-        <button
-          onClick={requestPermission}
-          className="text-xs font-semibold text-sage-700 underline shrink-0"
-        >
-          Allow
-        </button>
+    <div className="bg-sage-50 border border-sage-100 rounded-xl px-3 py-2.5 space-y-2">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-xs text-slate-600 flex-1">
+          {permissionState === "denied"
+            ? "Notifications blocked. Enable in device settings."
+            : "Allow notifications to get reminders when the app is closed."}
+        </p>
+        {permissionState !== "denied" && (
+          <button
+            onClick={requestPermission}
+            className="text-xs font-semibold text-sage-700 underline shrink-0"
+          >
+            Allow
+          </button>
+        )}
+      </div>
+      {requestFailed && (
+        <p className="text-xs text-terracotta-600 leading-relaxed">
+          That didn&apos;t work. Turn notifications on for NeuroCompass from your phone&apos;s
+          Settings app instead (Settings → Apps → NeuroCompass → Notifications).
+        </p>
       )}
     </div>
   );

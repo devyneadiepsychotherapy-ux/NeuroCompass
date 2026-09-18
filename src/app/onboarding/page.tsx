@@ -512,7 +512,7 @@ function StepNotification({
           })}
         </div>
         <p className="text-xs text-slate-400 -mt-1">
-          Notification delivery coming soon
+          You&apos;ll be asked to allow notifications the first time you turn on a reminder.
         </p>
         <button
           onClick={onNext}
