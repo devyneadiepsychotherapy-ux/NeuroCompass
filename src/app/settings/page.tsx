@@ -7,13 +7,14 @@ import { getTheme } from "@/lib/themes";
 import { getAvatarOption } from "@/app/onboarding/page";
 import { useTour } from "@/components/layout/TourProvider";
 import { NotificationPermissionBanner } from "@/components/NotificationPermissionBanner";
+import { requestAnyNotificationPermission } from "@/lib/nativeNotifications";
 import {
   ArrowLeft, Check, Bell, BellOff, BellRing, User, Flame,
   Cat, Star, Moon, Leaf, Zap, Sparkles, Mountain, Flower2, Compass, BookOpen,
   Music, Gamepad2, Heart, Telescope, Feather, Waves, ChevronRight,
   Download, Upload, AlertTriangle, CheckCircle2, MapPin, Share2, Copy, X,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, withTimeout } from "@/lib/utils";
 
 // ---------------------------------------------------------------------------
 // App links
@@ -83,8 +84,11 @@ function StreakReminderSetting() {
     setRequestFailed(false);
     setRequesting(true);
     try {
-      const { requestAnyNotificationPermission } = await import("@/lib/nativeNotifications");
-      setReminderPermissionState(await requestAnyNotificationPermission());
+      // See NotificationPermissionBanner for why this is a static import
+      // raced against its own timeout, not a dynamic import() relying on the
+      // timeout guards inside nativeNotifications.ts alone.
+      const result = await withTimeout(requestAnyNotificationPermission(), 10000, "notification permission request");
+      setReminderPermissionState(result);
     } catch (e) {
       console.error("[StreakReminderSetting] permission request failed", e);
       setRequestFailed(true);

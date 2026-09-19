@@ -1,6 +1,10 @@
 "use client";
 import { useState } from "react";
 import { useAppStore } from "@/store/useAppStore";
+import { requestAnyNotificationPermission } from "@/lib/nativeNotifications";
+import { withTimeout } from "@/lib/utils";
+
+const REQUEST_TIMEOUT_MS = 10000;
 
 /**
  * Shared "allow OS notifications" prompt. The permission it requests is global
@@ -12,6 +16,17 @@ import { useAppStore } from "@/store/useAppStore";
  * permission control of their own -- toggling them on silently did nothing
  * if permission had never been granted. This component is now shared across
  * all three surfaces so the prompt (and its logic) live in one place.
+ *
+ * Imports nativeNotifications statically (ReminderManager.tsx already does,
+ * and works) rather than via a click-time `await import(...)`, which this
+ * file used to do: a tester's "Allow" button got stuck on "Requesting..."
+ * indefinitely, well past the 10s timeout the native calls inside that
+ * module are guarded with - because that guard lives *inside* the
+ * dynamically-imported module, so it can't protect against the import()
+ * itself hanging (its chunk's network fetch stalling, most plausible on
+ * mobile data for a chunk the service worker hasn't cached yet). The whole
+ * click handler is now also raced against its own timeout below as a second
+ * layer, independent of import() entirely.
  */
 export function NotificationPermissionBanner() {
   const permissionState = useAppStore((s) => s.checkInReminders.permissionState);
@@ -25,16 +40,13 @@ export function NotificationPermissionBanner() {
     setRequestFailed(false);
     setRequesting(true);
     try {
-      const { requestAnyNotificationPermission } = await import("@/lib/nativeNotifications");
-      setReminderPermissionState(await requestAnyNotificationPermission());
+      const result = await withTimeout(
+        requestAnyNotificationPermission(),
+        REQUEST_TIMEOUT_MS,
+        "notification permission request",
+      );
+      setReminderPermissionState(result);
     } catch (e) {
-      // The request itself failed (e.g. the native plugin bridge rejected the
-      // call, or - now that native calls are timeout-guarded - it just never
-      // came back at all) rather than the user simply not having decided yet.
-      // This used to be swallowed, so the button looked broken with zero
-      // feedback; it can now take up to ~10s to surface a genuine failure,
-      // so the button showing "Requesting..." in the meantime matters more
-      // than it used to - silence for that long reads as "did nothing" too.
       console.error("[NotificationPermissionBanner] permission request failed", e);
       setRequestFailed(true);
     } finally {
