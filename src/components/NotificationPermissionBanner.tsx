@@ -17,20 +17,28 @@ export function NotificationPermissionBanner() {
   const permissionState = useAppStore((s) => s.checkInReminders.permissionState);
   const setReminderPermissionState = useAppStore((s) => s.setReminderPermissionState);
   const [requestFailed, setRequestFailed] = useState(false);
+  const [requesting, setRequesting] = useState(false);
 
   if (permissionState === "granted") return null;
 
   async function requestPermission() {
     setRequestFailed(false);
+    setRequesting(true);
     try {
       const { requestAnyNotificationPermission } = await import("@/lib/nativeNotifications");
       setReminderPermissionState(await requestAnyNotificationPermission());
     } catch (e) {
       // The request itself failed (e.g. the native plugin bridge rejected the
-      // call) rather than the user just not having decided yet - previously
-      // this was swallowed, so the button looked broken with zero feedback.
+      // call, or - now that native calls are timeout-guarded - it just never
+      // came back at all) rather than the user simply not having decided yet.
+      // This used to be swallowed, so the button looked broken with zero
+      // feedback; it can now take up to ~10s to surface a genuine failure,
+      // so the button showing "Requesting..." in the meantime matters more
+      // than it used to - silence for that long reads as "did nothing" too.
       console.error("[NotificationPermissionBanner] permission request failed", e);
       setRequestFailed(true);
+    } finally {
+      setRequesting(false);
     }
   }
 
@@ -45,9 +53,10 @@ export function NotificationPermissionBanner() {
         {permissionState !== "denied" && (
           <button
             onClick={requestPermission}
-            className="text-xs font-semibold text-sage-700 underline shrink-0"
+            disabled={requesting}
+            className="text-xs font-semibold text-sage-700 underline shrink-0 disabled:opacity-50 disabled:no-underline"
           >
-            Allow
+            {requesting ? "Requesting…" : "Allow"}
           </button>
         )}
       </div>

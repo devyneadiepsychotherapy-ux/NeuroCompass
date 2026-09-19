@@ -69,6 +69,34 @@ function mapPerm(display: string): PermState {
   return display === "granted" ? "granted" : display === "denied" ? "denied" : "default";
 }
 
+const NATIVE_CALL_TIMEOUT_MS = 10000;
+
+/**
+ * Every native plugin call gets raced against this. A tester reported the
+ * "Allow" button doing nothing at all, on more than one screen, even after
+ * assertPluginAvailable() started throwing on a missing bridge - which means
+ * a thrown/rejected call wasn't the (only) failure mode. The other
+ * possibility documented right on schedule()'s isExactNotification below is
+ * that a native call can trigger an OS screen launch (the exact-alarm
+ * settings prompt) that never returns a result back to JS if Android's
+ * background-activity-launch rules block it in this calling context - the
+ * call's promise then never resolves AND never rejects, so it neither
+ * succeeds nor hits a catch block: nothing happens, forever, silently.
+ * `try/catch` cannot see a promise that never settles; only racing it
+ * against something that does can turn that into a visible, honest failure.
+ */
+function withTimeout<T>(promise: Promise<T>, label: string): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error(`[nativeNotifications] ${label} timed out after ${NATIVE_CALL_TIMEOUT_MS}ms`));
+    }, NATIVE_CALL_TIMEOUT_MS);
+    promise.then(
+      (value) => { clearTimeout(timer); resolve(value); },
+      (err) => { clearTimeout(timer); reject(err); },
+    );
+  });
+}
+
 /**
  * Guard every native call with this. `registerPlugin` (inside the
  * @capacitor/local-notifications package) silently falls back to its web
@@ -112,7 +140,7 @@ export async function requestNativePermission(): Promise<PermState> {
   if (!(await detectNative())) return "default";
   await assertPluginAvailable();
   const LN = await getPlugin();
-  const res = await LN.requestPermissions();
+  const res = await withTimeout(LN.requestPermissions(), "requestPermissions()");
   return mapPerm(res.display);
 }
 
@@ -144,7 +172,7 @@ export async function checkNativePermission(): Promise<PermState> {
   try {
     await assertPluginAvailable();
     const LN = await getPlugin();
-    const res = await LN.checkPermissions();
+    const res = await withTimeout(LN.checkPermissions(), "checkPermissions()");
     return mapPerm(res.display);
   } catch (e) {
     console.error("[nativeNotifications] checkNativePermission failed", e);
@@ -310,22 +338,28 @@ export async function syncNativeNotifications(input: NativeSyncInput): Promise<v
 
   // Android notification channel (ignored on other platforms).
   try {
-    await LN.createChannel({
-      id: CHANNEL_ID,
-      name: "Reminders",
-      description: "Check-in, streak, and medication reminders",
-      importance: 4,
-      visibility: 1,
-    });
+    await withTimeout(
+      LN.createChannel({
+        id: CHANNEL_ID,
+        name: "Reminders",
+        description: "Check-in, streak, and medication reminders",
+        importance: 4,
+        visibility: 1,
+      }),
+      "createChannel()",
+    );
   } catch {
     /* not Android, or channels unsupported */
   }
 
   // Clear whatever we scheduled last time.
   try {
-    const pending = await LN.getPending();
+    const pending = await withTimeout(LN.getPending(), "getPending()");
     if (pending.notifications.length > 0) {
-      await LN.cancel({ notifications: pending.notifications.map((n) => ({ id: n.id })) });
+      await withTimeout(
+        LN.cancel({ notifications: pending.notifications.map((n) => ({ id: n.id })) }),
+        "cancel()",
+      );
     }
   } catch {
     /* nothing pending */
@@ -334,7 +368,7 @@ export async function syncNativeNotifications(input: NativeSyncInput): Promise<v
   if (input.notificationStyle === "silent") return;
 
   try {
-    const perm = await LN.checkPermissions();
+    const perm = await withTimeout(LN.checkPermissions(), "checkPermissions()");
     if (perm.display !== "granted") return;
   } catch (e) {
     console.error("[nativeNotifications] syncNativeNotifications: checkPermissions failed, nothing scheduled", e);
@@ -345,7 +379,7 @@ export async function syncNativeNotifications(input: NativeSyncInput): Promise<v
   if (planned.length === 0) return;
 
   try {
-    await LN.schedule({
+    await withTimeout(LN.schedule({
       notifications: planned.map((p) => ({
         id: p.id,
         title: p.title,
@@ -368,7 +402,7 @@ export async function syncNativeNotifications(input: NativeSyncInput): Promise<v
         // and never depends on a permission we've never asked for or explained.
         isExactNotification: false,
       })),
-    });
+    }), "schedule()");
   } catch (e) {
     console.warn("[nativeNotifications] schedule failed", e);
   }

@@ -1,7 +1,13 @@
 // NeuroCompass Service Worker
 // Cache strategy: network-first for HTML navigation, cache-first for static assets.
 
-const CACHE_NAME = 'neurocompass-v2';
+// Bump this whenever a fix depends on every device picking up fresh
+// _next/static assets promptly - that path is cache-first with no other
+// busting mechanism (see the fetch handler below), so a stale install can
+// keep serving pre-fix JS indefinitely otherwise. Last bumped for the
+// notification permission/scheduling fixes (v10-v13): a device that had the
+// app open before those shipped could still be running old cached code.
+const CACHE_NAME = 'neurocompass-v3';
 
 // App shell — pages and assets to pre-cache on install
 const PRECACHE_URLS = [
