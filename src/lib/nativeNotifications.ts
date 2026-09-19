@@ -27,6 +27,14 @@ type NotifStyle = "cheerleader" | "gentle" | "silent";
 type PermState = "granted" | "denied" | "default";
 
 const CHANNEL_ID = "reminders";
+// All of our notifications share this group so Android collapses several
+// arriving close together into one expandable stack in the shade ("N
+// notifications from NeuroCompass") instead of flooding it with full-size
+// cards - check-ins, the streak reminder, and medication reminders each have
+// independently user-configured times with no awareness of each other, so
+// two landing in the same window (matching defaults, or just a coincidence
+// of someone's own choices) is expected, not a bug in itself.
+const NOTIFICATION_GROUP = "neurocompass-reminders";
 
 export interface NativeSyncInput {
   notificationStyle: NotifStyle;
@@ -345,6 +353,7 @@ export async function syncNativeNotifications(input: NativeSyncInput): Promise<v
         channelId: CHANNEL_ID,
         schedule: { on: { hour: p.hour, minute: p.minute }, allowWhileIdle: true },
         extra: { href: p.href },
+        group: NOTIFICATION_GROUP,
         // isExactNotification defaults to true, and on Android 12+ that means
         // schedule() unilaterally launches the system "Alarms & reminders"
         // settings screen the moment permission isn't already granted - from

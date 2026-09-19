@@ -388,7 +388,7 @@ const defaultSectionVisibility: SectionVisibility = {
 };
 
 export const STORAGE_KEY = "neurocompass-store";
-export const STORE_VERSION = 9;
+export const STORE_VERSION = 10;
 
 export function migrateAppState(persistedState: unknown, version: number): unknown {
   // A non-object blob (null, a string, a truncated write) would make every
@@ -469,6 +469,17 @@ export function migrateAppState(persistedState: unknown, version: number): unkno
       state.medicationReminderShownDates = {};
     }
   }
+  if (version < 10) {
+    // The streak reminder's factory default collided with the mood check-in's
+    // (both 09:00) - anyone with both enabled got two real notifications at
+    // the exact same minute. Nudge it to the new default (08:30), but only if
+    // it's still sitting at the old default - a 09:00 a user deliberately
+    // chose is theirs to keep.
+    const sr = state.streakReminder as { time?: string } | undefined;
+    if (sr && sr.time === "09:00") {
+      sr.time = "08:30";
+    }
+  }
   return state;
 }
 
@@ -543,7 +554,14 @@ export const useAppStore = create<AppState>()(
       energyDrains: [],
       energyRestorers: [],
       habitBuilderItems: [],
-      streakReminder: { enabled: false, time: "09:00", lastNotifiedDate: "" },
+      // 08:30, not 09:00: the mood check-in default is also 09:00, so anyone
+      // enabling both got two real OS notifications scheduled for the exact
+      // same minute - the notification-shade "everything piles up at once"
+      // complaint starts right here, before a user has changed a single
+      // setting. Chosen to stay clear of every check-in default (09:00,
+      // 10:00, 12:00, 14:00, 18:00, 20:00) and the medication form's default
+      // morning time (08:00).
+      streakReminder: { enabled: false, time: "08:30", lastNotifiedDate: "" },
       checkInReminders: {
         mood: { enabled: false, times: ["09:00"], lastNotifiedDates: {} },
         body: { enabled: false, times: ["12:00"], lastNotifiedDates: {} },
