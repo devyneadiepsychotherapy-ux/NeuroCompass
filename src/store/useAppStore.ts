@@ -209,12 +209,20 @@ interface AppState {
   // Medication reminders
   medicationReminders: MedicationReminder[];
   medicationTakenDates: Record<string, string[]>; // dateKey -> array of medication IDs taken
+  // dateKey -> array of medication IDs (or "id-morning"/"id-evening") whose
+  // in-app banner has already been shown today. Unlike check-ins and the
+  // streak reminder, the medication "due" banner had no once-per-day gate at
+  // all: it re-showed on every single app open/foreground for as long as a
+  // dose stayed untaken, which read as the same notification repeating
+  // endlessly rather than a clean one-time nudge.
+  medicationReminderShownDates: Record<string, string[]>;
   medicationShowOnMe: boolean;
   medicationShowOnHome: boolean;
   addMedicationReminder: (med: Omit<MedicationReminder, "id">) => void;
   updateMedicationReminder: (id: string, updates: Partial<Omit<MedicationReminder, "id">>) => void;
   deleteMedicationReminder: (id: string) => void;
   toggleMedicationTaken: (id: string, date: string, slot?: "morning" | "evening") => void;
+  markMedicationReminderShown: (keys: string[], date: string) => void;
   setMedicationShowOnMe: (v: boolean) => void;
   setMedicationShowOnHome: (v: boolean) => void;
 
@@ -380,7 +388,7 @@ const defaultSectionVisibility: SectionVisibility = {
 };
 
 export const STORAGE_KEY = "neurocompass-store";
-export const STORE_VERSION = 8;
+export const STORE_VERSION = 9;
 
 export function migrateAppState(persistedState: unknown, version: number): unknown {
   // A non-object blob (null, a string, a truncated write) would make every
@@ -456,6 +464,11 @@ export function migrateAppState(persistedState: unknown, version: number): unkno
       state.journalEntries = [];
     }
   }
+  if (version < 9) {
+    if (!state.medicationReminderShownDates) {
+      state.medicationReminderShownDates = {};
+    }
+  }
   return state;
 }
 
@@ -497,6 +510,7 @@ export const useAppStore = create<AppState>()(
       usedPurchasedIndices: [],
       medicationReminders: [],
       medicationTakenDates: {},
+      medicationReminderShownDates: {},
       medicationShowOnMe: true,
       medicationShowOnHome: true,
       homeVisibility: {
@@ -1043,6 +1057,13 @@ export const useAppStore = create<AppState>()(
           get().addXp(med?.xpReward ?? 5);
         }
       },
+
+      markMedicationReminderShown: (keys, date) =>
+        set((s) => {
+          const shown = s.medicationReminderShownDates[date] ?? [];
+          const merged = [...new Set([...shown, ...keys])];
+          return { medicationReminderShownDates: { ...s.medicationReminderShownDates, [date]: merged } };
+        }),
 
       setMedicationShowOnMe: (v) => set({ medicationShowOnMe: v }),
       setMedicationShowOnHome: (v) => set({ medicationShowOnHome: v }),

@@ -345,6 +345,19 @@ export async function syncNativeNotifications(input: NativeSyncInput): Promise<v
         channelId: CHANNEL_ID,
         schedule: { on: { hour: p.hour, minute: p.minute }, allowWhileIdle: true },
         extra: { href: p.href },
+        // isExactNotification defaults to true, and on Android 12+ that means
+        // schedule() unilaterally launches the system "Alarms & reminders"
+        // settings screen the moment permission isn't already granted - from
+        // this automatic every-foreground sync call, not a deliberate tap.
+        // That's very likely why notifications appeared to just not fire: the
+        // plugin was hijacking the screen (or, if the background-activity-launch
+        // was blocked by the OS, silently leaving this schedule() call's promise
+        // unresolved) instead of ever reaching a scheduled notification. A mood
+        // or medication reminder has no need for to-the-second precision, so
+        // request inexact scheduling outright - still Doze-resistant via
+        // allowWhileIdle, still fires within a few minutes of the target time,
+        // and never depends on a permission we've never asked for or explained.
+        isExactNotification: false,
       })),
     });
   } catch (e) {

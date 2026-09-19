@@ -123,6 +123,7 @@ export default function ReminderManager() {
     checkInReminders, markReminderNotified, setReminderPermissionState,
     streakReminder, markStreakReminderNotified, streak,
     medicationReminders, medicationTakenDates,
+    medicationReminderShownDates, markMedicationReminderShown,
     notificationStyle, _hasHydrated,
   } = useAppStore();
   // _hasHydrated is set to true by onRehydrateStorage in the store once Zustand
@@ -151,18 +152,33 @@ export default function ReminderManager() {
       if (hasSlotDue) due.push(type);
     });
 
-    // Medication reminders: show banner if any due slot hasn't been taken yet
+    // Medication reminders: show a banner once per due slot per day. This used
+    // to have no "already shown" gate at all - it recomputed straight from
+    // "isn't marked taken yet" on every single foreground, so an untaken dose
+    // re-popped the same banner every time the app was opened, all day. Taking
+    // the dose still clears it immediately as before; this only stops it from
+    // re-announcing itself when nothing has changed.
     const takenToday = medicationTakenDates[today] ?? [];
-    const dueMeds = medicationReminders.filter((m) => {
-      if (m.schedule === "both") {
-        const morningDue = isTimePast(m.time) && !takenToday.includes(`${m.id}-morning`);
-        const eveningDue = m.eveningTime && isTimePast(m.eveningTime) && !takenToday.includes(`${m.id}-evening`);
-        return morningDue || eveningDue;
+    const shownToday = medicationReminderShownDates[today] ?? [];
+    const dueMedIds: string[] = [];
+    const newlyShownKeys: string[] = [];
+    medicationReminders.forEach((m) => {
+      const slotKeys =
+        m.schedule === "both"
+          ? [
+              ...(isTimePast(m.time) ? [`${m.id}-morning`] : []),
+              ...(m.eveningTime && isTimePast(m.eveningTime) ? [`${m.id}-evening`] : []),
+            ]
+          : isTimePast(m.time) ? [m.id] : [];
+      const newlyDue = slotKeys.filter((k) => !takenToday.includes(k) && !shownToday.includes(k));
+      if (newlyDue.length > 0) {
+        dueMedIds.push(m.id);
+        newlyShownKeys.push(...newlyDue);
       }
-      return isTimePast(m.time) && !takenToday.includes(m.id);
-    }).map((m) => m.id);
-    if (dueMeds.length > 0) {
-      setMedBanners(dueMeds);
+    });
+    if (dueMedIds.length > 0) {
+      setMedBanners(dueMedIds);
+      markMedicationReminderShown(newlyShownKeys, today);
     }
 
     // Streak morning reminder
