@@ -880,21 +880,6 @@ const REMINDER_OPTIONS = [
   { label: "1 hour before", value: 60 },
 ];
 
-function requestNotificationPermission() {
-  if (typeof Notification !== "undefined" && Notification.permission === "default") {
-    Notification.requestPermission();
-  }
-}
-
-function scheduleNotification(title: string, fireAt: Date) {
-  if (typeof Notification === "undefined" || Notification.permission !== "granted") return;
-  const msUntil = fireAt.getTime() - Date.now();
-  if (msUntil < 0) return;
-  setTimeout(() => {
-    new Notification("NeuroCompass Reminder", { body: title, icon: "/icon-192.png" });
-  }, msUntil);
-}
-
 // ---------------------------------------------------------------------------
 // Day progress bar
 // ---------------------------------------------------------------------------
@@ -1084,13 +1069,6 @@ function ScheduleSection({ selectedDate }: { selectedDate: Date }) {
       reminderMinsBefore: allDay ? undefined : reminderMins,
       color,
     });
-    if (!allDay && reminderMins !== undefined) {
-      requestNotificationPermission();
-      const [h, m] = startTime.split(":").map(Number);
-      const fireAt = new Date(selectedDate);
-      fireAt.setHours(h, m - reminderMins, 0, 0);
-      scheduleNotification(title.trim(), fireAt);
-    }
     setTitle("");
     setNotes("");
     setAllDay(false);
@@ -1498,13 +1476,6 @@ function AppointmentRow({
       showOn: editShowOn,
       reminderMinsBefore: editAllDay ? undefined : editReminderMins,
     });
-    if (editReminderMins !== undefined) {
-      requestNotificationPermission();
-      const [h, m] = editStartTime.split(":").map(Number);
-      const fireAt = new Date(appt.date + "T00:00:00");
-      fireAt.setHours(h, m - editReminderMins, 0, 0);
-      scheduleNotification(editTitle.trim(), fireAt);
-    }
     setShowEdit(false);
     setExpanded(false);
   };
@@ -2442,13 +2413,6 @@ function AddScheduleModal({
       showOn,
       reminderMinsBefore: allDay ? undefined : reminderMins,
     });
-    if (!allDay && reminderMins !== undefined) {
-      requestNotificationPermission();
-      const [h, m] = startTime.split(":").map(Number);
-      const fireAt = new Date(date + "T00:00:00");
-      fireAt.setHours(h, m - reminderMins, 0, 0);
-      scheduleNotification(title.trim(), fireAt);
-    }
     onClose();
   };
 
@@ -2661,6 +2625,8 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
   const [priority, setPriority] = useState<TaskPriority>(taskToEdit?.priority ?? "medium");
   const [duration, setDuration] = useState(taskToEdit?.duration ?? "");
   const [dueDate, setDueDate] = useState(taskToEdit?.dueDate ?? "");
+  const [dueTime, setDueTime] = useState(taskToEdit?.startTime ?? "");
+  const [reminderMins, setReminderMins] = useState<number | undefined>(taskToEdit?.reminderMinsBefore);
   const [isRecurring, setIsRecurring] = useState(taskToEdit?.isRecurring ?? false);
   const [recurType, setRecurType] = useState<RecurType>(taskToEdit?.recurType ?? "daily");
   const [category, setCategory] = useState(taskToEdit?.category ?? "Personal");
@@ -2690,6 +2656,8 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
         xpReward: rewardAmount,
         rewardType,
         dueDate: dueDate || undefined,
+        startTime: dueDate && !isRecurring ? (dueTime || undefined) : undefined,
+        reminderMinsBefore: dueDate && !isRecurring ? reminderMins : undefined,
         isRecurring,
         recurType: isRecurring ? recurType : undefined,
         timeEstimate,
@@ -2708,6 +2676,8 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
         xpReward: rewardAmount,
         rewardType,
         dueDate: dueDate || undefined,
+        startTime: dueDate && !isRecurring ? (dueTime || undefined) : undefined,
+        reminderMinsBefore: dueDate && !isRecurring ? reminderMins : undefined,
         isRecurring,
         recurType: isRecurring ? recurType : undefined,
         tags: [],
@@ -2878,6 +2848,37 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
             onChange={(e) => setDueDate(e.target.value)}
           />
         </div>
+
+        {/* Reminder - a specific date to fire on is required, and a recurring
+            task has no single stable date, so both stay hidden until there's
+            a due date and it isn't recurring. */}
+        {dueDate && !isRecurring && (
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <label className="block text-xs text-slate-400 mb-1">Due time (optional)</label>
+              <input
+                type="time"
+                className="w-full min-h-[44px] border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sage-400"
+                value={dueTime}
+                onChange={(e) => setDueTime(e.target.value)}
+              />
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs text-slate-400 mb-1">Reminder</label>
+              <select
+                className="w-full min-h-[44px] border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-sage-400 bg-white"
+                value={reminderMins === undefined ? "" : String(reminderMins)}
+                onChange={(e) => setReminderMins(e.target.value === "" ? undefined : Number(e.target.value))}
+              >
+                {REMINDER_OPTIONS.map((opt) => (
+                  <option key={String(opt.value)} value={opt.value === undefined ? "" : String(opt.value)}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
 
         {/* Recurring */}
         <div className="flex items-center gap-3">

@@ -125,6 +125,7 @@ export default function ReminderManager() {
     medicationReminders, medicationTakenDates,
     medicationReminderShownDates, markMedicationReminderShown,
     notificationStyle, _hasHydrated,
+    appointments, tasks,
   } = useAppStore();
   // _hasHydrated is set to true by onRehydrateStorage in the store once Zustand
   // persist has finished reading from localStorage. Without gating on it, this
@@ -308,6 +309,8 @@ export default function ReminderManager() {
         streakReminder,
         streak,
         medicationReminders,
+        appointments,
+        tasks,
       });
     };
 
@@ -321,7 +324,7 @@ export default function ReminderManager() {
       disposed = true;
       document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, [mounted, notificationStyle, checkInReminders, streakReminder, streak, medicationReminders]);
+  }, [mounted, notificationStyle, checkInReminders, streakReminder, streak, medicationReminders, appointments, tasks]);
 
   // Route the SPA when a scheduled notification is tapped (native only).
   useEffect(() => {

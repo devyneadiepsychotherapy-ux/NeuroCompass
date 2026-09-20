@@ -7,20 +7,25 @@
  * `Notification()` path as the browser fallback; this module only does anything
  * when running inside the native WebView.
  *
- * Strategy: each enabled reminder slot becomes ONE daily-repeating local
- * notification (`schedule.on = { hour, minute }`). On every sync we cancel every
- * pending notification we previously scheduled and re-schedule from current
- * state, so toggling a reminder / changing a time / changing notification style
- * all converge without per-id bookkeeping. The app is the only source of local
+ * Strategy: each enabled check-in/streak/medication reminder slot becomes ONE
+ * daily-repeating local notification (`schedule.on = { hour, minute }`); each
+ * appointment or non-recurring task with a reminder set becomes ONE dated,
+ * one-time notification (`schedule.at = Date`) instead, since those fire once
+ * and are done, not every day. On every sync we cancel every pending
+ * notification we previously scheduled and re-schedule from current state, so
+ * toggling a reminder / changing a time / changing notification style all
+ * converge without per-id bookkeeping. The app is the only source of local
  * notifications, so "cancel all pending" is safe.
  *
  * Copy here is intentionally kept in sync with REMINDER_CONFIG / STREAK_CONFIG in
  * ReminderManager.tsx (banners use the React-icon version, this uses plain text).
  */
 import type {
+  Appointment,
   CheckInReminders,
   MedicationReminder,
   StreakReminderConfig,
+  Task,
 } from "@/types";
 
 type NotifStyle = "cheerleader" | "gentle" | "silent";
@@ -42,6 +47,8 @@ export interface NativeSyncInput {
   streakReminder: StreakReminderConfig;
   streak: number;
   medicationReminders: MedicationReminder[];
+  appointments: Appointment[];
+  tasks: Task[];
 }
 
 let nativeChecked = false;
@@ -264,16 +271,76 @@ const CHECKIN_COPY: Record<
   },
 };
 
+type NotificationTime =
+  | { kind: "daily"; hour: number; minute: number }
+  | { kind: "once"; at: Date };
+
 interface PlannedNotification {
   id: number;
   title: string;
   body: string;
   href: string;
-  hour: number;
-  minute: number;
+  time: NotificationTime;
 }
 
-function planNotifications(input: NativeSyncInput): PlannedNotification[] {
+/** Copy for a one-time reminder firing `mins` before (or at, if 0) the event. */
+function leadTimeCopy(mins: number, style: Exclude<NotifStyle, "silent">): string {
+  if (mins === 0) return style === "cheerleader" ? "It's happening now! \u{1F389}" : "It's time.";
+  const unit = `minute${mins === 1 ? "" : "s"}`;
+  return style === "cheerleader" ? `Starting in ${mins} ${unit} \u{23F0}` : `Starting in ${mins} ${unit}.`;
+}
+
+/**
+ * Appointments and non-recurring tasks get ONE dated notification each,
+ * unlike the daily-repeating reminders above. A recurring task has no single
+ * stable date to fire on - real recurring native reminders are a separate,
+ * bigger feature - so those are skipped here entirely, same as anything
+ * already done/skipped or missing the fields needed to compute a fire time.
+ * Past-due fire times are dropped rather than scheduled: Capacitor has no
+ * defined behavior for an `at` time already in the past, and re-computing
+ * this fresh on every sync means a completed/expired one-time reminder just
+ * naturally stops appearing next time, with no separate bookkeeping needed.
+ */
+function planOneTimeNotifications(input: NativeSyncInput, now: Date): PlannedNotification[] {
+  const style = input.notificationStyle as Exclude<NotifStyle, "silent">;
+  const planned: PlannedNotification[] = [];
+
+  input.appointments.forEach((appt) => {
+    if (appt.allDay || appt.reminderMinsBefore === undefined || !appt.startTime) return;
+    const { hour, minute } = parseHM(appt.startTime);
+    const at = new Date(`${appt.date}T00:00:00`);
+    at.setHours(hour, minute - appt.reminderMinsBefore, 0, 0);
+    if (at.getTime() <= now.getTime()) return;
+    planned.push({
+      id: hashId(`appt:${appt.id}`),
+      title: appt.title,
+      body: leadTimeCopy(appt.reminderMinsBefore, style),
+      href: "/planner",
+      time: { kind: "once", at },
+    });
+  });
+
+  input.tasks.forEach((task) => {
+    if (task.isRecurring) return;
+    if (task.status === "done" || task.status === "skipped") return;
+    if (task.reminderMinsBefore === undefined || !task.dueDate) return;
+    const { hour, minute } = parseHM(task.startTime || "09:00");
+    const at = new Date(`${task.dueDate}T00:00:00`);
+    at.setHours(hour, minute - task.reminderMinsBefore, 0, 0);
+    if (at.getTime() <= now.getTime()) return;
+    planned.push({
+      id: hashId(`task:${task.id}`),
+      title: task.title,
+      body: leadTimeCopy(task.reminderMinsBefore, style),
+      href: "/planner",
+      time: { kind: "once", at },
+    });
+  });
+
+  return planned;
+}
+
+function planNotifications(input: NativeSyncInput, now: Date): PlannedNotification[] {
   const style = input.notificationStyle as Exclude<NotifStyle, "silent">;
   const planned: PlannedNotification[] = [];
 
@@ -288,8 +355,7 @@ function planNotifications(input: NativeSyncInput): PlannedNotification[] {
         title: copy.title,
         body: style === "cheerleader" ? copy.cheer : copy.gentle,
         href: copy.href,
-        hour,
-        minute,
+        time: { kind: "daily", hour, minute },
       });
     });
   });
@@ -305,8 +371,7 @@ function planNotifications(input: NativeSyncInput): PlannedNotification[] {
           ? `You're on a ${input.streak}-day streak. Open NeuroCompass to keep it alive.`
           : `${input.streak} days and counting. No pressure to check in today.`,
       href: "/",
-      hour,
-      minute,
+      time: { kind: "daily", hour, minute },
     });
   }
 
@@ -331,13 +396,12 @@ function planNotifications(input: NativeSyncInput): PlannedNotification[] {
             ? `Time to take ${m.name} \u{1F48A}`
             : `A reminder to take ${m.name}, whenever you're ready.`,
         href: "/me",
-        hour,
-        minute,
+        time: { kind: "daily", hour, minute },
       });
     });
   });
 
-  return planned;
+  return [...planned, ...planOneTimeNotifications(input, now)];
 }
 
 /**
@@ -396,7 +460,7 @@ export async function syncNativeNotifications(input: NativeSyncInput): Promise<v
     return;
   }
 
-  const planned = planNotifications(input);
+  const planned = planNotifications(input, new Date());
   if (planned.length === 0) return;
 
   try {
@@ -406,7 +470,10 @@ export async function syncNativeNotifications(input: NativeSyncInput): Promise<v
         title: p.title,
         body: p.body,
         channelId: CHANNEL_ID,
-        schedule: { on: { hour: p.hour, minute: p.minute }, allowWhileIdle: true },
+        schedule:
+          p.time.kind === "daily"
+            ? { on: { hour: p.time.hour, minute: p.time.minute }, allowWhileIdle: true }
+            : { at: p.time.at, allowWhileIdle: true },
         extra: { href: p.href },
         group: NOTIFICATION_GROUP,
         // isExactNotification defaults to true, and on Android 12+ that means
@@ -421,6 +488,7 @@ export async function syncNativeNotifications(input: NativeSyncInput): Promise<v
         // request inexact scheduling outright - still Doze-resistant via
         // allowWhileIdle, still fires within a few minutes of the target time,
         // and never depends on a permission we've never asked for or explained.
+        // Applies equally to one-time appointment/task reminders below.
         isExactNotification: false,
       })),
     }), "schedule()");
