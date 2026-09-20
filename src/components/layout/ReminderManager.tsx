@@ -167,22 +167,35 @@ export default function ReminderManager() {
     // re-popped the same banner every time the app was opened, all day. Taking
     // the dose still clears it immediately as before; this only stops it from
     // re-announcing itself when nothing has changed.
+    //
+    // The "shown" key deliberately includes the reminder's current time,
+    // unlike the "taken" key (which must stay id/slot-only to match
+    // toggleMedicationTaken's format - "taken" means the dose is done for the
+    // slot regardless of what time it was originally due). Editing a
+    // medication's time later in the day - the user missed the morning dose
+    // and wants a nudge this afternoon instead, or a tester retiming it to
+    // verify the reminder still works - used to stay permanently gated by the
+    // OLD time's "already shown today" flag, since the key never changed.
     const takenToday = medicationTakenDates[today] ?? [];
     const shownToday = medicationReminderShownDates[today] ?? [];
     const dueMedIds: string[] = [];
     const newlyShownKeys: string[] = [];
     medicationReminders.forEach((m) => {
-      const slotKeys =
+      const slots: { takenKey: string; shownKey: string; time: string }[] =
         m.schedule === "both"
           ? [
-              ...(isTimePast(m.time) ? [`${m.id}-morning`] : []),
-              ...(m.eveningTime && isTimePast(m.eveningTime) ? [`${m.id}-evening`] : []),
+              { takenKey: `${m.id}-morning`, shownKey: `${m.id}-morning:${m.time}`, time: m.time },
+              ...(m.eveningTime
+                ? [{ takenKey: `${m.id}-evening`, shownKey: `${m.id}-evening:${m.eveningTime}`, time: m.eveningTime }]
+                : []),
             ]
-          : isTimePast(m.time) ? [m.id] : [];
-      const newlyDue = slotKeys.filter((k) => !takenToday.includes(k) && !shownToday.includes(k));
+          : [{ takenKey: m.id, shownKey: `${m.id}:${m.time}`, time: m.time }];
+      const newlyDue = slots.filter(
+        (s) => isTimePast(s.time) && !takenToday.includes(s.takenKey) && !shownToday.includes(s.shownKey)
+      );
       if (newlyDue.length > 0) {
         dueMedIds.push(m.id);
-        newlyShownKeys.push(...newlyDue);
+        newlyShownKeys.push(...newlyDue.map((s) => s.shownKey));
       }
     });
     if (dueMedIds.length > 0) {
