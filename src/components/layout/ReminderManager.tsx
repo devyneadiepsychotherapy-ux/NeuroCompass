@@ -340,87 +340,97 @@ export default function ReminderManager() {
   const style: Exclude<NotifStyle, "silent"> = notificationStyle === "silent" ? "gentle" : notificationStyle;
   const streakCfg = STREAK_CONFIG[style];
 
+  // Streak, check-in groups, and medication reminders used to each render as their
+  // own floating card - fine when only one was due, but opening the app once and
+  // finding every category whose time already passed today all due at once (a
+  // normal way to use the app, not an edge case) meant up to 4 separate cards
+  // stacked on top of each other. Flattening everything due into one list and
+  // rendering it as rows inside a SINGLE shared card fixes the stacking while
+  // keeping each row's own look, and its own independent Go/dismiss, unchanged -
+  // the single-reminder case below renders identically to before.
+  const dueItems: {
+    key: string;
+    Icon: React.ElementType;
+    iconBg: string;
+    iconColor: string;
+    title: string;
+    body: string;
+    onGo: () => void;
+    onDismiss: () => void;
+  }[] = [];
+
+  if (showStreakBanner) {
+    dueItems.push({
+      key: "streak",
+      Icon: Flame,
+      iconBg: "bg-terracotta-100",
+      iconColor: "text-terracotta-600",
+      title: streakCfg.title,
+      body: streakCfg.body(streak),
+      onGo: () => { setShowStreakBanner(false); router.push("/"); },
+      onDismiss: () => setShowStreakBanner(false),
+    });
+  }
+
+  groupBanners(banners, style).forEach((group) => {
+    dueItems.push({
+      key: group.key,
+      Icon: group.Icon,
+      iconBg: "bg-sage-100",
+      iconColor: "text-sage-600",
+      title: group.title,
+      body: group.body,
+      onGo: () => {
+        setBanners((b) => b.filter((t) => !group.types.includes(t)));
+        router.push(group.href);
+      },
+      onDismiss: () => setBanners((b) => b.filter((t) => !group.types.includes(t))),
+    });
+  });
+
+  if (medBanners.length > 0) {
+    dueItems.push({
+      key: "medication",
+      Icon: Pill,
+      iconBg: "bg-sage-100",
+      iconColor: "text-sage-600",
+      title: "Medication reminder",
+      body:
+        medBanners.length === 1
+          ? medicationReminders.find((m) => m.id === medBanners[0])?.name ?? "Medication"
+          : `${medBanners.length} medications to take`,
+      onGo: () => { setMedBanners([]); router.push("/me"); },
+      onDismiss: () => setMedBanners([]),
+    });
+  }
+
   return (
-    <div className="fixed top-4 left-4 right-4 z-50 space-y-2 max-w-sm mx-auto">
-      {showStreakBanner && (
-        <div className="flex items-center gap-3 bg-white rounded-2xl shadow-xl border border-sage-200 px-4 py-3">
-          <div className="w-9 h-9 rounded-xl bg-terracotta-100 flex items-center justify-center shrink-0">
-            <Flame size={17} className="text-terracotta-600" />
+    <div className="fixed top-4 left-4 right-4 z-50 max-w-sm mx-auto">
+      <div className="bg-white rounded-2xl shadow-xl border border-sage-200 divide-y divide-sage-100 overflow-hidden">
+        {dueItems.map((item) => (
+          <div key={item.key} className="flex items-center gap-3 px-4 py-3">
+            <div className={`w-9 h-9 rounded-xl ${item.iconBg} flex items-center justify-center shrink-0`}>
+              <item.Icon size={17} className={item.iconColor} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-bold text-slate-800">{item.title}</p>
+              <p className="text-xs text-slate-500 mt-0.5">{item.body}</p>
+            </div>
+            <button
+              onClick={item.onGo}
+              className="text-xs font-semibold text-sage-600 underline underline-offset-2 shrink-0"
+            >
+              Go
+            </button>
+            <button
+              onClick={item.onDismiss}
+              className="text-slate-300 hover:text-slate-500 transition-colors shrink-0"
+            >
+              <X size={14} />
+            </button>
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold text-slate-800">{streakCfg.title}</p>
-            <p className="text-xs text-slate-500 mt-0.5">{streakCfg.body(streak)}</p>
-          </div>
-          <button
-            onClick={() => { setShowStreakBanner(false); router.push("/"); }}
-            className="text-xs font-semibold text-sage-600 underline underline-offset-2 shrink-0"
-          >
-            Go
-          </button>
-          <button
-            onClick={() => setShowStreakBanner(false)}
-            className="text-slate-300 hover:text-slate-500 transition-colors shrink-0"
-          >
-            <X size={14} />
-          </button>
-        </div>
-      )}
-      {groupBanners(banners, style).map((group) => (
-        <div
-          key={group.key}
-          className="flex items-center gap-3 bg-white rounded-2xl shadow-xl border border-sage-200 px-4 py-3"
-        >
-          <div className="w-9 h-9 rounded-xl bg-sage-100 flex items-center justify-center shrink-0">
-            <group.Icon size={17} className="text-sage-600" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold text-slate-800">{group.title}</p>
-            <p className="text-xs text-slate-500 mt-0.5">{group.body}</p>
-          </div>
-          <button
-            onClick={() => {
-              setBanners((b) => b.filter((t) => !group.types.includes(t)));
-              router.push(group.href);
-            }}
-            className="text-xs font-semibold text-sage-600 underline underline-offset-2 shrink-0"
-          >
-            Go
-          </button>
-          <button
-            onClick={() => setBanners((b) => b.filter((t) => !group.types.includes(t)))}
-            className="text-slate-300 hover:text-slate-500 transition-colors shrink-0"
-          >
-            <X size={14} />
-          </button>
-        </div>
-      ))}
-      {medBanners.length > 0 && (
-        <div className="flex items-center gap-3 bg-white rounded-2xl shadow-xl border border-sage-200 px-4 py-3">
-          <div className="w-9 h-9 rounded-xl bg-sage-100 flex items-center justify-center shrink-0">
-            <Pill size={17} className="text-sage-600" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold text-slate-800">Medication reminder</p>
-            <p className="text-xs text-slate-500 mt-0.5">
-              {medBanners.length === 1
-                ? medicationReminders.find((m) => m.id === medBanners[0])?.name ?? "Medication"
-                : `${medBanners.length} medications to take`}
-            </p>
-          </div>
-          <button
-            onClick={() => { setMedBanners([]); router.push("/me"); }}
-            className="text-xs font-semibold text-sage-600 underline underline-offset-2 shrink-0"
-          >
-            Go
-          </button>
-          <button
-            onClick={() => setMedBanners([])}
-            className="text-slate-300 hover:text-slate-500 transition-colors shrink-0"
-          >
-            <X size={14} />
-          </button>
-        </div>
-      )}
+        ))}
+      </div>
     </div>
   );
 }
