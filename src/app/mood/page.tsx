@@ -18,6 +18,7 @@ import {
   Bell,
   Plus,
   X,
+  Check,
   BookOpen,
   type LucideIcon,
 } from "lucide-react";
@@ -494,11 +495,28 @@ export default function MoodPage() {
   const [areaDescriptions, setAreaDescriptions] = useState<Record<string, string>>({});
   const [bodyNotes, setBodyNotes] = useState("");
   const [notes, setNotes] = useState("");
+  const [addingCustomEmotion, setAddingCustomEmotion] = useState(false);
+  const [customEmotionInput, setCustomEmotionInput] = useState("");
 
   const toggleEmotion = (e: string) => {
     setSelectedEmotions(prev =>
       prev.includes(e) ? prev.filter(x => x !== e) : [...prev, e]
     );
+  };
+
+  // Emotions typed in by hand rather than picked from the quadrant grid. Kept
+  // in the same selectedEmotions array as everything else - MoodEntry.emotions
+  // is a plain string[] with no fixed enum, so a custom word needs nothing
+  // beyond being added to that same list to be saved and shown everywhere
+  // presets already are.
+  const addCustomEmotion = () => {
+    const trimmed = customEmotionInput.trim();
+    if (!trimmed) { setAddingCustomEmotion(false); return; }
+    setSelectedEmotions(prev =>
+      prev.some(x => x.toLowerCase() === trimmed.toLowerCase()) ? prev : [...prev, trimmed]
+    );
+    setCustomEmotionInput("");
+    setAddingCustomEmotion(false);
   };
 
   const toggleArea = (a: string) => {
@@ -865,6 +883,56 @@ export default function MoodPage() {
                     {name}
                   </button>
                 ))}
+              </div>
+            </div>
+            {/* Custom / other - MoodEntry.emotions is a plain string[] with no
+                fixed list, so anything typed here saves and displays exactly
+                like a preset. Not placed in the grid above since a typed word
+                has no known energy/pleasantness coordinates to bucket it by. */}
+            <div className="mt-2 bg-cream-50 rounded-2xl p-3 border border-slate-200">
+              <p className="text-xs font-semibold text-slate-500 mb-2">Other</p>
+              <div className="flex flex-wrap gap-1.5 items-center">
+                {selectedEmotions
+                  .filter((name) => !Object.keys(emotions).some((k) => k.toLowerCase() === name.toLowerCase()))
+                  .map((name) => (
+                    <button key={name} onClick={() => toggleEmotion(name)}
+                      className="text-xs px-2 py-1 rounded-full transition-all bg-sage-500 text-white">
+                      {name}
+                    </button>
+                  ))}
+                {addingCustomEmotion ? (
+                  <div className="flex items-center gap-1">
+                    <input
+                      type="text"
+                      autoFocus
+                      value={customEmotionInput}
+                      onChange={(e) => setCustomEmotionInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") addCustomEmotion();
+                        if (e.key === "Escape") { setAddingCustomEmotion(false); setCustomEmotionInput(""); }
+                      }}
+                      placeholder="Type an emotion..."
+                      className="text-xs px-2.5 py-1 rounded-full border border-sage-300 focus:outline-none focus:ring-1 focus:ring-sage-400 w-32"
+                    />
+                    <button onClick={addCustomEmotion} aria-label="Add emotion" className="text-sage-600 shrink-0 p-0.5">
+                      <Check size={14} />
+                    </button>
+                    <button
+                      onClick={() => { setAddingCustomEmotion(false); setCustomEmotionInput(""); }}
+                      aria-label="Cancel"
+                      className="text-slate-400 shrink-0 p-0.5"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setAddingCustomEmotion(true)}
+                    className="text-xs px-2 py-1 rounded-full transition-all bg-cream-50 text-slate-500 border border-dashed border-slate-300 flex items-center gap-1"
+                  >
+                    <Plus size={11} /> Add your own
+                  </button>
+                )}
               </div>
             </div>
           </div>
