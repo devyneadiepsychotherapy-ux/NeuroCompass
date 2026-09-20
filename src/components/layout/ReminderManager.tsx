@@ -120,10 +120,10 @@ function isTimePast(time: string): boolean {
 
 export default function ReminderManager() {
   const {
-    checkInReminders, markReminderNotified, setReminderPermissionState,
-    streakReminder, markStreakReminderNotified, streak,
+    checkInReminders, setReminderPermissionState,
+    streakReminder, streak,
     medicationReminders, medicationTakenDates,
-    medicationReminderShownDates, markMedicationReminderShown,
+    medicationReminderShownDates,
     notificationStyle, _hasHydrated,
     appointments, tasks,
   } = useAppStore();
@@ -146,7 +146,21 @@ export default function ReminderManager() {
   // dismissing the visible item naturally reveals the next one in its place.
   const [activeIndex, setActiveIndex] = useState(0);
 
+  // Reads live store state via getState() rather than the checkInReminders /
+  // medicationReminders / etc. destructured above. Those are only fresh as of
+  // whatever render created THIS closure - the mount effect below registers
+  // its visibilitychange listener once (deps: [mounted]) and never again, so
+  // that listener permanently wraps the checkReminders defined during the
+  // very first render. Every later app-foreground event was calling that
+  // frozen closure, which still saw the pre-hydration/pre-mark snapshot of
+  // "have I shown this today" - so a reminder correctly marked notified minutes
+  // earlier would look undecided again on every subsequent foreground,
+  // re-showing the same banner indefinitely. getState() sidesteps the
+  // staleness entirely by reading the store directly at call time instead of
+  // trusting whatever this function's lexical scope captured.
   function checkReminders() {
+    const store = useAppStore.getState();
+    const { notificationStyle, checkInReminders, medicationTakenDates, medicationReminderShownDates, medicationReminders, streakReminder, streak } = store;
     if (notificationStyle === "silent") return;
     const style = notificationStyle as Exclude<NotifStyle, "silent">;
 
@@ -192,16 +206,16 @@ export default function ReminderManager() {
             ]
           : [{ takenKey: m.id, shownKey: `${m.id}:${m.time}`, time: m.time }];
       const newlyDue = slots.filter(
-        (s) => isTimePast(s.time) && !takenToday.includes(s.takenKey) && !shownToday.includes(s.shownKey)
+        (slot) => isTimePast(slot.time) && !takenToday.includes(slot.takenKey) && !shownToday.includes(slot.shownKey)
       );
       if (newlyDue.length > 0) {
         dueMedIds.push(m.id);
-        newlyShownKeys.push(...newlyDue.map((s) => s.shownKey));
+        newlyShownKeys.push(...newlyDue.map((slot) => slot.shownKey));
       }
     });
     if (dueMedIds.length > 0) {
       setMedBanners(dueMedIds);
-      markMedicationReminderShown(newlyShownKeys, today);
+      store.markMedicationReminderShown(newlyShownKeys, today);
     }
 
     // Streak morning reminder
@@ -226,7 +240,7 @@ export default function ReminderManager() {
               tag: `checkin-${type}-${t}`,
             });
           } catch { /* fallback below */ }
-          markReminderNotified(type, t, today);
+          store.markReminderNotified(type, t, today);
         });
       });
 
@@ -240,7 +254,7 @@ export default function ReminderManager() {
             tag: "streak-reminder",
           });
         } catch { /* fallback below */ }
-        markStreakReminderNotified(today);
+        store.markStreakReminderNotified(today);
       }
     } else {
       // In-app banners
@@ -250,14 +264,14 @@ export default function ReminderManager() {
           const r = checkInReminders[type];
           r.times.forEach((t) => {
             if (isTimePast(t) && r.lastNotifiedDates[t] !== today) {
-              markReminderNotified(type, t, today);
+              store.markReminderNotified(type, t, today);
             }
           });
         });
       }
       if (streakDue) {
         setShowStreakBanner(true);
-        markStreakReminderNotified(today);
+        store.markStreakReminderNotified(today);
       }
     }
   }
