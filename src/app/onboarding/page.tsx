@@ -10,6 +10,7 @@ import {
   ShoppingBag, CalendarDays, User, Bell, BellRing, BellOff,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { NotificationPermissionBanner } from "@/components/NotificationPermissionBanner";
 
 // ---------------------------------------------------------------------------
 // Avatar options
@@ -526,6 +527,121 @@ function StepNotification({
 }
 
 // ---------------------------------------------------------------------------
+// Step 5: Reminders
+// ---------------------------------------------------------------------------
+
+/**
+ * The notification-style step above only sets the overall tone (cheerleader/
+ * gentle); nothing during onboarding previously let someone actually turn a
+ * reminder ON. Turning it on was left to whenever someone happened to find
+ * the Reminders accordion in Check-In or Settings, which most people never
+ * would. Deliberately small - just the two reminders with existing simple
+ * single-time infrastructure (mood check-in, streak) - not medication, which
+ * has its own dedicated setup flow, and not tasks, since none exist yet at
+ * this point in onboarding. Skipped entirely when the previous step chose
+ * Silent, since offering to schedule reminders right after "no notifications"
+ * would contradict the choice just made.
+ */
+function StepReminders({ onNext, onSkip }: { onNext: () => void; onSkip: () => void }) {
+  const { checkInReminders, updateCheckInReminder, streakReminder, updateStreakReminder } = useAppStore();
+  const moodEnabled = checkInReminders.mood.enabled;
+  const moodTime = checkInReminders.mood.times[0] ?? "09:00";
+
+  return (
+    <div className="flex flex-col min-h-screen px-6 py-16">
+      <div className="max-w-sm mx-auto w-full flex flex-col gap-5">
+        <h2 className="text-2xl font-bold text-slate-800 leading-tight">Want a nudge?</h2>
+        <p className="text-sm text-slate-500 leading-relaxed -mt-2">
+          Turn on whichever reminders would actually help. You can add more, or change these, later in Settings.
+        </p>
+
+        <div className={cn(
+          "rounded-2xl border p-4 space-y-3 transition-all",
+          moodEnabled ? "bg-sage-50 border-sage-300" : "bg-cream-50 border-slate-200"
+        )}>
+          <div className="flex items-center gap-3">
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-slate-700">Daily mood check-in</p>
+              <p className="text-xs text-slate-400">A gentle nudge to check in with yourself</p>
+            </div>
+            <button
+              onClick={() => updateCheckInReminder("mood", { enabled: !moodEnabled, times: [moodTime] })}
+              className={cn(
+                "w-11 h-6 rounded-full transition-all shrink-0 relative",
+                moodEnabled ? "bg-sage-500" : "bg-slate-200"
+              )}
+            >
+              <span className={cn(
+                "absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all",
+                moodEnabled ? "left-5" : "left-0.5"
+              )} />
+            </button>
+          </div>
+          {moodEnabled && (
+            <div className="flex items-center gap-3 pt-1 border-t border-sage-200">
+              <p className="text-xs text-slate-500 flex-1">Reminder time</p>
+              <input
+                type="time"
+                value={moodTime}
+                onChange={(e) => updateCheckInReminder("mood", { times: [e.target.value] })}
+                className="text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-sage-400"
+              />
+            </div>
+          )}
+        </div>
+
+        <div className={cn(
+          "rounded-2xl border p-4 space-y-3 transition-all",
+          streakReminder.enabled ? "bg-sage-50 border-sage-300" : "bg-cream-50 border-slate-200"
+        )}>
+          <div className="flex items-center gap-3">
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-slate-700">Streak reminder</p>
+              <p className="text-xs text-slate-400">A nudge to keep your streak going</p>
+            </div>
+            <button
+              onClick={() => updateStreakReminder({ enabled: !streakReminder.enabled })}
+              className={cn(
+                "w-11 h-6 rounded-full transition-all shrink-0 relative",
+                streakReminder.enabled ? "bg-sage-500" : "bg-slate-200"
+              )}
+            >
+              <span className={cn(
+                "absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all",
+                streakReminder.enabled ? "left-5" : "left-0.5"
+              )} />
+            </button>
+          </div>
+          {streakReminder.enabled && (
+            <div className="flex items-center gap-3 pt-1 border-t border-sage-200">
+              <p className="text-xs text-slate-500 flex-1">Reminder time</p>
+              <input
+                type="time"
+                value={streakReminder.time}
+                onChange={(e) => updateStreakReminder({ time: e.target.value })}
+                className="text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-sage-400"
+              />
+            </div>
+          )}
+        </div>
+
+        {(moodEnabled || streakReminder.enabled) && <NotificationPermissionBanner />}
+
+        <button
+          onClick={onNext}
+          className="w-full bg-sage-600 hover:bg-sage-700 active:scale-[0.98] text-white font-semibold text-base py-4 rounded-2xl shadow-md transition-all"
+        >
+          Next
+        </button>
+        <button onClick={onSkip} className="text-sm text-slate-400 hover:text-slate-600 transition-colors text-center py-1">
+          Skip for now
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Step 6: First task
 // ---------------------------------------------------------------------------
 
@@ -731,7 +847,7 @@ function StepFirstHabit({ onFinish, onSkip }: { onFinish: () => void; onSkip: ()
 function ProgressDots({ step }: { step: number }) {
   return (
     <div className="fixed top-14 left-0 right-0 flex justify-center gap-1.5 pt-3 z-10">
-      {[1, 2, 3, 4, 5, 6, 7, 8].map((s) => (
+      {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((s) => (
         <div
           key={s}
           className={cn(
@@ -803,23 +919,27 @@ export default function OnboardingPage() {
         <StepNotification
           selected={notifStyle}
           onSelect={setNotifStyle}
-          onNext={() => setStep(5)}
+          onNext={() => setStep(notifStyle === "silent" ? 6 : 5)}
         />
       )}
 
       {step === 5 && (
-        <StepOverview onNext={() => setStep(6)} onTutorial={startTour} />
+        <StepReminders onNext={() => setStep(6)} onSkip={() => setStep(6)} />
       )}
 
       {step === 6 && (
-        <StepFirstTask onNext={() => setStep(7)} onSkip={() => setStep(7)} />
+        <StepOverview onNext={() => setStep(7)} onTutorial={startTour} />
       )}
 
       {step === 7 && (
-        <StepFirstReward onNext={() => setStep(8)} onSkip={() => setStep(8)} />
+        <StepFirstTask onNext={() => setStep(8)} onSkip={() => setStep(8)} />
       )}
 
       {step === 8 && (
+        <StepFirstReward onNext={() => setStep(9)} onSkip={() => setStep(9)} />
+      )}
+
+      {step === 9 && (
         <StepFirstHabit onFinish={() => finish(name, avatar, notifStyle)} onSkip={() => finish(name, avatar, notifStyle)} />
       )}
     </div>
