@@ -60,9 +60,26 @@ export async function detectNative(): Promise<boolean> {
   return nativeResult;
 }
 
-async function getPlugin() {
-  const mod = await import("@capacitor/local-notifications");
-  return mod.LocalNotifications;
+/**
+ * Capacitor's registerPlugin() wraps every native plugin in a Proxy whose
+ * `get` trap returns a callable stub for ANY property name, including
+ * "then" - so the plugin object is accidentally "thenable". Returning it
+ * directly from an async function (or awaiting it, or Promise.resolve()-ing
+ * it) makes the JS engine treat it as a thenable and call `.then(resolve,
+ * reject)` on it to adopt its state, per the Promise spec. The proxy
+ * interprets that as a call to a native method literally named "then",
+ * which doesn't exist: it throws an exception nobody catches (the
+ * "Uncaught (in promise)" spam seen in adb logcat on every launch) and,
+ * critically, never calls the resolve/reject it was given - so whatever
+ * was awaiting the plugin hangs forever. This was the real cause of every
+ * "Allow does nothing" / "stuck on Requesting..." report: every call site
+ * below does `await` a helper that returned the proxy this way. Getting
+ * the plugin inline, with the import and the property access as two
+ * separate un-awaited statements, means the proxy itself never has a
+ * chance to be treated as a return/await value.
+ */
+async function getPluginModule() {
+  return import("@capacitor/local-notifications");
 }
 
 function mapPerm(display: string): PermState {
@@ -139,7 +156,8 @@ async function assertPluginAvailable(): Promise<void> {
 export async function requestNativePermission(): Promise<PermState> {
   if (!(await detectNative())) return "default";
   await assertPluginAvailable();
-  const LN = await getPlugin();
+  const mod = await getPluginModule();
+  const LN = mod.LocalNotifications;
   const res = await withTimeout(LN.requestPermissions(), "requestPermissions()");
   return mapPerm(res.display);
 }
@@ -171,7 +189,8 @@ export async function checkNativePermission(): Promise<PermState> {
   if (!(await detectNative())) return "default";
   try {
     await assertPluginAvailable();
-    const LN = await getPlugin();
+    const mod = await getPluginModule();
+    const LN = mod.LocalNotifications;
     const res = await withTimeout(LN.checkPermissions(), "checkPermissions()");
     return mapPerm(res.display);
   } catch (e) {
@@ -186,7 +205,8 @@ export async function addNativeTapListener(
 ): Promise<() => void> {
   if (!(await detectNative())) return () => {};
   try {
-    const LN = await getPlugin();
+    const mod = await getPluginModule();
+    const LN = mod.LocalNotifications;
     const handle = await LN.addListener("localNotificationActionPerformed", (action) => {
       const href = action.notification?.extra?.href;
       if (typeof href === "string" && href) onNavigate(href);
@@ -327,10 +347,11 @@ function planNotifications(input: NativeSyncInput): PlannedNotification[] {
 export async function syncNativeNotifications(input: NativeSyncInput): Promise<void> {
   if (!(await detectNative())) return;
 
-  let LN: Awaited<ReturnType<typeof getPlugin>>;
+  let LN: Awaited<ReturnType<typeof getPluginModule>>["LocalNotifications"];
   try {
     await assertPluginAvailable();
-    LN = await getPlugin();
+    const mod = await getPluginModule();
+    LN = mod.LocalNotifications;
   } catch (e) {
     console.error("[nativeNotifications] syncNativeNotifications: plugin unavailable, nothing scheduled", e);
     return;
