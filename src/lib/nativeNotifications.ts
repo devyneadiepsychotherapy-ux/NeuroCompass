@@ -305,100 +305,140 @@ function planOneTimeNotifications(input: NativeSyncInput, now: Date): PlannedNot
   const style = input.notificationStyle as Exclude<NotifStyle, "silent">;
   const planned: PlannedNotification[] = [];
 
+  // Each item's computation is isolated in its own try/catch (see the same
+  // pattern below in planNotifications, and the comment there for why): one
+  // appointment or task with an unexpected/legacy field shape - or a date
+  // string that produces an Invalid Date, which silently passes the plain
+  // `<=` past-due check below since any comparison against NaN is false -
+  // must never be able to take the rest of this sync's scheduling down with
+  // it. isNaN() on the computed time is a second, explicit guard against
+  // that same Invalid Date case slipping through into a native schedule()
+  // call, which Capacitor/Android has no defined behavior for.
   input.appointments.forEach((appt) => {
-    if (appt.allDay || appt.reminderMinsBefore === undefined || !appt.startTime) return;
-    const { hour, minute } = parseHM(appt.startTime);
-    const at = new Date(`${appt.date}T00:00:00`);
-    at.setHours(hour, minute - appt.reminderMinsBefore, 0, 0);
-    if (at.getTime() <= now.getTime()) return;
-    planned.push({
-      id: hashId(`appt:${appt.id}`),
-      title: appt.title,
-      body: leadTimeCopy(appt.reminderMinsBefore, style),
-      href: "/planner",
-      time: { kind: "once", at },
-    });
+    try {
+      if (appt.allDay || appt.reminderMinsBefore === undefined || !appt.startTime) return;
+      const { hour, minute } = parseHM(appt.startTime);
+      const at = new Date(`${appt.date}T00:00:00`);
+      at.setHours(hour, minute - appt.reminderMinsBefore, 0, 0);
+      if (isNaN(at.getTime()) || at.getTime() <= now.getTime()) return;
+      planned.push({
+        id: hashId(`appt:${appt.id}`),
+        title: appt.title,
+        body: leadTimeCopy(appt.reminderMinsBefore, style),
+        href: "/planner",
+        time: { kind: "once", at },
+      });
+    } catch (e) {
+      console.error(`[nativeNotifications] skipping malformed appointment reminder "${appt.title ?? appt.id}"`, e);
+    }
   });
 
   input.tasks.forEach((task) => {
-    if (task.isRecurring) return;
-    if (task.status === "done" || task.status === "skipped") return;
-    if (task.reminderMinsBefore === undefined || !task.dueDate) return;
-    const { hour, minute } = parseHM(task.startTime || "09:00");
-    const at = new Date(`${task.dueDate}T00:00:00`);
-    at.setHours(hour, minute - task.reminderMinsBefore, 0, 0);
-    if (at.getTime() <= now.getTime()) return;
-    planned.push({
-      id: hashId(`task:${task.id}`),
-      title: task.title,
-      body: leadTimeCopy(task.reminderMinsBefore, style),
-      href: "/planner",
-      time: { kind: "once", at },
-    });
+    try {
+      if (task.isRecurring) return;
+      if (task.status === "done" || task.status === "skipped") return;
+      if (task.reminderMinsBefore === undefined || !task.dueDate) return;
+      const { hour, minute } = parseHM(task.startTime || "09:00");
+      const at = new Date(`${task.dueDate}T00:00:00`);
+      at.setHours(hour, minute - task.reminderMinsBefore, 0, 0);
+      if (isNaN(at.getTime()) || at.getTime() <= now.getTime()) return;
+      planned.push({
+        id: hashId(`task:${task.id}`),
+        title: task.title,
+        body: leadTimeCopy(task.reminderMinsBefore, style),
+        href: "/planner",
+        time: { kind: "once", at },
+      });
+    } catch (e) {
+      console.error(`[nativeNotifications] skipping malformed task reminder "${task.title ?? task.id}"`, e);
+    }
   });
 
   return planned;
 }
 
+/**
+ * Every reminder type below is planned independently, each wrapped in its
+ * own try/catch: a single malformed record (a legacy field shape, an
+ * unexpected undefined) must only cost that ONE reminder, never silently
+ * abort every other reminder sharing this same synchronous function. Before
+ * this, one bad record anywhere in check-ins/streak/medication could throw
+ * partway through and prevent planOneTimeNotifications() from ever running
+ * at all - so a perfectly correctly-configured appointment or task reminder
+ * could go permanently unscheduled for a reason that had nothing to do with
+ * it, with nothing but a swallowed exception to show for it.
+ */
 function planNotifications(input: NativeSyncInput, now: Date): PlannedNotification[] {
   const style = input.notificationStyle as Exclude<NotifStyle, "silent">;
   const planned: PlannedNotification[] = [];
 
   (["mood", "body", "full", "thirstHunger"] as const).forEach((type) => {
-    const entry = input.checkInReminders[type];
-    if (!entry?.enabled) return;
-    const copy = CHECKIN_COPY[type];
-    entry.times.forEach((t) => {
-      const { hour, minute } = parseHM(t);
-      planned.push({
-        id: hashId(`checkin:${type}:${t}`),
-        title: copy.title,
-        body: style === "cheerleader" ? copy.cheer : copy.gentle,
-        href: copy.href,
-        time: { kind: "daily", hour, minute },
+    try {
+      const entry = input.checkInReminders[type];
+      if (!entry?.enabled) return;
+      const copy = CHECKIN_COPY[type];
+      entry.times.forEach((t) => {
+        const { hour, minute } = parseHM(t);
+        planned.push({
+          id: hashId(`checkin:${type}:${t}`),
+          title: copy.title,
+          body: style === "cheerleader" ? copy.cheer : copy.gentle,
+          href: copy.href,
+          time: { kind: "daily", hour, minute },
+        });
       });
-    });
+    } catch (e) {
+      console.error(`[nativeNotifications] skipping malformed check-in reminder "${type}"`, e);
+    }
   });
 
-  const sr = input.streakReminder;
-  if (sr?.enabled && input.streak > 0) {
-    const { hour, minute } = parseHM(sr.time);
-    planned.push({
-      id: hashId("streak"),
-      title: style === "cheerleader" ? "Keep your streak going! \u{1F525}" : "Your streak is still here",
-      body:
-        style === "cheerleader"
-          ? `You're on a ${input.streak}-day streak. Open NeuroCompass to keep it alive.`
-          : `${input.streak} days and counting. No pressure to check in today.`,
-      href: "/",
-      time: { kind: "daily", hour, minute },
-    });
+  try {
+    const sr = input.streakReminder;
+    if (sr?.enabled && input.streak > 0) {
+      const { hour, minute } = parseHM(sr.time);
+      planned.push({
+        id: hashId("streak"),
+        title: style === "cheerleader" ? "Keep your streak going! \u{1F525}" : "Your streak is still here",
+        body:
+          style === "cheerleader"
+            ? `You're on a ${input.streak}-day streak. Open NeuroCompass to keep it alive.`
+            : `${input.streak} days and counting. No pressure to check in today.`,
+        href: "/",
+        time: { kind: "daily", hour, minute },
+      });
+    }
+  } catch (e) {
+    console.error("[nativeNotifications] skipping malformed streak reminder", e);
   }
 
   input.medicationReminders.forEach((m) => {
-    const schedule = m.schedule ?? "morning";
-    const slots: Array<{ slot: string; time: string }> = [];
-    if (schedule === "both") {
-      slots.push({ slot: "morning", time: m.time });
-      if (m.eveningTime) slots.push({ slot: "evening", time: m.eveningTime });
-    } else if (schedule === "evening") {
-      slots.push({ slot: "evening", time: m.time });
-    } else {
-      slots.push({ slot: "morning", time: m.time });
-    }
-    slots.forEach(({ slot, time }) => {
-      const { hour, minute } = parseHM(time);
-      planned.push({
-        id: hashId(`med:${m.id}:${slot}`),
-        title: "Medication reminder",
-        body:
-          style === "cheerleader"
-            ? `Time to take ${m.name} \u{1F48A}`
-            : `A reminder to take ${m.name}, whenever you're ready.`,
-        href: "/me",
-        time: { kind: "daily", hour, minute },
+    try {
+      const schedule = m.schedule ?? "morning";
+      const slots: Array<{ slot: string; time: string }> = [];
+      if (schedule === "both") {
+        slots.push({ slot: "morning", time: m.time });
+        if (m.eveningTime) slots.push({ slot: "evening", time: m.eveningTime });
+      } else if (schedule === "evening") {
+        slots.push({ slot: "evening", time: m.time });
+      } else {
+        slots.push({ slot: "morning", time: m.time });
+      }
+      slots.forEach(({ slot, time }) => {
+        const { hour, minute } = parseHM(time);
+        planned.push({
+          id: hashId(`med:${m.id}:${slot}`),
+          title: "Medication reminder",
+          body:
+            style === "cheerleader"
+              ? `Time to take ${m.name} \u{1F48A}`
+              : `A reminder to take ${m.name}, whenever you're ready.`,
+          href: "/me",
+          time: { kind: "daily", hour, minute },
+        });
       });
-    });
+    } catch (e) {
+      console.error(`[nativeNotifications] skipping malformed medication reminder "${m.name ?? m.id}"`, e);
+    }
   });
 
   return [...planned, ...planOneTimeNotifications(input, now)];
