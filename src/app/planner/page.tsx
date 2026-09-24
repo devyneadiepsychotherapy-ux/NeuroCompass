@@ -2,15 +2,16 @@
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
+import { Reorder, useDragControls } from "framer-motion";
 import { useAppStore, defaultTopPriorities } from "@/store/useAppStore";
-import { Task, TaskPriority, RecurType, RewardType, TaskItemType, Appointment, TopPriority, Habit } from "@/types";
+import { Task, TaskPriority, RecurType, RewardType, TaskItemType, Appointment, TopPriority, Habit, SectionVisibility } from "@/types";
 import { getTodayKey, formatMinutes } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import {
   Plus, Check, Trash2, Star, Clock, ChevronDown, ChevronUp, X, Repeat,
   Eye, EyeOff, Flame, CalendarClock, Target, ListTodo, Activity, Coins,
   ChevronLeft, ChevronRight, Calendar, CalendarDays, Pencil, UtensilsCrossed,
-  Pill, Sun, Moon, Bell,
+  Pill, Sun, Moon, Bell, SlidersHorizontal, GripVertical,
 } from "lucide-react";
 
 // ---------------------------------------------------------------------------
@@ -3287,13 +3288,109 @@ function TasksSection({
 }
 
 // ---------------------------------------------------------------------------
+// Planner day-view customize panel (reorder + show/hide)
+// ---------------------------------------------------------------------------
+
+const PLANNER_SECTIONS: { key: keyof SectionVisibility; label: string; desc: string }[] = [
+  { key: "schedule", label: "Schedule",         desc: "Appointments and time-blocks for today" },
+  { key: "top3",     label: "Top 3 Priorities", desc: "Your three must-do items for today" },
+  { key: "tasks",    label: "Tasks",            desc: "Your task list for today" },
+  { key: "habits",   label: "Habits",           desc: "Daily habit tracking" },
+  { key: "meal",     label: "Meal Plan",        desc: "Today's meal plan" },
+];
+
+function PlannerCustomizeRow({ itemKey, label, desc, checked, onToggle }: {
+  itemKey: keyof SectionVisibility;
+  label: string;
+  desc: string;
+  checked: boolean;
+  onToggle: () => void;
+}) {
+  const controls = useDragControls();
+  return (
+    <Reorder.Item value={itemKey} dragListener={false} dragControls={controls} className="flex items-center gap-1 bg-white">
+      <button
+        type="button"
+        onPointerDown={(e) => controls.start(e)}
+        className="p-2 -ml-1 text-slate-300 hover:text-slate-500 cursor-grab active:cursor-grabbing touch-none shrink-0"
+        aria-label={`Drag to reorder ${label}`}
+      >
+        <GripVertical size={16} />
+      </button>
+      <button onClick={onToggle} className="flex-1 flex items-center gap-3 py-3 text-left min-w-0">
+        <div className={cn(
+          "w-5 h-5 rounded flex items-center justify-center shrink-0 border-2 transition-all",
+          checked ? "bg-sage-500 border-sage-500" : "border-slate-300"
+        )}>
+          {checked && <Check size={11} className="text-white" strokeWidth={3} />}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-slate-700">{label}</p>
+          <p className="text-xs text-slate-400">{desc}</p>
+        </div>
+      </button>
+    </Reorder.Item>
+  );
+}
+
+function PlannerCustomizePanel({ visibility, order, onToggle, onReorder, onClose }: {
+  visibility: SectionVisibility;
+  order: (keyof SectionVisibility)[];
+  onToggle: (k: keyof SectionVisibility) => void;
+  onReorder: (order: (keyof SectionVisibility)[]) => void;
+  onClose: () => void;
+}) {
+  const sectionMeta = new Map(PLANNER_SECTIONS.map((s) => [s.key, s] as const));
+  return (
+    <div className="fixed inset-0 z-50 flex items-end" onClick={onClose}>
+      <div
+        className="w-full max-w-sm mx-auto bg-white rounded-t-3xl shadow-2xl border border-slate-200 flex flex-col max-h-[calc(100dvh-80px)]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-slate-100 shrink-0">
+          <div>
+            <p className="text-base font-bold text-slate-800">Customise Planner</p>
+            <p className="text-xs text-slate-400 mt-0.5">Drag to reorder, tap to show or hide</p>
+          </div>
+          <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-slate-600 transition-colors">
+            <X size={18} />
+          </button>
+        </div>
+        <div className="overflow-y-auto px-5 pt-3 pb-24">
+          <Reorder.Group axis="y" values={order} onReorder={onReorder} className="space-y-1">
+            {order.map((key) => {
+              const meta = sectionMeta.get(key);
+              if (!meta) return null;
+              return (
+                <PlannerCustomizeRow
+                  key={key}
+                  itemKey={key}
+                  label={meta.label}
+                  desc={meta.desc}
+                  checked={visibility[key] !== false}
+                  onToggle={() => onToggle(key)}
+                />
+              );
+            })}
+          </Reorder.Group>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Main page
 // ---------------------------------------------------------------------------
 
 export default function PlannerPage() {
-  const { sectionVisibility, toggleSection, streak, tasks, updateTask, completeTask } = useAppStore();
+  const {
+    sectionVisibility, toggleSection, plannerSectionOrder, setPlannerSectionOrder,
+    streak, tasks, updateTask, completeTask,
+  } = useAppStore();
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [showPlannerCustomize, setShowPlannerCustomize] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [activeView, setActiveView] = useState<PlannerView>("day");
   const [selectedDate, setSelectedDate] = useState(() => new Date());
@@ -3320,6 +3417,16 @@ export default function PlannerPage() {
 
   return (
     <div className="px-4 pt-0 pb-10">
+      {mounted && showPlannerCustomize && (
+        <PlannerCustomizePanel
+          visibility={sectionVisibility}
+          order={plannerSectionOrder}
+          onToggle={toggleSection}
+          onReorder={setPlannerSectionOrder}
+          onClose={() => setShowPlannerCustomize(false)}
+        />
+      )}
+
       {/* Header */}
       <div className="pt-3 pb-2">
         <div className="flex items-start justify-between gap-3">
@@ -3333,12 +3440,21 @@ export default function PlannerPage() {
             <p className="text-sm text-slate-500 mt-1">{greeting}, let&apos;s plan your day</p>
           </div>
           <div className="flex flex-col items-end gap-2 shrink-0">
-            <button
-              onClick={() => setShowScheduleModal(true)}
-              className="w-11 h-11 rounded-2xl bg-sage-600 flex items-center justify-center shadow-md hover:bg-sage-700 transition-all active:scale-95"
-            >
-              <Plus size={22} className="text-white" />
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setShowPlannerCustomize(true)}
+                className="p-2 text-slate-400 hover:text-slate-600 transition-colors"
+                aria-label="Customise Planner sections"
+              >
+                <SlidersHorizontal size={18} />
+              </button>
+              <button
+                onClick={() => setShowScheduleModal(true)}
+                className="w-11 h-11 rounded-2xl bg-sage-600 flex items-center justify-center shadow-md hover:bg-sage-700 transition-all active:scale-95"
+              >
+                <Plus size={22} className="text-white" />
+              </button>
+            </div>
             {mounted && streak > 0 && (
               <div className="flex items-center gap-1 bg-terracotta-100 text-terracotta-600 px-2.5 py-1 rounded-full">
                 <Flame size={12} />
@@ -3386,82 +3502,70 @@ export default function PlannerPage() {
             </div>
           )}
 
-          {/* Schedule */}
-          {(!mounted || sectionVisibility.schedule) && (
-            <Section
-              id="schedule"
-              icon={<CalendarClock size={16} />}
-              title="Schedule"
-              onToggle={() => toggleSection("schedule")}
-              card
-            >
-              <ScheduleSection selectedDate={selectedDate} />
-            </Section>
-          )}
+          {/* Reorderable day-view sections */}
+          {plannerSectionOrder.map((key) => {
+            const visible = !mounted || sectionVisibility[key] !== false;
+            if (!visible) return null;
+            switch (key) {
+              case "schedule":
+                return (
+                  <Section key={key} id="schedule" icon={<CalendarClock size={16} />} title="Schedule" onToggle={() => toggleSection("schedule")} card>
+                    <ScheduleSection selectedDate={selectedDate} />
+                  </Section>
+                );
 
-          {/* Top 3 Priorities */}
-          {(!mounted || sectionVisibility.top3) && (
-            <Section
-              id="top3"
-              icon={<Target size={16} />}
-              title="Top 3 Priorities"
-              onToggle={() => toggleSection("top3")}
-              card
-            >
-              <Top3Section date={dateKey(selectedDate)} />
-            </Section>
-          )}
+              case "top3":
+                return (
+                  <Section key={key} id="top3" icon={<Target size={16} />} title="Top 3 Priorities" onToggle={() => toggleSection("top3")} card>
+                    <Top3Section date={dateKey(selectedDate)} />
+                  </Section>
+                );
 
-          {/* Tasks */}
-          {(!mounted || sectionVisibility.tasks) && (
-            <Section
-              id="tasks"
-              icon={<ListTodo size={16} />}
-              title="Tasks"
-              onToggle={() => toggleSection("tasks")}
-              card
-              action={
-                <button
-                  onClick={() => setShowTaskModal(true)}
-                  className="flex items-center gap-1 text-xs text-sage-600 font-medium hover:text-sage-700 transition-all"
-                >
-                  <Plus size={13} />
-                  Add task
-                </button>
-              }
-            >
-              <TasksSection
-                onAddTask={() => setShowTaskModal(true)}
-                activeView={activeView}
-                selectedDate={selectedDate}
-              />
-            </Section>
-          )}
+              case "tasks":
+                return (
+                  <Section
+                    key={key}
+                    id="tasks"
+                    icon={<ListTodo size={16} />}
+                    title="Tasks"
+                    onToggle={() => toggleSection("tasks")}
+                    card
+                    action={
+                      <button
+                        onClick={() => setShowTaskModal(true)}
+                        className="flex items-center gap-1 text-xs text-sage-600 font-medium hover:text-sage-700 transition-all"
+                      >
+                        <Plus size={13} />
+                        Add task
+                      </button>
+                    }
+                  >
+                    <TasksSection
+                      onAddTask={() => setShowTaskModal(true)}
+                      activeView={activeView}
+                      selectedDate={selectedDate}
+                    />
+                  </Section>
+                );
 
-          {/* Habits */}
-          {(!mounted || sectionVisibility.habits) && (
-            <Section
-              id="habits"
-              icon={<Activity size={16} />}
-              title="Habits"
-              onToggle={() => toggleSection("habits")}
-              card
-            >
-              <HabitsSection selectedDate={selectedDate} />
-            </Section>
-          )}
+              case "habits":
+                return (
+                  <Section key={key} id="habits" icon={<Activity size={16} />} title="Habits" onToggle={() => toggleSection("habits")} card>
+                    <HabitsSection selectedDate={selectedDate} />
+                  </Section>
+                );
 
-          {/* Meal Plan */}
-          {(!mounted || sectionVisibility.meal !== false) && (
-            <Section
-              id="meal"
-              icon={<UtensilsCrossed size={16} />}
-              title="Meal Plan"
-              onToggle={() => toggleSection("meal")}
-            >
-              <MealPlanSection selectedDate={selectedDate} />
-            </Section>
-          )}
+              case "meal":
+                return (
+                  <Section key={key} id="meal" icon={<UtensilsCrossed size={16} />} title="Meal Plan" onToggle={() => toggleSection("meal")}>
+                    <MealPlanSection selectedDate={selectedDate} />
+                  </Section>
+                );
+
+              default:
+                return null;
+            }
+          })}
         </>
       )}
 
