@@ -6,7 +6,7 @@ import { TOOL_CATEGORIES, TOOLS, Tool } from "@/lib/tools-data";
 import { ICON_MAP } from "@/lib/icon-map";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/store/useAppStore";
-import { Heart, ChevronRight, MessageCircle, Search, HeartHandshake, ExternalLink, Wrench } from "lucide-react";
+import { Heart, ChevronRight, MessageCircle, Search, HeartHandshake, ExternalLink, Wrench, BookOpen } from "lucide-react";
 import { ToolModal } from "@/components/ToolModal";
 
 // Map category id to a soft background color for the icon container
@@ -391,6 +391,26 @@ function ToolsPageInner() {
             </a>
           ))}
         </div>
+      </div>
+
+      {/* Workbook Promo */}
+      <div className="bg-terracotta-50 rounded-2xl p-5 border border-terracotta-200 space-y-4">
+        <div className="flex items-center gap-2">
+          <BookOpen size={18} className="text-terracotta-600 shrink-0" />
+          <h2 className="text-base font-bold text-slate-800">Want More? Check Out Our Workbooks</h2>
+        </div>
+        <p className="text-sm text-slate-600 leading-relaxed">
+          Explore our neurodivergent-affirming workbook series, built to help ADHD, Autistic, and AuDHD brains build systems that actually fit.
+        </p>
+        <a
+          href="https://www.etsy.com/shop/NeuroCompassShop?ref=seller-platform-mcnav"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 bg-terracotta-600 text-white rounded-xl px-4 py-3 text-sm font-semibold hover:bg-terracotta-700 transition-all active:scale-[0.98]"
+        >
+          Visit Our Etsy Shop
+          <ExternalLink size={14} />
+        </a>
       </div>
 
       {selectedTool && <ToolModal tool={selectedTool} onClose={() => setSelectedTool(null)} />}
