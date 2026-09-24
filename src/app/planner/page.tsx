@@ -10,7 +10,7 @@ import {
   Plus, Check, Trash2, Star, Clock, ChevronDown, ChevronUp, X, Repeat,
   Eye, EyeOff, Flame, CalendarClock, Target, ListTodo, Activity, Coins,
   ChevronLeft, ChevronRight, Calendar, CalendarDays, Pencil, UtensilsCrossed,
-  Pill, Sun, Moon,
+  Pill, Sun, Moon, Bell,
 } from "lucide-react";
 
 // ---------------------------------------------------------------------------
@@ -2646,6 +2646,11 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
 
   const handleSubmit = () => {
     if (!title.trim()) return;
+    // Non-recurring reminders need a due date to count down from; recurring
+    // ones don't (they fire on the recurrence's own days) except "monthly",
+    // which has no native scheduling equivalent at all - see the reminder
+    // section's comments below for why.
+    const canHaveReminder = isRecurring ? recurType !== "monthly" : !!dueDate;
     if (isEditing && taskToEdit) {
       editTask(taskToEdit.id, {
         title: title.trim(),
@@ -2656,8 +2661,8 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
         xpReward: rewardAmount,
         rewardType,
         dueDate: dueDate || undefined,
-        startTime: dueDate && !isRecurring ? (dueTime || undefined) : undefined,
-        reminderMinsBefore: dueDate && !isRecurring ? reminderMins : undefined,
+        startTime: canHaveReminder ? (dueTime || undefined) : undefined,
+        reminderMinsBefore: canHaveReminder ? reminderMins : undefined,
         isRecurring,
         recurType: isRecurring ? recurType : undefined,
         timeEstimate,
@@ -2676,8 +2681,8 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
         xpReward: rewardAmount,
         rewardType,
         dueDate: dueDate || undefined,
-        startTime: dueDate && !isRecurring ? (dueTime || undefined) : undefined,
-        reminderMinsBefore: dueDate && !isRecurring ? reminderMins : undefined,
+        startTime: canHaveReminder ? (dueTime || undefined) : undefined,
+        reminderMinsBefore: canHaveReminder ? reminderMins : undefined,
         isRecurring,
         recurType: isRecurring ? recurType : undefined,
         tags: [],
@@ -2849,9 +2854,10 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
           />
         </div>
 
-        {/* Reminder - a specific date to fire on is required, and a recurring
-            task has no single stable date, so both stay hidden until there's
-            a due date and it isn't recurring. */}
+        {/* Reminder for non-recurring tasks - a specific date to fire on is
+            required, so this stays hidden until there's a due date. Same
+            "X minutes before" model as Appointments, since both are counting
+            down to one fixed event. */}
         {dueDate && !isRecurring && (
           <div className="flex gap-3">
             <div className="flex-1">
@@ -2878,6 +2884,46 @@ function AddTaskModal({ onClose, taskToEdit }: { onClose: () => void; taskToEdit
               </select>
             </div>
           </div>
+        )}
+
+        {/* Reminder for recurring tasks - there's no single date to count
+            down to, so this just fires AT a time on whichever day(s) the
+            task recurs, the same daily-repeating rhythm check-in and
+            medication reminders already use. Hidden for "monthly": a task
+            pinned to e.g. "2nd Tuesday" has no native repeating-alarm
+            equivalent (see recurringTaskWeekdays() in nativeNotifications.ts)
+            - offering a toggle that could never actually fire would be worse
+            than not offering one. */}
+        {isRecurring && recurType !== "monthly" && (
+          <div className="flex gap-3 items-end">
+            <div className="flex-1">
+              <label className="block text-xs text-slate-400 mb-1">Reminder time</label>
+              <input
+                type="time"
+                className="w-full min-h-[44px] border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sage-400"
+                value={dueTime}
+                onChange={(e) => setDueTime(e.target.value)}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => setReminderMins(reminderMins === undefined ? 0 : undefined)}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2.5 min-h-[44px] rounded-xl text-sm font-medium transition-all border shrink-0",
+                reminderMins !== undefined
+                  ? "bg-sage-100 text-sage-700 border-sage-300"
+                  : "bg-slate-100 text-slate-600 border-transparent"
+              )}
+            >
+              <Bell size={15} />
+              {reminderMins !== undefined ? "Reminder on" : "No reminder"}
+            </button>
+          </div>
+        )}
+        {isRecurring && recurType === "weekly" && !dueDate && reminderMins !== undefined && (
+          <p className="text-xs text-terracotta-600 -mt-2">
+            Add a due date above so the reminder knows which day of the week to fire on.
+          </p>
         )}
 
         {/* Recurring */}

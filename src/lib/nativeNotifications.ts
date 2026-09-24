@@ -272,7 +272,10 @@ const CHECKIN_COPY: Record<
 };
 
 type NotificationTime =
-  | { kind: "daily"; hour: number; minute: number }
+  // weekday, when present, is a Capacitor Weekday value (1=Sun...7=Sat) - see
+  // recurringTaskWeekdays() below for why this differs from Task.recurDays'
+  // own 0=Sun...6=Sat convention.
+  | { kind: "daily"; hour: number; minute: number; weekday?: number }
   | { kind: "once"; at: Date };
 
 interface PlannedNotification {
@@ -355,6 +358,44 @@ function planOneTimeNotifications(input: NativeSyncInput, now: Date): PlannedNot
   });
 
   return planned;
+}
+
+/**
+ * Which day(s) a recurring task's daily-repeating reminder should fire on,
+ * as Capacitor Weekday values (1=Sun...7=Sat - note this is NOT the same
+ * convention as Task.recurDays, which is 0=Sun...6=Sat, so "custom" needs a
+ * +1 conversion below). Returns:
+ * - [] for "fires every day, no weekday filter needed" (daily)
+ * - a non-empty array for "fires only on these specific weekdays"
+ * - null for "cannot determine a sensible day(s) to fire on for this task,
+ *   don't schedule a reminder at all" - true for "monthly" outright (a task
+ *   pinned to e.g. "2nd Tuesday of the month" has no native construct for
+ *   that; Capacitor's `on.day` is a fixed day-of-month, which would misfire
+ *   on any month where the Nth-weekday lands on a different date), and for
+ *   "weekly" specifically when the task has no dueDate to anchor to (weekly
+ *   tasks are otherwise satisfied by completion anywhere in the calendar
+ *   week - see isTaskDone in planner/page.tsx - not tied to one weekday, so
+ *   there's nothing to derive a fire day from without one).
+ */
+function recurringTaskWeekdays(task: Task): number[] | null {
+  switch (task.recurType) {
+    case "daily":
+      return [];
+    case "weekdays":
+      return [2, 3, 4, 5, 6]; // Mon-Fri
+    case "weekends":
+      return [1, 7]; // Sun, Sat
+    case "custom":
+      return (task.recurDays ?? []).map((d) => d + 1);
+    case "weekly": {
+      if (!task.dueDate) return null;
+      const day = new Date(`${task.dueDate}T12:00:00`).getDay();
+      return isNaN(day) ? null : [day + 1];
+    }
+    case "monthly":
+    default:
+      return null;
+  }
 }
 
 /**
@@ -441,6 +482,48 @@ function planNotifications(input: NativeSyncInput, now: Date): PlannedNotificati
     }
   });
 
+  // Recurring tasks: same daily-repeating rhythm as check-ins/medication above,
+  // not the one-time schedule.at path planOneTimeNotifications() uses for
+  // appointments and non-recurring tasks - a recurring task has no single
+  // date to fire once on. reminderMinsBefore is reused purely as an enabled
+  // flag here (its "before" framing doesn't apply to a task that isn't
+  // counting down to a fixed event) - the reminder always fires exactly at
+  // startTime, on whichever day(s) recurringTaskWeekdays() resolves.
+  input.tasks.forEach((task) => {
+    try {
+      if (!task.isRecurring) return;
+      if (task.reminderMinsBefore === undefined || !task.startTime) return;
+      const weekdays = recurringTaskWeekdays(task);
+      if (weekdays === null) return;
+      const { hour, minute } = parseHM(task.startTime);
+      const body =
+        style === "cheerleader"
+          ? `Time for: ${task.title} \u{2705}`
+          : `A reminder for: ${task.title}, whenever you're ready.`;
+      if (weekdays.length === 0) {
+        planned.push({
+          id: hashId(`recurtask:${task.id}`),
+          title: task.title,
+          body,
+          href: "/planner",
+          time: { kind: "daily", hour, minute },
+        });
+      } else {
+        weekdays.forEach((weekday) => {
+          planned.push({
+            id: hashId(`recurtask:${task.id}:${weekday}`),
+            title: task.title,
+            body,
+            href: "/planner",
+            time: { kind: "daily", hour, minute, weekday },
+          });
+        });
+      }
+    } catch (e) {
+      console.error(`[nativeNotifications] skipping malformed recurring task reminder "${task.title ?? task.id}"`, e);
+    }
+  });
+
   return [...planned, ...planOneTimeNotifications(input, now)];
 }
 
@@ -512,7 +595,7 @@ export async function syncNativeNotifications(input: NativeSyncInput): Promise<v
         channelId: CHANNEL_ID,
         schedule:
           p.time.kind === "daily"
-            ? { on: { hour: p.time.hour, minute: p.time.minute }, allowWhileIdle: true }
+            ? { on: { hour: p.time.hour, minute: p.time.minute, weekday: p.time.weekday }, allowWhileIdle: true }
             : { at: p.time.at, allowWhileIdle: true },
         extra: { href: p.href },
         group: NOTIFICATION_GROUP,
