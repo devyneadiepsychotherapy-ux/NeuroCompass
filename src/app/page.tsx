@@ -1,7 +1,6 @@
 "use client";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Reorder, useDragControls } from "framer-motion";
 import { useAppStore } from "@/store/useAppStore";
 import { getTodayKey, xpForLevel } from "@/lib/utils";
 import { TOOLS, Tool } from "@/lib/tools-data";
@@ -11,7 +10,7 @@ import Link from "next/link";
 import {
   Heart, Star, Zap, Flame, Sparkles, Brain, ChevronRight,
   Wind, Shuffle, X, PersonStanding, Snowflake,
-  HeartHandshake, ExternalLink, SlidersHorizontal, Check, Pill, Sun, Moon, GripVertical,
+  HeartHandshake, ExternalLink, SlidersHorizontal, Check, Pill, Sun, Moon,
 } from "lucide-react";
 import { ICON_MAP } from "@/lib/icon-map";
 import { cn } from "@/lib/utils";
@@ -142,8 +141,8 @@ function FreezeSavedBanner({ onDismiss }: { onDismiss: () => void }) {
 // Streak card
 // ---------------------------------------------------------------------------
 
-function StreakCard({ streak, longestStreak, streakFreezes }: {
-  streak: number; longestStreak: number; streakFreezes: number;
+function StreakCard({ streak, longestStreak, streakFreezes, quote }: {
+  streak: number; longestStreak: number; streakFreezes: number; quote?: string;
 }) {
   return (
     <div className="rounded-3xl overflow-hidden relative" style={{ background: "linear-gradient(135deg, var(--color-cream-50) 0%, var(--color-cream-100) 100%)" }}>
@@ -164,6 +163,12 @@ function StreakCard({ streak, longestStreak, streakFreezes }: {
           {streakFreezes} freeze{streakFreezes !== 1 ? "s" : ""}
         </span>
       </div>
+      {quote && (
+        <div className="border-t border-cream-200 px-5 py-3">
+          <p className="text-[10px] font-semibold text-sage-600 uppercase tracking-wide mb-1">Today&apos;s thought</p>
+          <p className="text-xs text-slate-500 italic leading-relaxed">&ldquo;{quote}&rdquo;</p>
+        </div>
+      )}
     </div>
   );
 }
@@ -503,48 +508,11 @@ const HOME_SECTIONS: { key: keyof import("@/types").HomeVisibility; label: strin
   { key: "support",         label: "Professional Support", desc: "Links to ND therapists and coaches" },
 ];
 
-function CustomizeRow({ itemKey, label, desc, checked, onToggle }: {
-  itemKey: keyof import("@/types").HomeVisibility;
-  label: string;
-  desc: string;
-  checked: boolean;
-  onToggle: () => void;
-}) {
-  const controls = useDragControls();
-  return (
-    <Reorder.Item value={itemKey} dragListener={false} dragControls={controls} className="flex items-center gap-1 bg-white">
-      <button
-        type="button"
-        onPointerDown={(e) => controls.start(e)}
-        className="p-2 -ml-1 text-slate-300 hover:text-slate-500 cursor-grab active:cursor-grabbing touch-none shrink-0"
-        aria-label={`Drag to reorder ${label}`}
-      >
-        <GripVertical size={16} />
-      </button>
-      <button onClick={onToggle} className="flex-1 flex items-center gap-3 py-3 text-left min-w-0">
-        <div className={cn(
-          "w-5 h-5 rounded flex items-center justify-center shrink-0 border-2 transition-all",
-          checked ? "bg-sage-500 border-sage-500" : "border-slate-300"
-        )}>
-          {checked && <Check size={11} className="text-white" strokeWidth={3} />}
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-slate-700">{label}</p>
-          <p className="text-xs text-slate-400">{desc}</p>
-        </div>
-      </button>
-    </Reorder.Item>
-  );
-}
-
-function CustomizePanel({ visibility, order, onToggle, onReorder, onClose }: {
+function CustomizePanel({ visibility, onToggle, onClose }: {
   visibility: import("@/types").HomeVisibility;
-  order: (keyof import("@/types").HomeVisibility)[];
   onToggle: (k: keyof import("@/types").HomeVisibility) => void;
-  onReorder: (order: (keyof import("@/types").HomeVisibility)[]) => void;
   onClose: () => void;
 }) {
-  const sectionMeta = new Map(HOME_SECTIONS.map((s) => [s.key, s] as const));
   return (
     <div className="fixed inset-0 z-50 flex items-end" onClick={onClose}>
       <div
@@ -553,32 +521,31 @@ function CustomizePanel({ visibility, order, onToggle, onReorder, onClose }: {
       >
         {/* Sticky header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-slate-100 shrink-0">
-          <div>
-            <p className="text-base font-bold text-slate-800">Customise Home</p>
-            <p className="text-xs text-slate-400 mt-0.5">Drag to reorder, tap to show or hide</p>
-          </div>
+          <p className="text-base font-bold text-slate-800">Customise Home</p>
           <button onClick={onClose} className="p-1.5 text-slate-400 hover:text-slate-600 transition-colors">
             <X size={18} />
           </button>
         </div>
         {/* Scrollable content — pb-24 clears the bottom nav */}
-        <div className="overflow-y-auto px-5 pt-3 pb-24">
-          <Reorder.Group axis="y" values={order} onReorder={onReorder} className="space-y-1">
-            {order.map((key) => {
-              const meta = sectionMeta.get(key);
-              if (!meta) return null;
-              return (
-                <CustomizeRow
-                  key={key}
-                  itemKey={key}
-                  label={meta.label}
-                  desc={meta.desc}
-                  checked={visibility[key]}
-                  onToggle={() => onToggle(key)}
-                />
-              );
-            })}
-          </Reorder.Group>
+        <div className="overflow-y-auto px-5 pt-3 pb-24 space-y-1">
+          {HOME_SECTIONS.map(({ key, label, desc }) => (
+            <button
+              key={key}
+              onClick={() => onToggle(key)}
+              className="w-full flex items-center gap-3 py-3 text-left"
+            >
+              <div className={cn(
+                "w-5 h-5 rounded flex items-center justify-center shrink-0 border-2 transition-all",
+                visibility[key] ? "bg-sage-500 border-sage-500" : "border-slate-300"
+              )}>
+                {visibility[key] && <Check size={11} className="text-white" strokeWidth={3} />}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-slate-700">{label}</p>
+                <p className="text-xs text-slate-400">{desc}</p>
+              </div>
+            </button>
+          ))}
         </div>
       </div>
     </div>
@@ -599,7 +566,7 @@ export default function HomePage() {
     streakFreezes,
     _hasHydrated,
     addXP, dailyEnergyLogs, logDailyEnergy,
-    homeVisibility, toggleHomeSection, homeSectionOrder, setHomeSectionOrder,
+    homeVisibility, toggleHomeSection,
     medicationReminders, medicationTakenDates, toggleMedicationTaken, medicationShowOnHome,
   } = useAppStore();
   const router = useRouter();
@@ -666,9 +633,7 @@ export default function HomePage() {
       {mounted && showCustomize && (
         <CustomizePanel
           visibility={homeVisibility}
-          order={homeSectionOrder}
           onToggle={toggleHomeSection}
-          onReorder={setHomeSectionOrder}
           onClose={() => setShowCustomize(false)}
         />
       )}
@@ -719,221 +684,204 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Reorderable sections */}
-      {homeSectionOrder.map((key) => {
-        switch (key) {
-          case "streak":
-            return homeVisibility.streak ? (
-              <StreakCard
-                key={key}
-                streak={mounted ? streak : 0}
-                longestStreak={mounted ? longestStreak : 0}
-                streakFreezes={mounted ? streakFreezes : 0}
-              />
-            ) : null;
+      {/* Streak + Quote (merged into one card) */}
+      {homeVisibility.streak && (
+        <StreakCard
+          streak={mounted ? streak : 0}
+          longestStreak={mounted ? longestStreak : 0}
+          streakFreezes={mounted ? streakFreezes : 0}
+          quote={homeVisibility.quote ? todayQuote : undefined}
+        />
+      )}
+      {!homeVisibility.streak && homeVisibility.quote && (
+        <div className="rounded-2xl px-4 py-3.5 border-l-4 border-sage-300" style={{ background: "linear-gradient(135deg, var(--color-sage-50) 0%, var(--color-sage-100) 100%)" }}>
+          <p className="text-xs font-semibold text-sage-600 mb-1">Today&apos;s thought</p>
+          <p className="text-sm text-slate-600 italic leading-relaxed">&ldquo;{todayQuote}&rdquo;</p>
+        </div>
+      )}
 
-          case "quote":
-            return homeVisibility.quote ? (
-              <div key={key} className="rounded-2xl px-4 py-3.5 border-l-4 border-sage-300" style={{ background: "linear-gradient(135deg, var(--color-sage-50) 0%, var(--color-sage-100) 100%)" }}>
-                <p className="text-xs font-semibold text-sage-600 mb-1">Today&apos;s thought</p>
-                <p className="text-sm text-slate-600 italic leading-relaxed">&ldquo;{todayQuote}&rdquo;</p>
-              </div>
-            ) : null;
-
-          case "medicationWidget":
-            return homeVisibility.medicationWidget && medicationShowOnHome ? (
-              <Fragment key={key}>
-                {medicationReminders.length === 0 && (
-                  <Link
-                    href="/tools/medication-reminder"
-                    className="flex items-center gap-3 bg-white/70 border border-dashed border-slate-200 rounded-2xl p-4 hover:border-sage-300 transition-colors"
-                  >
-                    <Pill size={16} className="text-slate-300 shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-slate-500">Set up medication reminders</p>
-                      <p className="text-xs text-slate-400">Track daily meds and earn XP for taking them</p>
-                    </div>
-                    <ChevronRight size={14} className="text-slate-300 shrink-0" />
-                  </Link>
-                )}
-                {medicationReminders.length > 0 && (
-                  <div className="bg-white/70 border border-slate-200 rounded-2xl p-4 space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Pill size={14} className="text-sage-500 shrink-0" />
-                        <p className="text-sm font-semibold text-slate-700">Medications today</p>
-                      </div>
-                      <Link href="/tools/medication-reminder" className="text-xs text-sage-600 font-medium">Manage</Link>
-                    </div>
-                    <div className="space-y-1.5">
-                      {medicationReminders.map((med) => {
-                        const isBoth = med.schedule === "both";
-                        if (isBoth) {
-                          return (
-                            <div key={med.id} className="space-y-1">
-                              <p className="text-xs font-semibold text-slate-500 px-1">{med.name}</p>
-                              <div className="flex gap-2">
-                                {(["morning", "evening"] as const).map((slot) => {
-                                  const medKey = `${med.id}-${slot}`;
-                                  const taken = todayMedTaken.includes(medKey);
-                                  return (
-                                    <button
-                                      key={slot}
-                                      onClick={() => toggleMedicationTaken(med.id, today, slot)}
-                                      className={cn(
-                                        "flex-1 flex items-center gap-2 rounded-xl px-3 py-2 border transition-all text-left",
-                                        taken ? "bg-sage-50 border-sage-200" : "bg-white border-slate-200 hover:border-sage-300"
-                                      )}
-                                    >
-                                      <div className={cn(
-                                        "w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0",
-                                        taken ? "bg-sage-500 border-sage-500" : "border-slate-300"
-                                      )}>
-                                        {taken && <Check size={8} className="text-white" strokeWidth={3} />}
-                                      </div>
-                                      {slot === "morning" ? <Sun size={11} className="text-amber-400" /> : <Moon size={11} className="text-indigo-400" />}
-                                      <span className={cn("text-xs font-medium flex-1 capitalize", taken ? "line-through text-slate-400" : "text-slate-600")}>
-                                        {slot}
-                                      </span>
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          );
-                        }
-                        const taken = todayMedTaken.includes(med.id);
+      {/* Medication checkoff */}
+      {homeVisibility.medicationWidget && medicationShowOnHome && medicationReminders.length === 0 && (
+        <Link
+          href="/tools/medication-reminder"
+          className="flex items-center gap-3 bg-white/70 border border-dashed border-slate-200 rounded-2xl p-4 hover:border-sage-300 transition-colors"
+        >
+          <Pill size={16} className="text-slate-300 shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-slate-500">Set up medication reminders</p>
+            <p className="text-xs text-slate-400">Track daily meds and earn XP for taking them</p>
+          </div>
+          <ChevronRight size={14} className="text-slate-300 shrink-0" />
+        </Link>
+      )}
+      {homeVisibility.medicationWidget && medicationShowOnHome && medicationReminders.length > 0 && (
+        <div className="bg-white/70 border border-slate-200 rounded-2xl p-4 space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Pill size={14} className="text-sage-500 shrink-0" />
+              <p className="text-sm font-semibold text-slate-700">Medications today</p>
+            </div>
+            <Link href="/tools/medication-reminder" className="text-xs text-sage-600 font-medium">Manage</Link>
+          </div>
+          <div className="space-y-1.5">
+            {medicationReminders.map((med) => {
+              const isBoth = med.schedule === "both";
+              if (isBoth) {
+                return (
+                  <div key={med.id} className="space-y-1">
+                    <p className="text-xs font-semibold text-slate-500 px-1">{med.name}</p>
+                    <div className="flex gap-2">
+                      {(["morning", "evening"] as const).map((slot) => {
+                        const key = `${med.id}-${slot}`;
+                        const taken = todayMedTaken.includes(key);
                         return (
                           <button
-                            key={med.id}
-                            onClick={() => toggleMedicationTaken(med.id, today)}
+                            key={slot}
+                            onClick={() => toggleMedicationTaken(med.id, today, slot)}
                             className={cn(
-                              "w-full flex items-center gap-3 rounded-xl px-3 py-2 text-left transition-all border",
+                              "flex-1 flex items-center gap-2 rounded-xl px-3 py-2 border transition-all text-left",
                               taken ? "bg-sage-50 border-sage-200" : "bg-white border-slate-200 hover:border-sage-300"
                             )}
                           >
                             <div className={cn(
-                              "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0",
+                              "w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0",
                               taken ? "bg-sage-500 border-sage-500" : "border-slate-300"
                             )}>
-                              {taken && <Check size={10} className="text-white" strokeWidth={3} />}
+                              {taken && <Check size={8} className="text-white" strokeWidth={3} />}
                             </div>
-                            <span className={cn("text-sm flex-1", taken ? "line-through text-slate-400" : "text-slate-700 font-medium")}>
-                              {med.name}
+                            {slot === "morning" ? <Sun size={11} className="text-amber-400" /> : <Moon size={11} className="text-indigo-400" />}
+                            <span className={cn("text-xs font-medium flex-1 capitalize", taken ? "line-through text-slate-400" : "text-slate-600")}>
+                              {slot}
                             </span>
                           </button>
                         );
                       })}
                     </div>
                   </div>
-                )}
-              </Fragment>
-            ) : null;
-
-          case "energyWidget":
-            return homeVisibility.energyWidget ? (
-              <EnergyWidget key={key} todayEnergy={todayEnergy} onLog={handleEnergyLog} />
-            ) : null;
-
-          case "frozen":
-            return homeVisibility.frozen ? (
-              <FeelingFrozenCard key={key} openTool={handleOpenToolById} />
-            ) : null;
-
-          case "toolbox":
-            return homeVisibility.toolbox ? (
-              <div key={key} className="p-4 rounded-3xl" style={{ background: "linear-gradient(135deg, var(--color-sage-50) 0%, var(--color-sage-100) 100%)" }}>
-                <div className="flex items-center justify-between mb-3">
-                  <p className="text-sm font-bold text-slate-700">My Toolbox</p>
-                  <Link href="/tools" className="text-xs text-sage-600 font-semibold">Browse all</Link>
-                </div>
-                {favTools.length === 0 ? (
-                  <div className="flex flex-col items-center gap-2 py-3 text-center">
-                    <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
-                      <Heart size={18} className="text-slate-300" />
-                    </div>
-                    <p className="text-sm text-slate-400 leading-relaxed max-w-[200px]">
-                      Heart your favourite tools to pin them here
-                    </p>
-                    <Link href="/tools" className="text-xs text-sage-600 font-medium underline underline-offset-2 mt-1">
-                      Browse tools
-                    </Link>
+                );
+              }
+              const taken = todayMedTaken.includes(med.id);
+              return (
+                <button
+                  key={med.id}
+                  onClick={() => toggleMedicationTaken(med.id, today)}
+                  className={cn(
+                    "w-full flex items-center gap-3 rounded-xl px-3 py-2 text-left transition-all border",
+                    taken ? "bg-sage-50 border-sage-200" : "bg-white border-slate-200 hover:border-sage-300"
+                  )}
+                >
+                  <div className={cn(
+                    "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0",
+                    taken ? "bg-sage-500 border-sage-500" : "border-slate-300"
+                  )}>
+                    {taken && <Check size={10} className="text-white" strokeWidth={3} />}
                   </div>
-                ) : (
-                  <div className="grid grid-cols-4 gap-2">
-                    {favTools.map((tool) => {
-                      const card = (
-                        <div className="flex flex-col items-center gap-1.5 group active:scale-[0.95] transition-all">
-                          <div className="w-12 h-12 flex items-center justify-center">
-                            {(() => { const IC = ICON_MAP[tool.icon]; return IC ? <IC size={24} className="text-sage-500" /> : null; })()}
-                          </div>
-                          <p className="text-xs font-medium text-slate-600 text-center leading-tight w-full px-0.5 truncate">{tool.title}</p>
-                        </div>
-                      );
-                      return tool.linkTo ? (
-                        <Link key={tool.id} href={tool.linkTo}>{card}</Link>
-                      ) : (
-                        <button key={tool.id} onClick={() => setOpenTool(tool)} className="w-full">
-                          {card}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
+                  <span className={cn("text-sm flex-1", taken ? "line-through text-slate-400" : "text-slate-700 font-medium")}>
+                    {med.name}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Energy quick-log */}
+      {homeVisibility.energyWidget && (
+        <EnergyWidget todayEnergy={todayEnergy} onLog={handleEnergyLog} />
+      )}
+
+      {/* Feeling Frozen */}
+      {homeVisibility.frozen && <FeelingFrozenCard openTool={handleOpenToolById} />}
+
+      {/* My Toolbox (favourites) */}
+      {homeVisibility.toolbox && (
+        <div className="p-4 rounded-3xl" style={{ background: "linear-gradient(135deg, var(--color-sage-50) 0%, var(--color-sage-100) 100%)" }}>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm font-bold text-slate-700">My Toolbox</p>
+            <Link href="/tools" className="text-xs text-sage-600 font-semibold">Browse all</Link>
+          </div>
+          {favTools.length === 0 ? (
+            <div className="flex flex-col items-center gap-2 py-3 text-center">
+              <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center">
+                <Heart size={18} className="text-slate-300" />
               </div>
-            ) : null;
-
-          case "learn":
-            return homeVisibility.learn ? (
-              <Link
-                key={key}
-                href="/psychoed"
-                className="bg-gradient-to-br from-sage-50 to-stone-50 border border-sage-200 rounded-2xl p-4 flex items-center gap-4 hover:border-sage-300 hover:shadow-md transition-all active:scale-[0.98]"
-              >
-                <Brain size={20} className="text-sage-600 shrink-0" />
-                <div className="flex-1">
-                  <p className="font-semibold text-slate-800 text-sm">Learn</p>
-                  <p className="text-xs text-slate-500 mt-0.5">How your brain works</p>
-                </div>
-                <ChevronRight size={16} className="text-slate-300 shrink-0" />
+              <p className="text-sm text-slate-400 leading-relaxed max-w-[200px]">
+                Heart your favourite tools to pin them here
+              </p>
+              <Link href="/tools" className="text-xs text-sage-600 font-medium underline underline-offset-2 mt-1">
+                Browse tools
               </Link>
-            ) : null;
+            </div>
+          ) : (
+            <div className="grid grid-cols-4 gap-2">
+              {favTools.map((tool) => {
+                const card = (
+                  <div className="flex flex-col items-center gap-1.5 group active:scale-[0.95] transition-all">
+                    <div className="w-12 h-12 flex items-center justify-center">
+                      {(() => { const IC = ICON_MAP[tool.icon]; return IC ? <IC size={24} className="text-sage-500" /> : null; })()}
+                    </div>
+                    <p className="text-xs font-medium text-slate-600 text-center leading-tight w-full px-0.5 truncate">{tool.title}</p>
+                  </div>
+                );
+                return tool.linkTo ? (
+                  <Link key={tool.id} href={tool.linkTo}>{card}</Link>
+                ) : (
+                  <button key={tool.id} onClick={() => setOpenTool(tool)} className="w-full">
+                    {card}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
-          case "support":
-            return homeVisibility.support ? (
-              <div key={key} className="bg-sage-50 rounded-2xl p-4 border border-sage-200 space-y-3">
-                <div className="flex items-center gap-2">
-                  <HeartHandshake size={15} className="text-sage-600 shrink-0" />
-                  <p className="text-sm font-semibold text-slate-800">Need professional support?</p>
-                </div>
-                <div className="space-y-2">
-                  {[
-                    { label: "ND Therapists", desc: "Find ND-affirming therapists (US and Canada)", href: "https://ndtherapists.com/" },
-                    { label: "ND Practitioners", desc: "Browse practitioners and coaches (Worldwide)", href: "https://neurodivergentpractitioners.org/" },
-                    { label: "Willow Creek Counselling & Psychotherapy", desc: "ND-affirming counselling in Ontario (virtual sessions available). Disclosure: this practice is owned by NeuroCompass's creator.", href: "https://www.willowcreekcounselling.com/" },
-                  ].map(({ label, desc, href }) => (
-                    <a
-                      key={href}
-                      href={href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 bg-white/70 border border-sage-200 rounded-xl px-3 py-2.5 hover:border-sage-400 hover:shadow-sm transition-all active:scale-[0.98]"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-semibold text-slate-800">{label}</p>
-                        <p className="text-xs text-slate-500 mt-0.5 leading-snug">{desc}</p>
-                      </div>
-                      <ExternalLink size={12} className="text-sage-500 shrink-0" />
-                    </a>
-                  ))}
-                </div>
-              </div>
-            ) : null;
+      {/* Learn */}
+      {homeVisibility.learn && (
+        <Link
+          href="/psychoed"
+          className="bg-gradient-to-br from-sage-50 to-stone-50 border border-sage-200 rounded-2xl p-4 flex items-center gap-4 hover:border-sage-300 hover:shadow-md transition-all active:scale-[0.98]"
+        >
+          <Brain size={20} className="text-sage-600 shrink-0" />
+          <div className="flex-1">
+            <p className="font-semibold text-slate-800 text-sm">Learn</p>
+            <p className="text-xs text-slate-500 mt-0.5">How your brain works</p>
+          </div>
+          <ChevronRight size={16} className="text-slate-300 shrink-0" />
+        </Link>
+      )}
 
-          default:
-            return null;
-        }
-      })}
+      {/* Professional Support */}
+      {homeVisibility.support && (
+        <div className="bg-sage-50 rounded-2xl p-4 border border-sage-200 space-y-3">
+          <div className="flex items-center gap-2">
+            <HeartHandshake size={15} className="text-sage-600 shrink-0" />
+            <p className="text-sm font-semibold text-slate-800">Need professional support?</p>
+          </div>
+          <div className="space-y-2">
+            {[
+              { label: "ND Therapists", desc: "Find ND-affirming therapists (US and Canada)", href: "https://ndtherapists.com/" },
+              { label: "ND Practitioners", desc: "Browse practitioners and coaches (Worldwide)", href: "https://neurodivergentpractitioners.org/" },
+              { label: "Willow Creek Counselling & Psychotherapy", desc: "ND-affirming counselling in Ontario (virtual sessions available). Disclosure: this practice is owned by NeuroCompass's creator.", href: "https://www.willowcreekcounselling.com/" },
+            ].map(({ label, desc, href }) => (
+              <a
+                key={href}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 bg-white/70 border border-sage-200 rounded-xl px-3 py-2.5 hover:border-sage-400 hover:shadow-sm transition-all active:scale-[0.98]"
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-slate-800">{label}</p>
+                  <p className="text-xs text-slate-500 mt-0.5 leading-snug">{desc}</p>
+                </div>
+                <ExternalLink size={12} className="text-sage-500 shrink-0" />
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
 
       {openTool && <ToolModal tool={openTool} onClose={() => setOpenTool(null)} />}
     </div>
