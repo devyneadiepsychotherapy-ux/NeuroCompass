@@ -46,6 +46,7 @@ interface AppState {
   moodEntries: MoodEntry[];
   profile: UserProfile;
   favorites: ToolFavorite[];
+  toolReminders: Record<string, import("@/types").ToolReminderConfig>; // keyed by tool id
 
   // Planner extras
   appointments: Appointment[];
@@ -70,6 +71,10 @@ interface AppState {
   // Favorites
   toggleFavorite: (toolId: string) => void;
   isFavorite: (toolId: string) => boolean;
+
+  // Tool reminders - "remind me to use this" on individual tools
+  setToolReminder: (toolId: string, config: import("@/types").ToolReminderConfig) => void;
+  clearToolReminder: (toolId: string) => void;
 
   // Appointments
   addAppointment: (appt: Omit<Appointment, "id" | "createdAt">) => void;
@@ -388,7 +393,7 @@ const defaultSectionVisibility: SectionVisibility = {
 };
 
 export const STORAGE_KEY = "neurocompass-store";
-export const STORE_VERSION = 10;
+export const STORE_VERSION = 11;
 
 export function migrateAppState(persistedState: unknown, version: number): unknown {
   // A non-object blob (null, a string, a truncated write) would make every
@@ -480,6 +485,11 @@ export function migrateAppState(persistedState: unknown, version: number): unkno
       sr.time = "08:30";
     }
   }
+  if (version < 11) {
+    if (!state.toolReminders) {
+      state.toolReminders = {};
+    }
+  }
   return state;
 }
 
@@ -490,6 +500,7 @@ export const useAppStore = create<AppState>()(
       moodEntries: [],
       profile: defaultProfile,
       favorites: [],
+      toolReminders: {},
       appointments: [],
       topPrioritiesByDate: {},
       habits: [],
@@ -697,6 +708,16 @@ export const useAppStore = create<AppState>()(
 
       isFavorite: (toolId) =>
         get().favorites.some((f) => f.toolId === toolId),
+
+      setToolReminder: (toolId, config) =>
+        set((s) => ({ toolReminders: { ...s.toolReminders, [toolId]: config } })),
+
+      clearToolReminder: (toolId) =>
+        set((s) => {
+          const rest = { ...s.toolReminders };
+          delete rest[toolId];
+          return { toolReminders: rest };
+        }),
 
       addAppointment: (appt) =>
         set((s) => ({

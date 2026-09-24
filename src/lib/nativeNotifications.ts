@@ -7,15 +7,17 @@
  * `Notification()` path as the browser fallback; this module only does anything
  * when running inside the native WebView.
  *
- * Strategy: each enabled check-in/streak/medication reminder slot becomes ONE
- * daily-repeating local notification (`schedule.on = { hour, minute }`); each
- * appointment or non-recurring task with a reminder set becomes ONE dated,
- * one-time notification (`schedule.at = Date`) instead, since those fire once
- * and are done, not every day. On every sync we cancel every pending
- * notification we previously scheduled and re-schedule from current state, so
- * toggling a reminder / changing a time / changing notification style all
- * converge without per-id bookkeeping. The app is the only source of local
- * notifications, so "cancel all pending" is safe.
+ * Strategy: each enabled check-in/streak/medication reminder slot, each
+ * recurring task reminder, and each "remind me to use this" tool reminder set
+ * to "daily"/"certain days" becomes ONE (or more, for specific weekdays)
+ * daily-repeating local notification (`schedule.on = { hour, minute,
+ * weekday? }`); each appointment, non-recurring task, or "once" tool reminder
+ * becomes ONE dated, one-time notification (`schedule.at = Date`) instead,
+ * since those fire once and are done, not every day. On every sync we cancel
+ * every pending notification we previously scheduled and re-schedule from
+ * current state, so toggling a reminder / changing a time / changing
+ * notification style all converge without per-id bookkeeping. The app is the
+ * only source of local notifications, so "cancel all pending" is safe.
  *
  * Copy here is intentionally kept in sync with REMINDER_CONFIG / STREAK_CONFIG in
  * ReminderManager.tsx (banners use the React-icon version, this uses plain text).
@@ -26,7 +28,9 @@ import type {
   MedicationReminder,
   StreakReminderConfig,
   Task,
+  ToolReminderConfig,
 } from "@/types";
+import { TOOLS } from "./tools-data";
 
 type NotifStyle = "cheerleader" | "gentle" | "silent";
 type PermState = "granted" | "denied" | "default";
@@ -49,6 +53,7 @@ export interface NativeSyncInput {
   medicationReminders: MedicationReminder[];
   appointments: Appointment[];
   tasks: Task[];
+  toolReminders: Record<string, ToolReminderConfig>;
 }
 
 let nativeChecked = false;
@@ -399,6 +404,63 @@ function recurringTaskWeekdays(task: Task): number[] | null {
 }
 
 /**
+ * "Remind me to use this" reminders on individual tools, tucked away as a
+ * bell next to each tool's existing favourite heart rather than a prominent
+ * control. Reuses both scheduling shapes already built above rather than
+ * inventing a third: "daily"/"certain-days" are daily-repeating (same
+ * weekday-mapping idea as recurringTaskWeekdays, just working from the
+ * config's own `days` array instead of a Task's recurType), "once" is a
+ * one-time dated notification exactly like planOneTimeNotifications() uses
+ * for appointments and tasks.
+ */
+function planToolReminders(input: NativeSyncInput, now: Date): PlannedNotification[] {
+  const style = input.notificationStyle as Exclude<NotifStyle, "silent">;
+  const planned: PlannedNotification[] = [];
+
+  Object.entries(input.toolReminders).forEach(([toolId, cfg]) => {
+    try {
+      if (!cfg.enabled || !cfg.time) return;
+      const tool = TOOLS.find((t) => t.id === toolId);
+      const label = tool?.title ?? "your tool";
+      const href = tool?.linkTo ?? "/tools";
+      const body =
+        style === "cheerleader" ? `Time to try ${label}! \u{2728}` : `A gentle nudge to try ${label}.`;
+      const { hour, minute } = parseHM(cfg.time);
+
+      if (cfg.frequency === "once") {
+        if (!cfg.onceDate) return;
+        const at = new Date(`${cfg.onceDate}T00:00:00`);
+        at.setHours(hour, minute, 0, 0);
+        if (isNaN(at.getTime()) || at.getTime() <= now.getTime()) return;
+        planned.push({ id: hashId(`tool:${toolId}`), title: label, body, href, time: { kind: "once", at } });
+        return;
+      }
+
+      const weekdays = cfg.frequency === "certain-days" ? (cfg.days ?? []).map((d) => d + 1) : [];
+      if (cfg.frequency === "certain-days" && weekdays.length === 0) return; // no days picked yet
+
+      if (weekdays.length === 0) {
+        planned.push({ id: hashId(`tool:${toolId}`), title: label, body, href, time: { kind: "daily", hour, minute } });
+      } else {
+        weekdays.forEach((weekday) => {
+          planned.push({
+            id: hashId(`tool:${toolId}:${weekday}`),
+            title: label,
+            body,
+            href,
+            time: { kind: "daily", hour, minute, weekday },
+          });
+        });
+      }
+    } catch (e) {
+      console.error(`[nativeNotifications] skipping malformed tool reminder "${toolId}"`, e);
+    }
+  });
+
+  return planned;
+}
+
+/**
  * Every reminder type below is planned independently, each wrapped in its
  * own try/catch: a single malformed record (a legacy field shape, an
  * unexpected undefined) must only cost that ONE reminder, never silently
@@ -524,7 +586,7 @@ function planNotifications(input: NativeSyncInput, now: Date): PlannedNotificati
     }
   });
 
-  return [...planned, ...planOneTimeNotifications(input, now)];
+  return [...planned, ...planOneTimeNotifications(input, now), ...planToolReminders(input, now)];
 }
 
 /**

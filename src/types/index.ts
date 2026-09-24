@@ -72,6 +72,14 @@ export interface ToolFavorite {
   addedAt: string;
 }
 
+export interface ToolReminderConfig {
+  enabled: boolean;
+  frequency: "daily" | "certain-days" | "once";
+  time: string; // "HH:MM" 24-hour
+  days?: number[]; // 0=Sun...6=Sat, only used when frequency === "certain-days"
+  onceDate?: string; // "YYYY-MM-DD", only used when frequency === "once"
+}
+
 export interface Appointment {
   id: string;
   date: string;      // "YYYY-MM-DD"

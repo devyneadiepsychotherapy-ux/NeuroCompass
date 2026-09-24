@@ -555,9 +555,41 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
     eatingRoutine, setEatingRoutine,
     personalBurnoutSigns, addPersonalBurnoutSign, removePersonalBurnoutSign,
     checkInReminders, updateCheckInReminder, addReminderTime, removeReminderTime, setReminderPermissionState,
+    toolReminders, setToolReminder, clearToolReminder,
   } = useAppStore();
 
   const fav = isFavorite(tool.id);
+  const toolReminder = toolReminders[tool.id];
+  // "Remind me to use this" - tucked away as a bell next to the favourite
+  // heart rather than a prominent control (71 tools, most people won't want
+  // a reminder on most of them). The panel below is closed by default and
+  // only appears when the bell is tapped; the bell's own fill state still
+  // shows at a glance whether a reminder is currently set, same as the heart.
+  const [showReminderPanel, setShowReminderPanel] = useState(false);
+  const [reminderFrequency, setReminderFrequency] = useState<"daily" | "certain-days" | "once">(
+    toolReminder?.frequency ?? "daily"
+  );
+  const [reminderTime, setReminderTime] = useState(toolReminder?.time ?? "09:00");
+  const [reminderDays, setReminderDays] = useState<number[]>(toolReminder?.days ?? []);
+  const [reminderOnceDate, setReminderOnceDate] = useState(toolReminder?.onceDate ?? "");
+
+  const toggleReminderDay = (day: number) => {
+    setReminderDays((prev) => (prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day].sort()));
+  };
+  const saveToolReminder = () => {
+    setToolReminder(tool.id, {
+      enabled: true,
+      frequency: reminderFrequency,
+      time: reminderTime,
+      days: reminderFrequency === "certain-days" ? reminderDays : undefined,
+      onceDate: reminderFrequency === "once" ? reminderOnceDate : undefined,
+    });
+    setShowReminderPanel(false);
+  };
+  const turnOffToolReminder = () => {
+    clearToolReminder(tool.id);
+    setShowReminderPanel(false);
+  };
   const isBrainDump = tool.id === "brain-dump";
   const hasTimer = !!tool.content.timerMinutes;
   const defaultSeconds = (tool.content.timerMinutes ?? 25) * 60;
@@ -950,6 +982,13 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
           </div>
           <div className="flex items-center gap-2">
             <button
+              onClick={() => setShowReminderPanel((v) => !v)}
+              aria-label="Remind me to use this"
+              className={cn("p-2 rounded-xl transition-all", toolReminder?.enabled ? "text-sage-600" : "text-slate-300 hover:text-sage-500")}
+            >
+              <Bell size={20} fill={toolReminder?.enabled ? "currentColor" : "none"} />
+            </button>
+            <button
               onClick={() => toggleFavorite(tool.id)}
               className={cn("p-2 rounded-xl transition-all", fav ? "text-rose-500" : "text-slate-300 hover:text-rose-400")}
             >
@@ -960,6 +999,94 @@ export function ToolModal({ tool, onClose }: { tool: Tool; onClose: () => void }
             </button>
           </div>
         </div>
+
+        {showReminderPanel && (
+          <div className="px-6 pt-4 pb-1">
+            <div className="bg-white rounded-2xl border border-slate-200 p-4 space-y-3">
+              <p className="text-sm font-semibold text-slate-700">Remind me to use this</p>
+
+              <div className="flex gap-2">
+                {([
+                  { value: "daily" as const, label: "Daily" },
+                  { value: "certain-days" as const, label: "Certain days" },
+                  { value: "once" as const, label: "One-time" },
+                ]).map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setReminderFrequency(opt.value)}
+                    className={cn(
+                      "flex-1 py-2 rounded-xl text-xs font-semibold border-2 transition-all",
+                      reminderFrequency === opt.value
+                        ? "border-sage-500 bg-sage-50 text-sage-700"
+                        : "border-transparent bg-slate-50 text-slate-500"
+                    )}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+
+              {reminderFrequency === "certain-days" && (
+                <div className="flex gap-1.5 justify-between">
+                  {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((label, day) => (
+                    <button
+                      key={day}
+                      onClick={() => toggleReminderDay(day)}
+                      className={cn(
+                        "w-9 h-9 rounded-full text-xs font-semibold transition-all",
+                        reminderDays.includes(day)
+                          ? "bg-sage-500 text-white"
+                          : "bg-slate-100 text-slate-500"
+                      )}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {reminderFrequency === "once" && (
+                <div>
+                  <label className="block text-xs text-slate-400 mb-1">Date</label>
+                  <input
+                    type="date"
+                    className="w-full min-h-[44px] border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sage-400"
+                    value={reminderOnceDate}
+                    onChange={(e) => setReminderOnceDate(e.target.value)}
+                  />
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs text-slate-400 mb-1">Time</label>
+                <input
+                  type="time"
+                  className="w-full min-h-[44px] border border-slate-200 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-sage-400"
+                  value={reminderTime}
+                  onChange={(e) => setReminderTime(e.target.value)}
+                />
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={saveToolReminder}
+                  disabled={reminderFrequency === "once" && !reminderOnceDate}
+                  className="flex-1 bg-sage-600 hover:bg-sage-700 disabled:bg-slate-200 disabled:text-slate-400 text-white font-semibold rounded-xl py-2.5 text-sm transition-all"
+                >
+                  {toolReminder?.enabled ? "Update reminder" : "Set reminder"}
+                </button>
+                {toolReminder?.enabled && (
+                  <button
+                    onClick={turnOffToolReminder}
+                    className="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-500 border border-slate-200 hover:bg-slate-50 transition-all"
+                  >
+                    Turn off
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="px-6 py-5 space-y-5 pb-24">
 
