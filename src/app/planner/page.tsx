@@ -3462,12 +3462,14 @@ export default function PlannerPage() {
           {mounted && <DayProgressBar selectedDate={selectedDate} />}
           {mounted && <MedQuickStrip selectedDate={selectedDate} />}
 
-          {/* Customize sections trigger — reorder + show/hide, all in one place */}
+          {/* Customize sections trigger — reorder + show/hide, all in one place.
+              Solid pill + rounded-full deliberately breaks from the section
+              cards' rounded-2xl/white look so it reads as a control, not a list item. */}
           <button
             onClick={() => setShowPlannerCustomize(true)}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold bg-sage-50 border border-sage-200 text-sage-700 hover:border-sage-400 hover:bg-sage-100 transition-all active:scale-[0.98]"
+            className="flex items-center gap-1.5 self-start mt-3 mb-1 px-4 py-2 rounded-full text-xs font-bold bg-sage-600 text-white shadow-sm hover:bg-sage-700 transition-all active:scale-95"
           >
-            <SlidersHorizontal size={15} />
+            <SlidersHorizontal size={13} />
             Customise sections
           </button>
 
