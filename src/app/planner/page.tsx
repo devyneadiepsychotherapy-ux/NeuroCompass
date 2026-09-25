@@ -3448,6 +3448,19 @@ export default function PlannerPage() {
             )}
           </div>
         </div>
+
+        {/* Customize sections trigger — lives in the header, next to the date/
+            add button, so it reads as a page-level control rather than another
+            item in the section list below. Only relevant to the day view. */}
+        {activeView === "day" && (
+          <button
+            onClick={() => setShowPlannerCustomize(true)}
+            className="mt-3 flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold bg-sage-600 text-white shadow-sm hover:bg-sage-700 transition-all active:scale-95"
+          >
+            <SlidersHorizontal size={13} />
+            Customise sections
+          </button>
+        )}
       </div>
 
       {/* View toggle + date navigation */}
@@ -3461,17 +3474,6 @@ export default function PlannerPage() {
         <>
           {mounted && <DayProgressBar selectedDate={selectedDate} />}
           {mounted && <MedQuickStrip selectedDate={selectedDate} />}
-
-          {/* Customize sections trigger — reorder + show/hide, all in one place.
-              Solid pill + rounded-full deliberately breaks from the section
-              cards' rounded-2xl/white look so it reads as a control, not a list item. */}
-          <button
-            onClick={() => setShowPlannerCustomize(true)}
-            className="flex items-center gap-1.5 self-start mt-3 mb-1 px-4 py-2 rounded-full text-xs font-bold bg-sage-600 text-white shadow-sm hover:bg-sage-700 transition-all active:scale-95"
-          >
-            <SlidersHorizontal size={13} />
-            Customise sections
-          </button>
 
           {/* Reorderable day-view sections */}
           {plannerSectionOrder.map((key) => {
