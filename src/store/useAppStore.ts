@@ -53,6 +53,7 @@ interface AppState {
   topPrioritiesByDate: Record<string, TopPriority[]>; // keyed by "YYYY-MM-DD"
   habits: Habit[];
   sectionVisibility: SectionVisibility;
+  plannerSectionOrder: (keyof SectionVisibility)[]; // day-view section order, Planner "Customise" panel
 
   // Tasks
   addTask: (task: Omit<Task, "id" | "createdAt">) => void;
@@ -92,6 +93,7 @@ interface AppState {
 
   // Section visibility
   toggleSection: (section: keyof SectionVisibility) => void;
+  setPlannerSectionOrder: (order: (keyof SectionVisibility)[]) => void;
 
   // Focus session
   focusSession: FocusSession | null;
@@ -234,6 +236,8 @@ interface AppState {
   // Home page customisation
   homeVisibility: HomeVisibility;
   toggleHomeSection: (section: keyof HomeVisibility) => void;
+  homeSectionOrder: (keyof HomeVisibility)[];
+  setHomeSectionOrder: (order: (keyof HomeVisibility)[]) => void;
 
   // Me page customisation
   meVisibility: MeVisibility;
@@ -392,8 +396,14 @@ const defaultSectionVisibility: SectionVisibility = {
   meal: true,
 };
 
+const defaultPlannerSectionOrder: (keyof SectionVisibility)[] = ["schedule", "top3", "tasks", "habits", "meal"];
+
+const defaultHomeSectionOrder: (keyof HomeVisibility)[] = [
+  "streak", "quote", "medicationWidget", "energyWidget", "frozen", "toolbox", "learn", "support",
+];
+
 export const STORAGE_KEY = "neurocompass-store";
-export const STORE_VERSION = 11;
+export const STORE_VERSION = 12;
 
 export function migrateAppState(persistedState: unknown, version: number): unknown {
   // A non-object blob (null, a string, a truncated write) would make every
@@ -490,6 +500,14 @@ export function migrateAppState(persistedState: unknown, version: number): unkno
       state.toolReminders = {};
     }
   }
+  if (version < 12) {
+    if (!state.homeSectionOrder) {
+      state.homeSectionOrder = [...defaultHomeSectionOrder];
+    }
+    if (!state.plannerSectionOrder) {
+      state.plannerSectionOrder = [...defaultPlannerSectionOrder];
+    }
+  }
   return state;
 }
 
@@ -505,6 +523,7 @@ export const useAppStore = create<AppState>()(
       topPrioritiesByDate: {},
       habits: [],
       sectionVisibility: defaultSectionVisibility,
+      plannerSectionOrder: defaultPlannerSectionOrder,
       focusSession: null,
       sensoryProfile: { triggers: {}, soothers: {}, accommodators: {} },
       soothingKits: [],
@@ -545,6 +564,7 @@ export const useAppStore = create<AppState>()(
         energyWidget: true,
         medicationWidget: true,
       },
+      homeSectionOrder: defaultHomeSectionOrder,
       meVisibility: {
         energyWidget: true,
         medication: true,
@@ -794,6 +814,8 @@ export const useAppStore = create<AppState>()(
             [section]: !s.sectionVisibility[section],
           },
         })),
+
+      setPlannerSectionOrder: (order) => set({ plannerSectionOrder: order }),
 
       startFocusSession: (durationSeconds, selectedMinutes) =>
         set({
@@ -1111,6 +1133,8 @@ export const useAppStore = create<AppState>()(
         set((s) => ({
           homeVisibility: { ...s.homeVisibility, [section]: !s.homeVisibility[section] },
         })),
+
+      setHomeSectionOrder: (order) => set({ homeSectionOrder: order }),
 
       toggleMeSection: (section) =>
         set((s) => ({
