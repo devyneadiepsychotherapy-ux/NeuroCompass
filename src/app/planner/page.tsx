@@ -9,7 +9,7 @@ import { getTodayKey, formatMinutes } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import {
   Plus, Check, Trash2, Star, Clock, ChevronDown, ChevronUp, X, Repeat,
-  Eye, EyeOff, Flame, CalendarClock, Target, ListTodo, Activity, Coins,
+  EyeOff, Flame, CalendarClock, Target, ListTodo, Activity, Coins,
   ChevronLeft, ChevronRight, Calendar, CalendarDays, Pencil, UtensilsCrossed,
   Pill, Sun, Moon, Bell, SlidersHorizontal, GripVertical,
 } from "lucide-react";
@@ -3397,12 +3397,6 @@ export default function PlannerPage() {
 
   useEffect(() => setMounted(true), []);
 
-  const hiddenSections = mounted
-    ? Object.entries(sectionVisibility)
-        .filter(([, v]) => !v)
-        .map(([k]) => k as keyof typeof sectionVisibility)
-    : [];
-
   const handleDaySelect = (d: Date) => {
     setSelectedDate(d);
     setActiveView("day");
@@ -3440,21 +3434,12 @@ export default function PlannerPage() {
             <p className="text-sm text-slate-500 mt-1">{greeting}, let&apos;s plan your day</p>
           </div>
           <div className="flex flex-col items-end gap-2 shrink-0">
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setShowPlannerCustomize(true)}
-                className="p-2 text-slate-400 hover:text-slate-600 transition-colors"
-                aria-label="Customise Planner sections"
-              >
-                <SlidersHorizontal size={18} />
-              </button>
-              <button
-                onClick={() => setShowScheduleModal(true)}
-                className="w-11 h-11 rounded-2xl bg-sage-600 flex items-center justify-center shadow-md hover:bg-sage-700 transition-all active:scale-95"
-              >
-                <Plus size={22} className="text-white" />
-              </button>
-            </div>
+            <button
+              onClick={() => setShowScheduleModal(true)}
+              className="w-11 h-11 rounded-2xl bg-sage-600 flex items-center justify-center shadow-md hover:bg-sage-700 transition-all active:scale-95"
+            >
+              <Plus size={22} className="text-white" />
+            </button>
             {mounted && streak > 0 && (
               <div className="flex items-center gap-1 bg-terracotta-100 text-terracotta-600 px-2.5 py-1 rounded-full">
                 <Flame size={12} />
@@ -3477,30 +3462,14 @@ export default function PlannerPage() {
           {mounted && <DayProgressBar selectedDate={selectedDate} />}
           {mounted && <MedQuickStrip selectedDate={selectedDate} />}
 
-          {/* Hidden section chips */}
-          {hiddenSections.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {hiddenSections.map((key) => {
-                const labels: Record<string, string> = {
-                  schedule: "Schedule",
-                  top3: "Top 3",
-                  tasks: "Tasks",
-                  habits: "Habits",
-                  meal: "Meal Plan",
-                };
-                return (
-                  <button
-                    key={key}
-                    onClick={() => toggleSection(key)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-cream-50 border border-slate-200 text-slate-500 hover:border-sage-300 hover:text-sage-600 transition-all"
-                  >
-                    <Eye size={12} />
-                    Show {labels[key]}
-                  </button>
-                );
-              })}
-            </div>
-          )}
+          {/* Customize sections trigger — reorder + show/hide, all in one place */}
+          <button
+            onClick={() => setShowPlannerCustomize(true)}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold bg-sage-50 border border-sage-200 text-sage-700 hover:border-sage-400 hover:bg-sage-100 transition-all active:scale-[0.98]"
+          >
+            <SlidersHorizontal size={15} />
+            Customise sections
+          </button>
 
           {/* Reorderable day-view sections */}
           {plannerSectionOrder.map((key) => {
@@ -3509,14 +3478,14 @@ export default function PlannerPage() {
             switch (key) {
               case "schedule":
                 return (
-                  <Section key={key} id="schedule" icon={<CalendarClock size={16} />} title="Schedule" onToggle={() => toggleSection("schedule")} card>
+                  <Section key={key} id="schedule" icon={<CalendarClock size={16} />} title="Schedule" card>
                     <ScheduleSection selectedDate={selectedDate} />
                   </Section>
                 );
 
               case "top3":
                 return (
-                  <Section key={key} id="top3" icon={<Target size={16} />} title="Top 3 Priorities" onToggle={() => toggleSection("top3")} card>
+                  <Section key={key} id="top3" icon={<Target size={16} />} title="Top 3 Priorities" card>
                     <Top3Section date={dateKey(selectedDate)} />
                   </Section>
                 );
@@ -3528,7 +3497,6 @@ export default function PlannerPage() {
                     id="tasks"
                     icon={<ListTodo size={16} />}
                     title="Tasks"
-                    onToggle={() => toggleSection("tasks")}
                     card
                     action={
                       <button
@@ -3550,14 +3518,14 @@ export default function PlannerPage() {
 
               case "habits":
                 return (
-                  <Section key={key} id="habits" icon={<Activity size={16} />} title="Habits" onToggle={() => toggleSection("habits")} card>
+                  <Section key={key} id="habits" icon={<Activity size={16} />} title="Habits" card>
                     <HabitsSection selectedDate={selectedDate} />
                   </Section>
                 );
 
               case "meal":
                 return (
-                  <Section key={key} id="meal" icon={<UtensilsCrossed size={16} />} title="Meal Plan" onToggle={() => toggleSection("meal")}>
+                  <Section key={key} id="meal" icon={<UtensilsCrossed size={16} />} title="Meal Plan">
                     <MealPlanSection selectedDate={selectedDate} />
                   </Section>
                 );
