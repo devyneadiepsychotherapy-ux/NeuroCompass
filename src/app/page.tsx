@@ -600,6 +600,7 @@ export default function HomePage() {
     _hasHydrated,
     addXP, dailyEnergyLogs, logDailyEnergy,
     homeVisibility, toggleHomeSection, homeSectionOrder, setHomeSectionOrder,
+    seenHomeCustomizeHint, dismissHomeCustomizeHint,
     medicationReminders, medicationTakenDates, toggleMedicationTaken, medicationShowOnHome,
   } = useAppStore();
   const router = useRouter();
@@ -692,13 +693,23 @@ export default function HomePage() {
               const { Icon, iconColor } = av;
               return <Icon size={32} className={iconColor} />;
             })()}
-            <button
-              onClick={() => setShowCustomize(true)}
-              className="p-2 text-slate-400 hover:text-slate-600 transition-colors"
-              aria-label="Customise home page"
-            >
-              <SlidersHorizontal size={18} />
-            </button>
+            <div className="relative">
+              <button
+                onClick={() => { setShowCustomize(true); dismissHomeCustomizeHint(); }}
+                className="p-2 text-slate-400 hover:text-slate-600 transition-colors"
+                aria-label="Customise home page"
+              >
+                <SlidersHorizontal size={18} />
+              </button>
+              {mounted && !seenHomeCustomizeHint && (
+                <div className="absolute top-full right-0 mt-1 z-30 w-40 animate-fade-in-up pointer-events-none">
+                  <div className="absolute -top-1 right-3 w-2.5 h-2.5 bg-sage-700 rotate-45" />
+                  <div className="relative bg-sage-700 text-white text-xs font-medium leading-snug rounded-xl px-3 py-2.5 shadow-lg">
+                    Tap here to customise your sections
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
         {/* XP bar */}

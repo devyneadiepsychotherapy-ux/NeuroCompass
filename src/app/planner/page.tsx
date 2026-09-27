@@ -3386,6 +3386,7 @@ function PlannerCustomizePanel({ visibility, order, onToggle, onReorder, onClose
 export default function PlannerPage() {
   const {
     sectionVisibility, toggleSection, plannerSectionOrder, setPlannerSectionOrder,
+    seenPlannerCustomizeHint, dismissPlannerCustomizeHint,
     streak, tasks, updateTask, completeTask,
   } = useAppStore();
   const [showTaskModal, setShowTaskModal] = useState(false);
@@ -3434,12 +3435,34 @@ export default function PlannerPage() {
             <p className="text-sm text-slate-500 mt-1">{greeting}, let&apos;s plan your day</p>
           </div>
           <div className="flex flex-col items-end gap-2 shrink-0">
-            <button
-              onClick={() => setShowScheduleModal(true)}
-              className="w-11 h-11 rounded-2xl bg-sage-600 flex items-center justify-center shadow-md hover:bg-sage-700 transition-all active:scale-95"
-            >
-              <Plus size={22} className="text-white" />
-            </button>
+            <div className="flex items-center gap-1">
+              {/* Small, subtle icon matching Home's customize treatment — day view only. */}
+              {activeView === "day" && (
+                <div className="relative">
+                  <button
+                    onClick={() => { setShowPlannerCustomize(true); dismissPlannerCustomizeHint(); }}
+                    className="p-2 text-slate-400 hover:text-slate-600 transition-colors"
+                    aria-label="Customise Planner sections"
+                  >
+                    <SlidersHorizontal size={18} />
+                  </button>
+                  {mounted && !seenPlannerCustomizeHint && (
+                    <div className="absolute top-full right-0 mt-1 z-30 w-40 animate-fade-in-up pointer-events-none">
+                      <div className="absolute -top-1 right-3 w-2.5 h-2.5 bg-sage-700 rotate-45" />
+                      <div className="relative bg-sage-700 text-white text-xs font-medium leading-snug rounded-xl px-3 py-2.5 shadow-lg">
+                        Tap here to customise your sections
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+              <button
+                onClick={() => setShowScheduleModal(true)}
+                className="w-11 h-11 rounded-2xl bg-sage-600 flex items-center justify-center shadow-md hover:bg-sage-700 transition-all active:scale-95"
+              >
+                <Plus size={22} className="text-white" />
+              </button>
+            </div>
             {mounted && streak > 0 && (
               <div className="flex items-center gap-1 bg-terracotta-100 text-terracotta-600 px-2.5 py-1 rounded-full">
                 <Flame size={12} />
@@ -3448,19 +3471,6 @@ export default function PlannerPage() {
             )}
           </div>
         </div>
-
-        {/* Customize sections trigger — lives in the header, next to the date/
-            add button, so it reads as a page-level control rather than another
-            item in the section list below. Only relevant to the day view. */}
-        {activeView === "day" && (
-          <button
-            onClick={() => setShowPlannerCustomize(true)}
-            className="mt-3 flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold bg-sage-600 text-white shadow-sm hover:bg-sage-700 transition-all active:scale-95"
-          >
-            <SlidersHorizontal size={13} />
-            Customise sections
-          </button>
-        )}
       </div>
 
       {/* View toggle + date navigation */}

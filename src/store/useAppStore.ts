@@ -238,6 +238,10 @@ interface AppState {
   toggleHomeSection: (section: keyof HomeVisibility) => void;
   homeSectionOrder: (keyof HomeVisibility)[];
   setHomeSectionOrder: (order: (keyof HomeVisibility)[]) => void;
+  seenHomeCustomizeHint: boolean;
+  dismissHomeCustomizeHint: () => void;
+  seenPlannerCustomizeHint: boolean;
+  dismissPlannerCustomizeHint: () => void;
 
   // Me page customisation
   meVisibility: MeVisibility;
@@ -403,7 +407,7 @@ const defaultHomeSectionOrder: (keyof HomeVisibility)[] = [
 ];
 
 export const STORAGE_KEY = "neurocompass-store";
-export const STORE_VERSION = 12;
+export const STORE_VERSION = 13;
 
 export function migrateAppState(persistedState: unknown, version: number): unknown {
   // A non-object blob (null, a string, a truncated write) would make every
@@ -508,6 +512,14 @@ export function migrateAppState(persistedState: unknown, version: number): unkno
       state.plannerSectionOrder = [...defaultPlannerSectionOrder];
     }
   }
+  if (version < 13) {
+    if (state.seenHomeCustomizeHint === undefined) {
+      state.seenHomeCustomizeHint = false;
+    }
+    if (state.seenPlannerCustomizeHint === undefined) {
+      state.seenPlannerCustomizeHint = false;
+    }
+  }
   return state;
 }
 
@@ -565,6 +577,8 @@ export const useAppStore = create<AppState>()(
         medicationWidget: true,
       },
       homeSectionOrder: defaultHomeSectionOrder,
+      seenHomeCustomizeHint: false,
+      seenPlannerCustomizeHint: false,
       meVisibility: {
         energyWidget: true,
         medication: true,
@@ -1135,6 +1149,8 @@ export const useAppStore = create<AppState>()(
         })),
 
       setHomeSectionOrder: (order) => set({ homeSectionOrder: order }),
+      dismissHomeCustomizeHint: () => set({ seenHomeCustomizeHint: true }),
+      dismissPlannerCustomizeHint: () => set({ seenPlannerCustomizeHint: true }),
 
       toggleMeSection: (section) =>
         set((s) => ({
